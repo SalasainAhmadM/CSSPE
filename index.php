@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    
-    <link rel="stylesheet" href="../assets/css/login.css">
+
+    <link rel="stylesheet" href="./assets/css/login.css">
 </head>
+
 <body>
     <div class="container">
         <div class="headerContainer">
             <div class="subHeaderContainer">
                 <div class="logoContainer">
-                    <img class="logo" src="../assets/img/CSSPE.png" alt="">
+                    <img class="logo" src="./assets/img/CSSPE.png" alt="">
                 </div>
 
                 <div class="collegeNameContainer">
@@ -122,38 +124,38 @@
                 <div class="titleContainer">
                     <p>Register</p>
                 </div>
-    
+
                 <div class="subLoginContainer">
                     <div class="inputContainer">
                         <input class="inputEmail" type="text" placeholder="First Name:">
                     </div>
-                    
+
                     <div class="inputContainer">
                         <input class="inputEmail" type="text" placeholder="Last Name:">
                     </div>
-                    
+
                     <div class="inputContainer">
                         <input class="inputEmail" type="text" placeholder="Middle Name (Optional):">
                     </div>
-                    
+
                     <div class="inputContainer">
                         <input class="inputEmail" type="email" placeholder="Email:">
                     </div>
-    
+
                     <div class="inputContainer">
                         <input class="inputEmail" type="text" placeholder="Address:">
                     </div>
-                    
+
                     <div class="inputContainer">
                         <input class="inputEmail" type="text" placeholder="Contact No.:">
                     </div>
-                    
+
                     <div class="inputContainer" style="gap: 0.5rem;">
                         <select class="inputEmail" name="" id="">
                             <option value="">Choose a Departments</option>
                         </select>
                     </div>
-    
+
                     <div class="inputContainer" style="gap: 0.5rem;">
                         <select class="inputEmail" name="" id="">
                             <option value="">Choose a rank</option>
@@ -163,19 +165,19 @@
                             <option value="Professor">Professor</option>
                         </select>
                     </div>
-    
+
                     <div class="inputContainer">
                         <input class="inputEmail" type="password" placeholder="Password:">
                     </div>
-    
+
                     <div class="inputContainer">
                         <input class="inputEmail" type="password" placeholder="Confirm Password:">
                     </div>
-    
+
                     <div class="inputContainer">
                         <button class="login">Register</button>
                     </div>
-    
+
                     <div class="registerLinkContainer">
                         <p>Already have an account? <span onclick="login()">Login</span></p>
                     </div>
@@ -186,4 +188,5 @@
 
     <script src="../assets/js/login.js"></script>
 </body>
+
 </html>
