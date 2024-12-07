@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 
-    <link rel="stylesheet" href="/dionSe/assets/css/organization.css">
-    <link rel="stylesheet" href="/dionSe/assets/css/sidebar.css">
-    <link rel="stylesheet" href="/dionSe/assets/css/notification.css">
+    <link rel="stylesheet" href="../assets/css/organization.css">
+    <link rel="stylesheet" href="../assets/css/sidebar.css">
+    <link rel="stylesheet" href="../assets/css/notification.css">
 </head>
 <body>
     <div class="body">
@@ -15,7 +15,7 @@
             <div  class="sidebarContent">
                 <div class="arrowContainer" style="margin-left: 80rem;" id="toggleButton">
                     <div class="subArrowContainer">
-                        <img class="hideIcon" src="/dionSe/assets/img/arrow.png" alt="">
+                        <img class="hideIcon" src="../assets/img/arrow.png" alt="">
                     </div>
                 </div>
             </div>
@@ -23,7 +23,7 @@
                 <div class="subUserContainer">
                     <div class="userPictureContainer" >
                         <div class="subUserPictureContainer">
-                            <img class="subUserPictureContainer" src="/dionSe/assets/img/CSSPE.png" alt="">
+                            <img class="subUserPictureContainer" src="../assets/img/CSSPE.png" alt="">
                         </div>
                     </div>
     
@@ -34,7 +34,7 @@
         
                 <div class="navContainer">
                     <div class="subNavContainer">
-                        <a href="../homePage/profile.html">
+                        <a href="../homePage/profile.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Profile</p>
@@ -42,7 +42,7 @@
                             </div>
                         </a>
         
-                        <a href="../homePage/announcement.html">
+                        <a href="../homePage/">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Announcements</p>
@@ -50,7 +50,7 @@
                             </div>
                         </a>
         
-                        <a href="../homePage/borrowing.html">
+                        <a href="../homePage/borrowing.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Inventories</p>
@@ -58,7 +58,7 @@
                             </div>
                         </a>
         
-                        <a href="../homePage/memorandumHome.html">
+                        <a href="../homePage/memorandumHome.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Memorandums</p>
@@ -66,7 +66,7 @@
                             </div>
                         </a>
     
-                        <a href="../homePage/events.html">
+                        <a href="../homePage/events.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Events</p>
@@ -74,7 +74,7 @@
                             </div>
                         </a>
     
-                        <a href="../homePage/members.html">
+                        <a href="../homePage/members.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Faculty Members</p>
@@ -82,7 +82,7 @@
                             </div>
                         </a>
     
-                        <a href="../homePage/organization.html">
+                        <a href="../homePage/organization.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Organizations</p>
@@ -90,7 +90,7 @@
                             </div>
                         </a>
     
-                        <a href="../homePage/notification.html">
+                        <a href="../homePage/notification.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Notificaitons</p>
@@ -101,7 +101,7 @@
                 </div>
         
                 <div class="subUserContainer">
-                    <a href="/dionSe/authentication/login.html">
+                    <a href="/dionSe/authentication/login.php">
                         <div style="margin-left: 1.5rem;" class="userPictureContainer1">
                             <p>Logout</p>
                         </div>
@@ -156,6 +156,6 @@
             </div>
         </div>
     </div>
-    <script src="/dionSe/assets/js/sidebar.js"></script>
+    <script src="../assets/js/sidebar.js"></script>
 </body>
 </html>
