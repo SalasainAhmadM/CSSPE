@@ -7,6 +7,7 @@
     <title>Document</title>
 
     <link rel="stylesheet" href="/dionSe/assets/css/program.css">
+    <link rel="stylesheet" href="/dionSe/assets/css/facultyMember.css">
     <link rel="stylesheet" href="/dionSe/assets/css/sidebar.css">
 </head>
 
@@ -147,11 +148,11 @@
 
                         <tbody>
                             <tr>
-                                <td>Hakdog</td>
+                                <td>km falcatan</td>
                                 <td>
                                     <img class="image" src="/dionSe/assets/img/CSSPE.png" alt="">
                                 </td>
-                                <td>Hakdog</td>
+                                <td>Teacher</td>
                                 <td class="button">
                                     <button onclick="editProgram()" class="addButton" style="width: 5rem;">Edit</button>
                                     <button class="addButton1" style="width: 5rem;">Delete</button>

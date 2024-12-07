@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,10 +10,11 @@
     <link rel="stylesheet" href="/dionSe/assets/css/sidebar.css">
     <link rel="stylesheet" href="/dionSe/assets/css/dashboard.css">
 </head>
+
 <body>
     <div class="body" style="margin-bottom: 3rem;">
         <div class="sidebar">
-            <div  class="sidebarContent">
+            <div class="sidebarContent">
                 <div class="arrowContainer" style="margin-left: 80rem;" id="toggleButton">
                     <div class="subArrowContainer">
                         <img class="hideIcon" src="/dionSe/assets/img/arrow.png" alt="">
@@ -21,61 +23,61 @@
             </div>
             <div class="userContainer">
                 <div class="subUserContainer">
-                    <div class="userPictureContainer" >
+                    <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
                             <img class="subUserPictureContainer" src="/dionSe/assets/img/CSSPE.png" alt="">
                         </div>
                     </div>
-    
+
                     <div class="userPictureContainer1">
                         <p>Khriz marr l. falcatan</p>
                     </div>
                 </div>
-        
+
                 <div class="navContainer">
                     <div class="subNavContainer">
-        
-                        <a href="../inventoryAdmin/homePage/announcement.html">
+
+                        <a href="../inventoryAdmin/homePage/announcement.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Home</p>
                                 </div>
                             </div>
                         </a>
-        
-                        <a href="../inventoryAdmin/dashboard.html">
+
+                        <a href="../inventoryAdmin/dashboard.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Dashboard</p>
                                 </div>
                             </div>
                         </a>
-        
-                        <a href="../inventoryAdmin/inventory.html">
+
+                        <a href="../inventoryAdmin/inventory.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Inventories</p>
                                 </div>
                             </div>
                         </a>
-        
-                        <a href="../inventoryAdmin/borrowing.html">
+
+                        <a href="../inventoryAdmin/borrowing.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Borrow request</p>
                                 </div>
                             </div>
                         </a>
-        
-                        <a href="../inventoryAdmin/borrowItem.html">
+
+                        <a href="../inventoryAdmin/borrowItem.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Borrowed Item</p>
                                 </div>
                             </div>
                         </a>
-    
-                        <a href="../inventoryAdmin/notification.html">
+
+                        <a href="../inventoryAdmin/notification.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Notification</p>
@@ -84,9 +86,9 @@
                         </a>
                     </div>
                 </div>
-        
+
                 <div class="subUserContainer">
-                    <a href="/dionSe/authentication/login.html">
+                    <a href="/dionSe/authentication/login.php">
                         <div style="margin-left: 1.5rem;" class="userPictureContainer1">
                             <p>Logout</p>
                         </div>
@@ -94,7 +96,7 @@
                 </div>
             </div>
         </div>
-    
+
         <div class="mainContainer" style="margin-left: 250px;">
             <div class="container">
                 <div class="headerContainer">
@@ -102,7 +104,7 @@
                         <div class="logoContainer">
                             <img class="logo" src="/dionSe/assets/img/CSSPE.png" alt="">
                         </div>
-        
+
                         <div class="collegeNameContainer">
                             <p>CSSPE Inventory & Information System</p>
                         </div>
@@ -114,7 +116,7 @@
                 </div>
 
                 <div class="dashboardContainer">
-                      <div class="statusContainer">
+                    <div class="statusContainer">
                         <div onclick="borrowed()" class="subStatusContainer">
                             <div class="nameContainer" style="border-bottom: solid gray 1px;">
                                 <p>Borrowed</p>
@@ -194,7 +196,7 @@
                                 <p>100</p>
                             </div>
                         </div>
-                      </div>
+                    </div>
                 </div>
 
                 <div class="searchContainer" style="margin-top: 2rem;">
@@ -211,7 +213,7 @@
                                 <th>Quantity</th>
                             </tr>
                         </thead>
-    
+
                         <tbody>
                             <tr>
                                 <td>Hakdog</td>
@@ -231,7 +233,7 @@
     <div class="summaryContainer borrowed" style="display: none; background-color: none;">
         <div class="summaryContainer">
             <div class="subSummaryContainer">
-    
+
                 <div class="textContainer" style="color: white; justify-content: center; font-size: 3rem;">
                     <p>Borrowed</p>
                 </div>
@@ -250,7 +252,7 @@
                                 <th>Email</th>
                             </tr>
                         </thead>
-    
+
                         <tbody>
                             <tr>
                                 <td>Hakdog</td>
@@ -265,7 +267,7 @@
                         </tbody>
                     </table>
                 </div>
-    
+
                 <div class="buttonContainer">
                     <button class="addButton">Print</button>
                     <button onclick="borrowed()" class="addButton">Close</button>
@@ -277,7 +279,7 @@
     <div class="summaryContainer return" style="display: none; background-color: none;">
         <div class="summaryContainer">
             <div class="subSummaryContainer">
-    
+
                 <div class="textContainer" style="color: white; justify-content: center; font-size: 3rem;">
                     <p>Returned</p>
                 </div>
@@ -296,7 +298,7 @@
                                 <th>Email</th>
                             </tr>
                         </thead>
-    
+
                         <tbody>
                             <tr>
                                 <td>Hakdog</td>
@@ -311,7 +313,7 @@
                         </tbody>
                     </table>
                 </div>
-    
+
                 <div class="buttonContainer">
                     <button class="addButton">Print</button>
                     <button onclick="return1()" class="addButton">Close</button>
@@ -323,7 +325,7 @@
     <div class="summaryContainer available" style="display: none; background-color: none;">
         <div class="summaryContainer">
             <div class="subSummaryContainer">
-    
+
                 <div class="textContainer" style="color: white; justify-content: center; font-size: 3rem;">
                     <p>Available</p>
                 </div>
@@ -338,7 +340,7 @@
                                 <th>Description</th>
                             </tr>
                         </thead>
-    
+
                         <tbody>
                             <tr>
                                 <td>Hakdog</td>
@@ -349,7 +351,7 @@
                         </tbody>
                     </table>
                 </div>
-    
+
                 <div class="buttonContainer">
                     <button class="addButton">Print</button>
                     <button onclick="available()" class="addButton">Close</button>
@@ -361,7 +363,7 @@
     <div class="summaryContainer lost" style="display: none; background-color: none;">
         <div class="summaryContainer">
             <div class="subSummaryContainer">
-    
+
                 <div class="textContainer" style="color: white; justify-content: center; font-size: 3rem;">
                     <p>Lost</p>
                 </div>
@@ -380,7 +382,7 @@
                                 <th>Email</th>
                             </tr>
                         </thead>
-    
+
                         <tbody>
                             <tr>
                                 <td>Hakdog</td>
@@ -395,7 +397,7 @@
                         </tbody>
                     </table>
                 </div>
-    
+
                 <div class="buttonContainer">
                     <button class="addButton">Print</button>
                     <button onclick="lost()" class="addButton">Close</button>
@@ -407,7 +409,7 @@
     <div class="summaryContainer damage" style="display: none; background-color: none;">
         <div class="summaryContainer">
             <div class="subSummaryContainer">
-    
+
                 <div class="textContainer" style="color: white; justify-content: center; font-size: 3rem;">
                     <p>Damaged</p>
                 </div>
@@ -426,7 +428,7 @@
                                 <th>Email</th>
                             </tr>
                         </thead>
-    
+
                         <tbody>
                             <tr>
                                 <td>Hakdog</td>
@@ -441,7 +443,7 @@
                         </tbody>
                     </table>
                 </div>
-    
+
                 <div class="buttonContainer">
                     <button class="addButton">Print</button>
                     <button onclick="damage()" class="addButton">Close</button>
@@ -453,7 +455,7 @@
     <div class="summaryContainer replace" style="display: none; background-color: none;">
         <div class="summaryContainer">
             <div class="subSummaryContainer">
-    
+
                 <div class="textContainer" style="color: white; justify-content: center; font-size: 3rem;">
                     <p>Replaced Item</p>
                 </div>
@@ -472,7 +474,7 @@
                                 <th>Email</th>
                             </tr>
                         </thead>
-    
+
                         <tbody>
                             <tr>
                                 <td>Hakdog</td>
@@ -487,7 +489,7 @@
                         </tbody>
                     </table>
                 </div>
-    
+
                 <div class="buttonContainer">
                     <button class="addButton">Print</button>
                     <button onclick="replace1()" class="addButton">Close</button>
@@ -499,7 +501,7 @@
     <div class="summaryContainer added" style="display: none; background-color: none;">
         <div class="summaryContainer">
             <div class="subSummaryContainer">
-    
+
                 <div class="textContainer" style="color: white; justify-content: center; font-size: 3rem;">
                     <p>Replaced Added</p>
                 </div>
@@ -517,7 +519,7 @@
                                 <th>Date Added</th>
                             </tr>
                         </thead>
-    
+
                         <tbody>
                             <tr>
                                 <td>1</td>
@@ -533,7 +535,7 @@
                         </tbody>
                     </table>
                 </div>
-    
+
                 <div class="buttonContainer">
                     <button class="addButton">Print</button>
                     <button onclick="added()" class="addButton">Close</button>
@@ -545,7 +547,7 @@
     <div class="summaryContainer overdue" style="display: none; background-color: none;">
         <div class="summaryContainer">
             <div class="subSummaryContainer">
-    
+
                 <div class="textContainer" style="color: white; justify-content: center; font-size: 3rem;">
                     <p>Overdue</p>
                 </div>
@@ -564,7 +566,7 @@
                                 <th>Email</th>
                             </tr>
                         </thead>
-    
+
                         <tbody>
                             <tr>
                                 <td>Hakdog</td>
@@ -579,7 +581,7 @@
                         </tbody>
                     </table>
                 </div>
-    
+
                 <div class="buttonContainer">
                     <button class="addButton">Print</button>
                     <button onclick="overdue()" class="addButton">Close</button>
@@ -590,4 +592,5 @@
     <script src="/dionSe/assets/js/sidebar.js"></script>
     <script src="/dionSe/assets/js/dashboard.js"></script>
 </body>
+
 </html>
