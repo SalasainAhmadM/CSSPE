@@ -18,7 +18,7 @@
                 </div>
 
                 <div class="collegeNameContainer">
-                    <p>CSSPE Yes Inventory & Information System</p>
+                    <p>CSSPE Inventory & Information System</p>
                 </div>
             </div>
 
