@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,10 +9,11 @@
     <link rel="stylesheet" href="/dionSe/assets/css/pendingAccount.css">
     <link rel="stylesheet" href="/dionSe/assets/css/sidebar.css">
 </head>
+
 <body>
     <div class="body">
         <div class="sidebar">
-            <div  class="sidebarContent">
+            <div class="sidebarContent">
                 <div class="arrowContainer" style="margin-left: 80rem;" id="toggleButton">
                     <div class="subArrowContainer">
                         <img class="hideIcon" src="/dionSe/assets/img/arrow.png" alt="">
@@ -20,45 +22,45 @@
             </div>
             <div class="userContainer">
                 <div class="subUserContainer">
-                    <div class="userPictureContainer" >
+                    <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
                             <img class="subUserPictureContainer" src="/dionSe/assets/img/CSSPE.png" alt="">
                         </div>
                     </div>
-    
+
                     <div class="userPictureContainer1">
                         <p>Khriz marr l. falcatan</p>
                     </div>
                 </div>
-        
+
                 <div class="navContainer">
                     <div class="subNavContainer">
-        
-                        <a href="../superAdmin/homePage/announcement.html">
+
+                        <a href="../superAdmin/homePage/announcement.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Home</p>
                                 </div>
                             </div>
                         </a>
-        
-                        <a href="../superAdmin/account.html">
+
+                        <a href="../superAdmin/account.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Accounts</p>
                                 </div>
                             </div>
                         </a>
-        
-                        <a href="../superAdmin/pendingAccount.html">
+
+                        <a href="../superAdmin/pendingAccount.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Pending Accounts</p>
                                 </div>
                             </div>
                         </a>
-    
-                        <a href="../superAdmin/createAdmin.html">
+
+                        <a href="../superAdmin/createAdmin.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Create Account</p>
@@ -66,7 +68,7 @@
                             </div>
                         </a>
 
-                        <a href="../superAdmin/informationAdmin/program.html">
+                        <a href="../superAdmin/informationAdmin/program.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Information Admin Panel</p>
@@ -74,7 +76,7 @@
                             </div>
                         </a>
 
-                        <a href="../superAdmin/inventoryAdmin/dashboard.html">
+                        <a href="../superAdmin/inventoryAdmin/dashboard.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Inventory Admin Panel</p>
@@ -83,9 +85,9 @@
                         </a>
                     </div>
                 </div>
-        
+
                 <div class="subUserContainer">
-                    <a href="/dionSe/authentication/login.html">
+                    <a href="/dionSe/authentication/login.php">
                         <div style="margin-left: 1.5rem;" class="userPictureContainer1">
                             <p>Logout</p>
                         </div>
@@ -93,7 +95,7 @@
                 </div>
             </div>
         </div>
-    
+
         <div class="mainContainer" style="margin-left: 250px;">
             <div class="container">
                 <div class="headerContainer">
@@ -101,7 +103,7 @@
                         <div class="logoContainer">
                             <img class="logo" src="/dionSe/assets/img/CSSPE.png" alt="">
                         </div>
-        
+
                         <div class="collegeNameContainer">
                             <p>CSSPE Inventory & Information System</p>
                         </div>
@@ -135,7 +137,7 @@
                                 <th>Action</th>
                             </tr>
                         </thead>
-    
+
                         <tbody>
                             <tr>
                                 <td>km falcatan</td>
@@ -162,30 +164,39 @@
                 <div class="titleContainer">
                     <p>Create Borrowing</p>
                 </div>
-    
+
                 <div class="subLoginContainer">
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Item Name:</label>
+                        <label for=""
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Item
+                            Name:</label>
                         <input class="inputEmail" type="text" placeholder="Item Name:">
                     </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Quantity:</label>
+                        <label for=""
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Quantity:</label>
                         <input class="inputEmail" type="Number" placeholder="Quantity:">
                     </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Borrow Date:</label>
+                        <label for=""
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Borrow
+                            Date:</label>
                         <input class="inputEmail" type="date" placeholder="Date:">
                     </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Class schedule time from:</label>
+                        <label for=""
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Class
+                            schedule time from:</label>
                         <input class="inputEmail" type="time" placeholder="From:">
                     </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Class schedule time to:</label>
+                        <label for=""
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Class
+                            schedule time to:</label>
                         <input class="inputEmail" type="time" placeholder="To">
                     </div>
 
@@ -200,7 +211,7 @@
                             <option value="">Choose a teacher</option>
                         </select>
                     </div>
-    
+
                     <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
                         <button class="addButton" style="width: 6rem;">Add</button>
                         <button onclick="addProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
@@ -216,40 +227,51 @@
                 <div class="titleContainer">
                     <p>Edit Borrowed Item</p>
                 </div>
-    
+
                 <div class="subLoginContainer">
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Item Name:</label>
+                        <label for=""
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Item
+                            Name:</label>
                         <input class="inputEmail" type="text" placeholder="Item Name:">
                     </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Quantity:</label>
+                        <label for=""
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Quantity:</label>
                         <input class="inputEmail" type="Number" placeholder="Quantity:">
                     </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Borrow Date:</label>
+                        <label for=""
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Borrow
+                            Date:</label>
                         <input class="inputEmail" type="date" placeholder="Date:">
                     </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Class schedule time from:</label>
+                        <label for=""
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Class
+                            schedule time from:</label>
                         <input class="inputEmail" type="time" placeholder="From:">
                     </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Class schedule time to:</label>
+                        <label for=""
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Class
+                            schedule time to:</label>
                         <input class="inputEmail" type="time" placeholder="To">
                     </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Brand:</label>
+                        <label for=""
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Brand:</label>
                         <input class="inputEmail" type="text" placeholder="Brand:">
                     </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Teacher:</label>
+                        <label for=""
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Teacher:</label>
                         <input class="inputEmail" type="text" placeholder="Teacher:">
                     </div>
 
@@ -258,7 +280,7 @@
                             <option value="">Update a Status</option>
                         </select>
                     </div>
-    
+
                     <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
                         <button class="addButton" style="width: 6rem;">Save</button>
                         <button onclick="editProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
@@ -271,4 +293,5 @@
     <script src="/dionSe/assets/js/sidebar.js"></script>
     <script src="/dionSe/assets/js/program.js"></script>
 </body>
+
 </html>
