@@ -1,0 +1,111 @@
+.dashboardContainer{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  flex-direction: column;
+}
+
+.mainContainer{
+    background-color: rgb(243, 243, 243);
+    padding-bottom: 2rem;
+}
+
+.notificationContainer{
+  width: 80%;
+  background-color: rgb(223, 222, 222);
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.699);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.subNotificaitonContainer{
+  display: flex;
+  flex-direction: column;
+}
+
+.messageContainer{
+  font-size: 1.2rem;
+  text-align: left;
+}
+
+.dateContainer{
+  height: 2rem;
+  font-size: 1.2rem;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  color: gray;
+}
+
+.deleteContainer{
+  height: 3rem;
+}
+
+.type{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2rem;
+  border-bottom: solid gray 1px;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/*tablet*/
+@media only screen and (min-width: 601px) and (max-width: 1024px) {
+  .notificationContainer{
+    flex-direction: row;
+  }
+
+  .deleteContainer{
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30rem;
+  }
+}
+
+/*laptop*/
+@media only screen and (min-width: 1025px) and (max-width: 1440px) {
+  .graphContainer{
+    height: 25rem;
+    width: 25rem;
+  }
+
+  .notificationContainer{
+    flex-direction: row;
+  }
+
+  .deleteContainer{
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30rem;
+  }
+}
+
+/*pc*/
+@media only screen and (min-width: 1441px){
+  .graphContainer{
+    height: 35rem;
+    width: 35rem;
+  }
+  
+  .notificationContainer{
+    flex-direction: row;
+  }
+
+  .deleteContainer{
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30rem;
+  }
+}

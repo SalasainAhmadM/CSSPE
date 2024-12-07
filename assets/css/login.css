@@ -1,0 +1,337 @@
+*{
+    padding: 0;
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+html{
+    scroll-behavior: smooth;
+}
+
+.container{
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.mainContainer{
+    background-color: rgb(243, 243, 243);
+}
+
+.headerContainer{
+    height: 4rem;
+    width: 100%;
+    padding: 0 0.5rem 0 0.5rem;
+    background-color: rgb(109, 18, 10);
+    justify-content: space-between;
+    display: flex;
+}
+
+.subHeaderContainer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    gap: 0.5rem;
+}
+
+.logoContainer{
+    height: 100%;
+    width: 4rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.logo{
+    height: 4rem;
+}
+
+.collegeNameContainer{
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+    display: none;
+}
+
+.aboutButton{
+    height: 2.5rem;
+    width: 6rem;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    background-color: transparent;
+    color: white;
+    font-weight: bold;
+    margin-right: 1rem;
+}
+
+.aboutButton:hover{
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.699);
+    background-color: white;
+    color: black;
+    font-weight: bold;
+}
+
+.aboutButton:active{
+    box-shadow: none;
+    transform: scale(0.9);
+    background-color: transparent;
+    border: solid white 1px;
+    color: white;
+}
+
+.subContainer{
+    height: 93vh;
+    background: url(../img/gym.jfif);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
+}
+
+.backgroundColor{
+    position: absolute;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.685);
+    top: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loginContainer{
+    width: 90%;
+    border-radius: 0.5rem;
+    background-color: rgb(223, 222, 222);
+}
+
+.titleContainer{
+    height: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.subLoginContainer{
+    margin-top: 1rem;
+    gap: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.inputContainer{
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.inputEmail{
+    height: 100%;
+    width: 90%;
+    border-radius: 0.5rem;
+    border: none;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.699);
+    padding-left: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.login{
+    width: 92%;
+    height: 3rem;
+    border: none;
+    border-radius: 0.5rem;
+    background-color: rgb(109, 18, 10);
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.699);
+}
+
+.login:hover{
+    background-color: transparent;
+    border: solid rgb(109, 18, 10) 1px;
+    color: rgb(109, 18, 10);
+}
+
+.login:active{
+    transform: scale(0.9);
+    background-color: rgb(109, 18, 10);
+    color: white;
+    box-shadow: none;
+}
+
+.registerLinkContainer{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 2rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+}
+
+span{
+    text-decoration: none;
+    color: rgb(109, 18, 10);
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.registerContainer{
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.404);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rank{
+    width: 100%;
+    height: 3rem;
+    border-radius: 0.5rem;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.699);
+    font-size: 1rem;
+    color: black;
+}
+
+.subInputContainer{
+    width: 92%;
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+}
+
+.aboutContainer{
+    background-color: rgb(109, 18, 10);
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+.subAboutContainer{
+    display: flex;
+    flex-direction: column;
+    height: 20rem;
+    justify-content: center;
+}
+
+.subAboutContainer1{
+    display: flex;
+    flex-direction: column;
+    height: 16.5rem;
+    justify-content: center;
+    border-bottom: solid gray 1px;
+    border-top: solid gray 1px;
+}
+
+.wmsuContainer{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.wmsuContainer1{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.wmsuLogo{
+    height: 5rem;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+}
+
+.wmsuLogo1{
+    height: 5rem;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+}
+
+.address{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    flex-direction: column;
+    font-size: 1.2rem;
+}
+
+/*tablet*/
+@media only screen and (min-width: 601px){
+    .loginContainer{
+        width: 30rem;
+    }
+
+    .collegeNameContainer{
+        display: flex;
+        font-size: 1.4rem;
+        font-weight: bold;
+    }
+}
+
+
+/*laptop*/
+@media only screen and (min-width: 1025px){
+    .aboutContainer{
+        flex-direction: row;
+    }
+
+    .subAboutContainer1{
+        border-bottom: none;
+        border-top: none;
+        width: 100%;
+        height: 22rem;
+        border-left: solid gray 1px;
+        border-right: solid gray 1px;
+    }
+
+    .subAboutContainer{
+        width: 100%;
+        height: 22rem;
+        row-gap: 2rem;
+    }
+
+    .wmsuContainer1{
+        flex-direction: row;
+        padding-left: 1rem;
+    }
+
+    .wmsuLogo1{
+        width: 5rem;
+    }
+
+    .wmsuLogo{
+        margin-left: 1rem;
+    }
+}

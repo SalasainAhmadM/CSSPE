@@ -1,0 +1,329 @@
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  }
+  
+  .sidebar-container {
+    width: 20rem; 
+    height: 100vh;
+  }
+
+
+  .userContainer{
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+.subUserContainer{
+    height: 6rem;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 5rem 1fr;
+    border-bottom: solid snow 1px;
+    cursor: pointer;
+}
+
+.userPictureContainer{
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.userPictureContainer1{
+    height: 100%;
+    display: flex;
+    align-items: center;
+    color: snow;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.subUserPictureContainer{
+    height: 3rem;
+    width: 3rem;
+    border-radius: 5rem;
+    background: rgb(207, 224, 236);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profilePicture{
+    width: 100%;
+    height: 100%;
+    border-radius: 5rem;
+}
+
+.navContainer{
+    width: 100%;
+}
+
+.subNavContainer{
+    height: 36rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.buttonContainer1{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+    transition: all 0.15s;
+    cursor: pointer;
+}
+
+.buttonContainer1:hover{
+    background-color: rgb(112, 40, 33);
+    color: black;
+    padding: 0.5rem 0;
+}
+
+.iconContainer9{
+    height: 100%;
+    width: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon{
+    height: 2.5rem;
+    background-color: rgb(112, 40, 33);
+}
+
+.iconContainer9 #icon{
+    width: 1.9rem;
+    height: 1.9rem;
+}
+
+.nameOfIconContainer{
+    height: 100%;
+    width: 70%;
+    display: flex;
+    align-items: center;
+    color: rgba(255, 250, 250, 0.893);
+    font-size: 1.3rem;
+    transition: all 0.15s
+}
+.nameOfIconContainer:hover,
+.icon:hover{
+  background-color: rgb(112, 40, 33);
+    color: black;
+    padding: 0.5rem 0;
+}
+
+a{
+    text-decoration: none;
+}
+
+.settingContainer{
+    height: 2.7rem;
+}
+
+.sideBarContainer3{
+    height: 100%;
+    width: 100%;
+}
+
+/*  */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 16rem; 
+    height: 100vh;
+    background-color: rgb(71, 12, 7);
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .mainContainer {
+    margin-left: 210px; 
+    text-align: center;
+    transition: margin-left 0.3s ease-in-out;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .mainContainer.centered {
+    margin-left: auto;
+  }
+  
+  body.sidebar-hidden .sidebar {
+    transform: translateX(-16.2rem); 
+  }
+  
+  .arrowContainer {
+    height: 100%;
+    width: 1.5rem;
+    right: -1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+  }
+  
+  .subArrowContainer {
+    width: 100%;
+    height: 5rem;
+    border-radius: -10rem;    
+    background-color: rgb(71, 12, 7);
+    border-radius: 0 0.5rem 0.5rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  
+  .hideIcon {
+    height: 1.5rem;
+    animation: rotateLeft 0.5s linear;
+  }
+  
+  .rotate {
+    height: 1.5rem;
+    transform: rotate(180deg);
+    animation: rotateRight 0.5s linear;
+  }
+
+
+  /* success & error message */
+  .messageModal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+  }
+
+.alertModal{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.alertContent{
+    width: 50%;
+    height: 35vh;
+    background-color: snow;
+    border: 1px solid gray;
+    border-radius: 0.3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 3rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 1rem;
+}
+
+.alertIcon{
+    width: 20%;
+    height: 6rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.iconBorder{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5rem;
+    border: 1px solid rgba(0, 128, 0, 0.69);
+    width: 50%;
+    padding: 0.5rem 1.3rem;
+}
+
+.iconBorder p{
+  font-size: 3rem;
+  color: rgba(0, 128, 0, 0.69);
+}
+
+.iconBorder .errorIcon{
+  color: red;
+  font-weight: bold;
+  width: 100%;
+  margin: auto;
+  font-size: 3.5rem;
+}
+
+.alertMsg{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    color: #333;
+}
+
+.success-message, .error-message{
+    margin: auto;
+    width: 100%;
+    color: #333;
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.alertBtn1{
+    width: 80%;
+    display: flex;
+    justify-content: end;
+    align-items: center;
+}
+
+.closebtn,
+.close{
+  height: 2rem;
+  width: 5rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: solid rgb(2, 116, 200) 1px;
+  color: rgb(2, 116, 200);
+  transition: all 0.15s;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.closebtn:hover,
+.close:hover{
+  background-color:rgb(2, 116, 200);
+  color: snow;
+}
+
+.closebtn:active,
+.close:active{
+  transform: scale(0.9);
+}
+
+  
+@media (max-width: 767px) {
+  .mainContainer {
+      margin-left: 0;
+    }
+}
+
+@media only screen and (min-width: 1025px){
+  .alertContent{
+      width: 20%;
+      max-width: 500px; 
+      height: 35vh;
+  }
+}
