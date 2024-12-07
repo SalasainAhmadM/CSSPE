@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,10 +9,11 @@
     <link rel="stylesheet" href="/dionSe/assets/css/memorandum.css">
     <link rel="stylesheet" href="/dionSe/assets/css/sidebar.css">
 </head>
+
 <body>
     <div class="body">
         <div class="sidebar">
-            <div  class="sidebarContent">
+            <div class="sidebarContent">
                 <div class="arrowContainer" style="margin-left: 80rem;" id="toggleButton">
                     <div class="subArrowContainer">
                         <img class="hideIcon" src="/dionSe/assets/img/arrow.png" alt="">
@@ -20,69 +22,69 @@
             </div>
             <div class="userContainer">
                 <div class="subUserContainer">
-                    <div class="userPictureContainer" >
+                    <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
                             <img class="subUserPictureContainer" src="/dionSe/assets/img/CSSPE.png" alt="">
                         </div>
                     </div>
-    
+
                     <div class="userPictureContainer1">
                         <p>Khriz marr l. falcatan</p>
                     </div>
                 </div>
-        
+
                 <div class="navContainer">
                     <div class="subNavContainer">
-        
-                        <a href="../informationAdmin/homePage/announcement.html">
+
+                        <a href="../informationAdmin/homePage/announcement.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Home</p>
                                 </div>
                             </div>
                         </a>
-        
-                        <a href="../informationAdmin/program.html">
+
+                        <a href="../informationAdmin/program.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Departments</p>
                                 </div>
                             </div>
                         </a>
-        
-                        <a href="../informationAdmin/facultyMember.html">
+
+                        <a href="../informationAdmin/facultyMember.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Faculty Members</p>
                                 </div>
                             </div>
                         </a>
-        
-                        <a href="../informationAdmin/oraganization.html">
+
+                        <a href="../informationAdmin/oraganization.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Organizations</p>
                                 </div>
                             </div>
                         </a>
-    
-                        <a href="../informationAdmin/memorandum.html">
+
+                        <a href="../informationAdmin/memorandum.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Memorandums</p>
                                 </div>
                             </div>
                         </a>
-    
-                        <a href="../informationAdmin/announcement.html">
+
+                        <a href="../informationAdmin/announcement.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Announcements</p>
                                 </div>
                             </div>
                         </a>
-    
-                        <a href="../informationAdmin/events.html">
+
+                        <a href="../informationAdmin/events.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Events</p>
@@ -91,9 +93,9 @@
                         </a>
                     </div>
                 </div>
-        
+
                 <div class="subUserContainer">
-                    <a href="/dionSe/authentication/login.html">
+                    <a href="/dionSe/authentication/login.php">
                         <div style="margin-left: 1.5rem;" class="userPictureContainer1">
                             <p>Logout</p>
                         </div>
@@ -101,7 +103,7 @@
                 </div>
             </div>
         </div>
-    
+
         <div class="mainContainer" style="margin-left: 250px;">
             <div class="container">
                 <div class="headerContainer">
@@ -109,7 +111,7 @@
                         <div class="logoContainer">
                             <img class="logo" src="/dionSe/assets/img/CSSPE.png" alt="">
                         </div>
-        
+
                         <div class="collegeNameContainer">
                             <p>CSSPE Inventory & Information System</p>
                         </div>
@@ -139,7 +141,7 @@
                                 <th>Action</th>
                             </tr>
                         </thead>
-    
+
                         <tbody>
                             <tr>
                                 <td>Hakdog</td>
@@ -164,7 +166,7 @@
                 <div class="titleContainer">
                     <p>Add Memorandums</p>
                 </div>
-    
+
                 <div class="subLoginContainer">
                     <div class="inputContainer">
                         <input class="inputEmail" type="text" placeholder="File path:">
@@ -173,7 +175,7 @@
                     <div class="inputContainer">
                         <input class="inputEmail" type="text" placeholder="Title:">
                     </div>
-    
+
                     <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
                         <button class="addButton" style="width: 6rem;">Add</button>
                         <button onclick="addProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
@@ -189,18 +191,21 @@
                 <div class="titleContainer">
                     <p>Edit Memorandums</p>
                 </div>
-    
+
                 <div class="subLoginContainer">
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">File path:</label>
+                        <label for=""
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">File
+                            path:</label>
                         <input class="inputEmail" type="text">
                     </div>
-                    
+
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">TItle:</label>
+                        <label for=""
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">TItle:</label>
                         <input class="inputEmail" type="text">
                     </div>
-    
+
                     <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
                         <button class="addButton" style="width: 6rem;">Save</button>
                         <button onclick="editProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
@@ -213,4 +218,5 @@
     <script src="/dionSe/assets/js/sidebar.js"></script>
     <script src="/dionSe/assets/js/program.js"></script>
 </body>
+
 </html>
