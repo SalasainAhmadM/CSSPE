@@ -5,6 +5,52 @@ require_once '../conn/auth.php';
 
 validateSessionRole('super_admin');
 
+// Fetch data from the pending_users table
+$query = "SELECT id, first_name, last_name, middle_name, email, address, contact_no, rank, password, created_at, role FROM pending_users";
+$result = mysqli_query($conn, $query);
+
+// delete request
+if (isset($_GET['delete_id'])) {
+    $user_id = $_GET['delete_id'];
+    $delete_query = "DELETE FROM pending_users WHERE id = $user_id";
+    if (mysqli_query($conn, $delete_query)) {
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit();
+    } else {
+        echo "Error deleting record: " . mysqli_error($conn);
+    }
+}
+
+// approve request
+if (isset($_GET['approve_id'])) {
+    $user_id = $_GET['approve_id'];
+    $select_query = "SELECT * FROM pending_users WHERE id = $user_id";
+    $result_select = mysqli_query($conn, $select_query);
+    $pending_user = mysqli_fetch_assoc($result_select);
+    
+    $insert_query = "INSERT INTO users (first_name, last_name, middle_name, email, address, contact_no, rank, password, role) 
+                     VALUES ('" . mysqli_real_escape_string($conn, $pending_user['first_name']) . "', 
+                             '" . mysqli_real_escape_string($conn, $pending_user['last_name']) . "', 
+                             '" . mysqli_real_escape_string($conn, $pending_user['middle_name']) . "', 
+                             '" . mysqli_real_escape_string($conn, $pending_user['email']) . "', 
+                             '" . mysqli_real_escape_string($conn, $pending_user['address']) . "', 
+                             '" . mysqli_real_escape_string($conn, $pending_user['contact_no']) . "', 
+                             '" . mysqli_real_escape_string($conn, $pending_user['rank']) . "', 
+                             '" . mysqli_real_escape_string($conn, $pending_user['password']) . "', 
+                             '" . mysqli_real_escape_string($conn, $pending_user['role']) . "')";
+                             
+    if (mysqli_query($conn, $insert_query)) {
+        $delete_query = "DELETE FROM pending_users WHERE id = $user_id";
+        if (mysqli_query($conn, $delete_query)) {
+            header('Location: ' . $_SERVER['PHP_SELF']);
+            exit();
+        } else {
+            echo "Error deleting record after approval: " . mysqli_error($conn);
+        }
+    } else {
+        echo "Error inserting into users table: " . mysqli_error($conn);
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -17,11 +63,14 @@ validateSessionRole('super_admin');
 
     <link rel="stylesheet" href="../assets/css/pendingAccount.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+
 </head>
 
 <body>
     <div class="body">
-        <div class="sidebar">
+    <div class="sidebar">
             <div class="sidebarContent">
                 <div class="arrowContainer" style="margin-left: 80rem;" id="toggleButton">
                     <div class="subArrowContainer">
@@ -148,18 +197,24 @@ validateSessionRole('super_admin');
                         </thead>
 
                         <tbody>
-                            <tr>
-                                <td>km falcatan</td>
-                                <td>Teacher</td>
-                                <td>Verified</td>
-                                <td>Verified</td>
-                                <td>Verified</td>
-                                <td>Verified</td>
-                                <td class="button">
-                                    <button class="addButton" style="width: 6rem;">Approve</button>
-                                    <button class="addButton1" style="width: 6rem;">Delete</button>
-                                </td>
-                            </tr>
+                            <?php while($row = mysqli_fetch_assoc($result)): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['email']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['address']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['contact_no']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['rank']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['role']); ?></td>
+                                    <td class="button">
+                                        <a href="#" onclick="approveUser(<?php echo $row['id']; ?>)">
+                                            <button class="addButton1" style="width: 6rem;">Approve</button>
+                                        </a>
+                                        <a href="#" onclick="deleteUser(<?php echo $row['id']; ?>)">
+                                            <button class="addButton1" style="width: 6rem;">Delete</button>
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
                         </tbody>
                     </table>
                 </div>
@@ -167,140 +222,43 @@ validateSessionRole('super_admin');
         </div>
     </div>
 
-    <div class="addContainer" style="display: none; background-color: none;">
-        <div class="addContainer">
-            <div class="subAddContainer">
-                <div class="titleContainer">
-                    <p>Create Borrowing</p>
-                </div>
-
-                <div class="subLoginContainer">
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Item
-                            Name:</label>
-                        <input class="inputEmail" type="text" placeholder="Item Name:">
-                    </div>
-
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Quantity:</label>
-                        <input class="inputEmail" type="Number" placeholder="Quantity:">
-                    </div>
-
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Borrow
-                            Date:</label>
-                        <input class="inputEmail" type="date" placeholder="Date:">
-                    </div>
-
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Class
-                            schedule time from:</label>
-                        <input class="inputEmail" type="time" placeholder="From:">
-                    </div>
-
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Class
-                            schedule time to:</label>
-                        <input class="inputEmail" type="time" placeholder="To">
-                    </div>
-
-                    <div class="inputContainer">
-                        <select name="" id="" class="inputEmail">
-                            <option value="">Choose a brand</option>
-                        </select>
-                    </div>
-
-                    <div class="inputContainer">
-                        <select name="" id="" class="inputEmail">
-                            <option value="">Choose a teacher</option>
-                        </select>
-                    </div>
-
-                    <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
-                        <button class="addButton" style="width: 6rem;">Add</button>
-                        <button onclick="addProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="editContainer" style="display: none; background-color: none;">
-        <div class="editContainer">
-            <div class="subAddContainer">
-                <div class="titleContainer">
-                    <p>Edit Borrowed Item</p>
-                </div>
-
-                <div class="subLoginContainer">
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Item
-                            Name:</label>
-                        <input class="inputEmail" type="text" placeholder="Item Name:">
-                    </div>
-
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Quantity:</label>
-                        <input class="inputEmail" type="Number" placeholder="Quantity:">
-                    </div>
-
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Borrow
-                            Date:</label>
-                        <input class="inputEmail" type="date" placeholder="Date:">
-                    </div>
-
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Class
-                            schedule time from:</label>
-                        <input class="inputEmail" type="time" placeholder="From:">
-                    </div>
-
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Class
-                            schedule time to:</label>
-                        <input class="inputEmail" type="time" placeholder="To">
-                    </div>
-
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Brand:</label>
-                        <input class="inputEmail" type="text" placeholder="Brand:">
-                    </div>
-
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Teacher:</label>
-                        <input class="inputEmail" type="text" placeholder="Teacher:">
-                    </div>
-
-                    <div class="inputContainer">
-                        <select name="" id="" class="inputEmail">
-                            <option value="">Update a Status</option>
-                        </select>
-                    </div>
-
-                    <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
-                        <button class="addButton" style="width: 6rem;">Save</button>
-                        <button onclick="editProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script src="../assets/js/sidebar.js"></script>
     <script src="../assets/js/program.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        function approveUser(userId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Do you want to approve this user?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, approve!',
+                cancelButtonText: 'No, cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "?approve_id=" + userId;
+                }
+            });
+        }
+
+        function deleteUser(userId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Do you want to delete this user?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete!',
+                cancelButtonText: 'No, cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "?delete_id=" + userId;
+                }
+            });
+        }
+    </script>
+
 </body>
 
 </html>

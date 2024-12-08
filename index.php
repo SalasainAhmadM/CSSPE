@@ -32,7 +32,7 @@ function registerUser($firstName, $lastName, $middleName, $email, $address, $con
     $role = "instructor"; // Default role
 
     $insertQuery = "
-        INSERT INTO users (first_name, last_name, middle_name, email, address, contact_no, rank, password, role)
+        INSERT INTO pending_users (first_name, last_name, middle_name, email, address, contact_no, rank, password, role)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     ";
     $stmt = $conn->prepare($insertQuery);
@@ -50,7 +50,7 @@ function registerUser($firstName, $lastName, $middleName, $email, $address, $con
     );
 
     if ($stmt->execute()) {
-        return "Registration successful!";
+        return "Registration successful. Wait for Approval!";
     } else {
         return "Error: " . $stmt->error;
     }
