@@ -149,7 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="collegeNameContainer">
-                    <p>CSSPE Inventory & Information System whaha</p>
+                    <p>CSSPE Inventory & Information System</p>
                 </div>
             </div>
 
