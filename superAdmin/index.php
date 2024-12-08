@@ -15,7 +15,7 @@ validateSessionRole('super_admin');
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 
-    <link rel="stylesheet" href="../assets/css/pendingAccount.css">
+    <link rel="stylesheet" href="../assets/css/account.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
 </head>
 
@@ -120,7 +120,7 @@ validateSessionRole('super_admin');
                 </div>
 
                 <div class="textContainer">
-                    <p class="text">Pending Account</p>
+                    <p class="text">Verified Accounts</p>
                 </div>
 
                 <div class="searchContainer">
@@ -128,7 +128,7 @@ validateSessionRole('super_admin');
                     <div class="printButton" style="gap: 1rem; display: flex; width: 90%;">
                         <button class="addButton size">Print</button>
                         <select name="" class="addButton size" id="">
-                            <option value="">Choose a position</option>
+                            <option value="">Choose a role</option>
                         </select>
                     </div>
                 </div>
@@ -143,6 +143,7 @@ validateSessionRole('super_admin');
                                 <th>Contact Number</th>
                                 <th>Department</th>
                                 <th>Position</th>
+                                <th>Role</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -155,9 +156,9 @@ validateSessionRole('super_admin');
                                 <td>Verified</td>
                                 <td>Verified</td>
                                 <td>Verified</td>
+                                <td>Verified</td>
                                 <td class="button">
-                                    <button class="addButton" style="width: 6rem;">Approve</button>
-                                    <button class="addButton1" style="width: 6rem;">Delete</button>
+                                    <button class="addButton1" style="width: 5rem;">Delete</button>
                                 </td>
                             </tr>
                         </tbody>

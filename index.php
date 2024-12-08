@@ -1,8 +1,9 @@
 <?php
 session_start();
-require_once './conn/conn.php'; 
+require_once './conn/conn.php';
 
-function registerUser($firstName, $lastName, $middleName, $email, $address, $contactNo, $department, $rank, $password) {
+function registerUser($firstName, $lastName, $middleName, $email, $address, $contactNo, $rank, $password)
+{
     global $conn;
 
     // Check for existing email
@@ -31,19 +32,18 @@ function registerUser($firstName, $lastName, $middleName, $email, $address, $con
     $role = "instructor"; // Default role
 
     $insertQuery = "
-        INSERT INTO users (first_name, last_name, middle_name, email, address, contact_no, department, rank, password, role)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO users (first_name, last_name, middle_name, email, address, contact_no, rank, password, role)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     ";
     $stmt = $conn->prepare($insertQuery);
     $stmt->bind_param(
-        "ssssssssss",
+        "sssssssss",
         $firstName,
         $lastName,
         $middleName,
         $email,
         $address,
         $contactNo,
-        $department,
         $rank,
         $hashedPassword,
         $role
@@ -56,7 +56,8 @@ function registerUser($firstName, $lastName, $middleName, $email, $address, $con
     }
 }
 
-function loginUser($email, $password) {
+function loginUser($email, $password)
+{
     global $conn;
 
     $query = "SELECT * FROM users WHERE email = ?";
@@ -73,7 +74,18 @@ function loginUser($email, $password) {
             $_SESSION['last_name'] = $user['last_name'];
             $_SESSION['user_role'] = $user['role'];
 
-            header("Location: ./homePage/index.php");
+            // Redirect based on the role
+            if ($_SESSION['user_role'] == 'instructor') {
+                header("Location: ./homePage/");
+            } elseif ($_SESSION['user_role'] == 'super_admin') {
+                header("Location: ./superAdmin/");
+            } elseif ($_SESSION['user_role'] == 'inventory_admin') {
+                header("Location: ./inventoryAdmin/");
+            } elseif ($_SESSION['user_role'] == 'information_admin') {
+                header("Location: ./informationAdmin/");
+            } else {
+                header("Location: ./homePage/"); // Default fallback
+            }
             exit();
         } else {
             return "Error: Incorrect password.";
@@ -84,16 +96,16 @@ function loginUser($email, $password) {
 }
 
 
+
 $message = "";
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['register'])) {
         $firstName = $_POST['first_name'];
         $lastName = $_POST['last_name'];
-        $middleName = $_POST['middle_name'] ?? null; 
+        $middleName = $_POST['middle_name'] ?? null;
         $email = $_POST['email'];
         $address = $_POST['address'];
         $contactNo = $_POST['contact_no'];
-        $department = $_POST['department'];
         $rank = $_POST['rank'];
         $password = $_POST['password'];
         $confirmPassword = $_POST['confirm_password'];
@@ -101,8 +113,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($password !== $confirmPassword) {
             $message = "Error: Passwords do not match.";
         } else {
-            $message = registerUser($firstName, $lastName, $middleName, $email, $address, $contactNo, $department, $rank, $password);
+            $message = registerUser($firstName, $lastName, $middleName, $email, $address, $contactNo, $rank, $password);
         }
+
+
     } elseif (isset($_POST['login'])) {
         $email = $_POST['email'];
         $password = $_POST['password'];
@@ -110,6 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -150,29 +165,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <p>Login</p>
                     </div>
                     <form method="POST" action="">
-                    <div class="subLoginContainer">
-                        <div class="inputContainer">
-                            <input class="inputEmail" type="email" name="email" placeholder="Email:">
-                        </div>
+                        <div class="subLoginContainer">
+                            <div class="inputContainer">
+                                <input class="inputEmail" type="email" name="email" placeholder="Email:">
+                            </div>
 
-                        <div class="inputContainer">
-                            <input class="inputEmail" type="password" name="password" placeholder="Password:">
-                        </div>
+                            <div class="inputContainer">
+                                <input class="inputEmail" type="password" name="password" placeholder="Password:">
+                            </div>
 
-                        <div class="inputContainer">
-                            <button type="submit" name="login" class="login">Login</button>
+                            <div class="inputContainer">
+                                <button type="submit" name="login" class="login">Login</button>
+                            </div>
                         </div>
-                    </div>
-                    </form>    
+                    </form>
 
-                        <div class="registerLinkContainer">
-                            <p>Don't have an account? <span onclick="login()">Register</span></p>
-                        </div>
+                    <div class="registerLinkContainer">
+                        <p>Don't have an account? <span onclick="login()">Register</span></p>
                     </div>
                 </div>
             </div>
         </div>
-        
+    </div>
+
     </div>
 
 
@@ -268,13 +283,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="inputContainer">
                             <input class="inputEmail" type="text" name="contact_no" placeholder="Contact No.:" required>
                         </div>
-                        <div class="inputContainer" style="gap: 0.5rem;">
+                        <!-- <div class="inputContainer" style="gap: 0.5rem;">
                             <select class="inputEmail" name="department" required>
                                 <option value="">Choose a Department</option>
                                 <option value="College of Architecture">College of Architecture</option>
                                 <option value="College of Nursing">College of Nursing</option>
                             </select>
-                        </div>
+                        </div> -->
                         <div class="inputContainer" style="gap: 0.5rem;">
                             <select class="inputEmail" name="rank" required>
                                 <option value="">Choose a rank</option>
@@ -291,7 +306,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <input class="inputEmail" type="password" name="confirm_password" placeholder="Confirm Password:" required>
                         </div>
                         <div class="inputContainer">
-                            <button type="submit"  name="register" class="login">Register</button>
+                            <button type="submit" name="register" class="login">Register</button>
                         </div>
 
                         <div class="registerLinkContainer">
@@ -323,7 +338,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         document.addEventListener("DOMContentLoaded", () => {
             const message = <?php echo json_encode($message); ?>;
             if (message) {
-                if (message.includes("successful")) {
+                if (message.includes("Error: Please fill in all the fields.")) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: message,
+                    });
+                } else if (message.includes("successful")) {
                     Swal.fire({
                         icon: 'success',
                         title: 'Success',
@@ -353,7 +374,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </script>
 
 
-    
+
 </body>
 
 </html>
