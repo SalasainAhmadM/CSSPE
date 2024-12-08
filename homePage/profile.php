@@ -1,9 +1,15 @@
 <!DOCTYPE html>
+<?php
+
+require_once '../conn/conn.php';
+
+?>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Profile</title>
 
     <link rel="stylesheet" href="../assets/css/organization.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
