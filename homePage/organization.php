@@ -1,3 +1,12 @@
+<?php
+session_start();
+require_once '../conn/conn.php'; 
+require_once '../conn/auth.php'; 
+
+validateSessionRole('instructor');
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
