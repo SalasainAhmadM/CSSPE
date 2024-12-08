@@ -1,3 +1,14 @@
+<?php
+session_start();
+require_once '../conn/conn.php'; 
+require_once '../conn/auth.php'; 
+
+validateSessionRole('instructor');
+
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -101,7 +112,7 @@
                 </div>
         
                 <div class="subUserContainer">
-                    <a href="/dionSe/authentication/login.php">
+                    <a href="../logout.php">>
                         <div style="margin-left: 1.5rem;" class="userPictureContainer1">
                             <p>Logout</p>
                         </div>

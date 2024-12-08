@@ -1,12 +1,128 @@
+<?php
+session_start();
+require_once './conn/conn.php'; 
+
+function registerUser($firstName, $lastName, $middleName, $email, $address, $contactNo, $department, $rank, $password) {
+    global $conn;
+
+    // Check for existing email
+    $emailQuery = "SELECT * FROM users WHERE email = ?";
+    $emailStmt = $conn->prepare($emailQuery);
+    $emailStmt->bind_param("s", $email);
+    $emailStmt->execute();
+    $emailResult = $emailStmt->get_result();
+
+    if ($emailResult->num_rows > 0) {
+        return "Error: Email already exists.";
+    }
+
+    // Check for existing name (first name and last name combination)
+    $nameQuery = "SELECT * FROM users WHERE first_name = ? AND last_name = ?";
+    $nameStmt = $conn->prepare($nameQuery);
+    $nameStmt->bind_param("ss", $firstName, $lastName);
+    $nameStmt->execute();
+    $nameResult = $nameStmt->get_result();
+
+    if ($nameResult->num_rows > 0) {
+        return "Error: User with the same name already exists.";
+    }
+
+    $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+    $role = "instructor"; // Default role
+
+    $insertQuery = "
+        INSERT INTO users (first_name, last_name, middle_name, email, address, contact_no, department, rank, password, role)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ";
+    $stmt = $conn->prepare($insertQuery);
+    $stmt->bind_param(
+        "ssssssssss",
+        $firstName,
+        $lastName,
+        $middleName,
+        $email,
+        $address,
+        $contactNo,
+        $department,
+        $rank,
+        $hashedPassword,
+        $role
+    );
+
+    if ($stmt->execute()) {
+        return "Registration successful!";
+    } else {
+        return "Error: " . $stmt->error;
+    }
+}
+
+function loginUser($email, $password) {
+    global $conn;
+
+    $query = "SELECT * FROM users WHERE email = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $user = $result->fetch_assoc();
+        if (password_verify($password, $user['password'])) {
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['first_name'] = $user['first_name'];
+            $_SESSION['last_name'] = $user['last_name'];
+            $_SESSION['user_role'] = $user['role'];
+
+            header("Location: ./homePage/index.php");
+            exit();
+        } else {
+            return "Error: Incorrect password.";
+        }
+    } else {
+        return "Error: Email not found.";
+    }
+}
+
+
+$message = "";
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['register'])) {
+        $firstName = $_POST['first_name'];
+        $lastName = $_POST['last_name'];
+        $middleName = $_POST['middle_name'] ?? null; 
+        $email = $_POST['email'];
+        $address = $_POST['address'];
+        $contactNo = $_POST['contact_no'];
+        $department = $_POST['department'];
+        $rank = $_POST['rank'];
+        $password = $_POST['password'];
+        $confirmPassword = $_POST['confirm_password'];
+
+        if ($password !== $confirmPassword) {
+            $message = "Error: Passwords do not match.";
+        } else {
+            $message = registerUser($firstName, $lastName, $middleName, $email, $address, $contactNo, $department, $rank, $password);
+        }
+    } elseif (isset($_POST['login'])) {
+        $email = $_POST['email'];
+        $password = $_POST['password'];
+        $message = loginUser($email, $password);
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Login</title>
 
     <link rel="stylesheet" href="./assets/css/login.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+
 </head>
 
 <body>
@@ -33,19 +149,21 @@
                     <div class="titleContainer">
                         <p>Login</p>
                     </div>
-
+                    <form method="POST" action="">
                     <div class="subLoginContainer">
                         <div class="inputContainer">
-                            <input class="inputEmail" type="email" placeholder="Email:">
+                            <input class="inputEmail" type="email" name="email" placeholder="Email:">
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" type="password" placeholder="Password:">
+                            <input class="inputEmail" type="password" name="password" placeholder="Password:">
                         </div>
 
                         <div class="inputContainer">
-                            <button class="login">Login</button>
+                            <button type="submit" name="login" class="login">Login</button>
                         </div>
+                    </div>
+                    </form>    
 
                         <div class="registerLinkContainer">
                             <p>Don't have an account? <span onclick="login()">Register</span></p>
@@ -54,7 +172,10 @@
                 </div>
             </div>
         </div>
+        
     </div>
+
+
 
     <div class="aboutContainer" id="about">
         <div class="subAboutContainer">
@@ -125,68 +246,114 @@
                     <p>Register</p>
                 </div>
 
-                <div class="subLoginContainer">
-                    <div class="inputContainer">
-                        <input class="inputEmail" type="text" placeholder="First Name:">
-                    </div>
+                <form method="POST" action="">
 
-                    <div class="inputContainer">
-                        <input class="inputEmail" type="text" placeholder="Last Name:">
-                    </div>
+                    <div class="subLoginContainer">
 
-                    <div class="inputContainer">
-                        <input class="inputEmail" type="text" placeholder="Middle Name (Optional):">
-                    </div>
+                        <div class="inputContainer">
+                            <input class="inputEmail" type="text" name="first_name" placeholder="First Name:" required>
+                        </div>
+                        <div class="inputContainer">
+                            <input class="inputEmail" type="text" name="last_name" placeholder="Last Name:" required>
+                        </div>
+                        <div class="inputContainer">
+                            <input class="inputEmail" type="text" name="middle_name" placeholder="Middle Name (Optional):">
+                        </div>
+                        <div class="inputContainer">
+                            <input class="inputEmail" type="email" name="email" placeholder="Email:" required>
+                        </div>
+                        <div class="inputContainer">
+                            <input class="inputEmail" type="text" name="address" placeholder="Address:" required>
+                        </div>
+                        <div class="inputContainer">
+                            <input class="inputEmail" type="text" name="contact_no" placeholder="Contact No.:" required>
+                        </div>
+                        <div class="inputContainer" style="gap: 0.5rem;">
+                            <select class="inputEmail" name="department" required>
+                                <option value="">Choose a Department</option>
+                                <option value="College of Architecture">College of Architecture</option>
+                                <option value="College of Nursing">College of Nursing</option>
+                            </select>
+                        </div>
+                        <div class="inputContainer" style="gap: 0.5rem;">
+                            <select class="inputEmail" name="rank" required>
+                                <option value="">Choose a rank</option>
+                                <option value="Instructor">Instructor</option>
+                                <option value="Assistant Professor">Assistant Professor</option>
+                                <option value="Associate Professor">Associate Professor</option>
+                                <option value="Professor">Professor</option>
+                            </select>
+                        </div>
+                        <div class="inputContainer">
+                            <input class="inputEmail" type="password" name="password" placeholder="Password:" required>
+                        </div>
+                        <div class="inputContainer">
+                            <input class="inputEmail" type="password" name="confirm_password" placeholder="Confirm Password:" required>
+                        </div>
+                        <div class="inputContainer">
+                            <button type="submit"  name="register" class="login">Register</button>
+                        </div>
 
-                    <div class="inputContainer">
-                        <input class="inputEmail" type="email" placeholder="Email:">
-                    </div>
+                        <div class="registerLinkContainer">
+                            <p>Already have an account? <span onclick="login()">Login</span></p>
+                        </div>
 
-                    <div class="inputContainer">
-                        <input class="inputEmail" type="text" placeholder="Address:">
-                    </div>
+                </form>
 
-                    <div class="inputContainer">
-                        <input class="inputEmail" type="text" placeholder="Contact No.:">
-                    </div>
-
-                    <div class="inputContainer" style="gap: 0.5rem;">
-                        <select class="inputEmail" name="" id="">
-                            <option value="">Choose a Departments</option>
-                        </select>
-                    </div>
-
-                    <div class="inputContainer" style="gap: 0.5rem;">
-                        <select class="inputEmail" name="" id="">
-                            <option value="">Choose a rank</option>
-                            <option value="Instructor">Instructor</option>
-                            <option value="Assistant Professor">Assistant Professor</option>
-                            <option value="Associate Professor">Associate Professor</option>
-                            <option value="Professor">Professor</option>
-                        </select>
-                    </div>
-
-                    <div class="inputContainer">
-                        <input class="inputEmail" type="password" placeholder="Password:">
-                    </div>
-
-                    <div class="inputContainer">
-                        <input class="inputEmail" type="password" placeholder="Confirm Password:">
-                    </div>
-
-                    <div class="inputContainer">
-                        <button class="login">Register</button>
-                    </div>
-
-                    <div class="registerLinkContainer">
-                        <p>Already have an account? <span onclick="login()">Login</span></p>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
+    </div>
 
-    <script src="../assets/js/login.js"></script>
+    <script src="./assets/js/login.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <?php if (!empty($message)) : ?>
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Failed',
+                text: '<?= $message; ?>',
+            });
+        </script>
+    <?php endif; ?>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const message = <?php echo json_encode($message); ?>;
+            if (message) {
+                if (message.includes("successful")) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: message,
+                    });
+                } else if (message.includes("Email already exists")) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Duplicate Email',
+                        text: message,
+                    });
+                } else if (message.includes("User with the same name already exists")) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Duplicate Name',
+                        text: message,
+                    });
+                } else if (message.includes("Error")) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: message,
+                    });
+                }
+            }
+        });
+    </script>
+
+
+    
 </body>
 
 </html>

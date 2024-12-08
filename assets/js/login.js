@@ -1,9 +1,12 @@
-function login(){
-    const loginButton = document.querySelector('.registerContainer');
+function login() {
+    const loginContainer = document.querySelector('.loginContainer');
+    const registerContainer = document.querySelector('.registerContainer');
 
-    if(loginButton.style.display === 'none'){
-        loginButton.style.display = 'block';
-    } else{
-        loginButton .style.display = 'none'
+    if (registerContainer.style.display === 'none') {
+        registerContainer.style.display = 'block';
+        loginContainer.style.display = 'none';
+    } else {
+        registerContainer.style.display = 'none';
+        loginContainer.style.display = 'block';
     }
 }
