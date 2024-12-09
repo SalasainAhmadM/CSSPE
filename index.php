@@ -30,14 +30,15 @@ function registerUser($firstName, $lastName, $middleName, $email, $address, $con
 
     $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
     $role = "instructor"; // Default role
+    $defaultImage = "CSSPE.png"; // Default image value
 
     $insertQuery = "
-        INSERT INTO pending_users (first_name, last_name, middle_name, email, address, contact_no, rank, password, role)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO pending_users (first_name, last_name, middle_name, email, address, contact_no, rank, password, role, image)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ";
     $stmt = $conn->prepare($insertQuery);
     $stmt->bind_param(
-        "sssssssss",
+        "ssssssssss",
         $firstName,
         $lastName,
         $middleName,
@@ -46,7 +47,8 @@ function registerUser($firstName, $lastName, $middleName, $email, $address, $con
         $contactNo,
         $rank,
         $hashedPassword,
-        $role
+        $role,
+        $defaultImage
     );
 
     if ($stmt->execute()) {
@@ -55,6 +57,7 @@ function registerUser($firstName, $lastName, $middleName, $email, $address, $con
         return "Error: " . $stmt->error;
     }
 }
+
 
 function loginUser($email, $password)
 {

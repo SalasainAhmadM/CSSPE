@@ -5,7 +5,78 @@ require_once '../conn/auth.php';
 
 validateSessionRole('instructor');
 
+// Fetch user data
+$userid = $_SESSION['user_id'];
+$sql = "SELECT first_name, last_name, middle_name, email, address, contact_no, rank, role, image 
+        FROM users WHERE id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $userid);
+$stmt->execute();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
+
+$stmt->close();
+
+
+
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $userid = $_SESSION['user_id'];
+
+    // Update profile details
+    $firstName = $_POST['first_name'] ?? $user['first_name'];
+    $lastName = $_POST['last_name'] ?? $user['last_name'];
+    $middleName = $_POST['middle_name'] ?? $user['middle_name'];
+    $email = $_POST['email'] ?? $user['email'];
+    $address = $_POST['address'] ?? $user['address'];
+    $contactNo = $_POST['contact_no'] ?? $user['contact_no'];
+    $rank = $_POST['rank'] ?? $user['rank'];
+
+    $sql = "UPDATE users SET first_name = ?, last_name = ?, middle_name = ?, email = ?, address = ?, contact_no = ?, rank = ? WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sssssssi", $firstName, $lastName, $middleName, $email, $address, $contactNo, $rank, $userid);
+    $stmt->execute();
+    $stmt->close();
+
+    // Check if a file is uploaded
+    if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
+        $fileTmpPath = $_FILES['profile_image']['tmp_name'];
+        $fileName = $_FILES['profile_image']['name'];
+        $fileSize = $_FILES['profile_image']['size'];
+        $fileType = $_FILES['profile_image']['type'];
+        $fileNameCmps = explode(".", $fileName);
+        $fileExtension = strtolower(end($fileNameCmps));
+        
+        // Allowed extensions
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+        if (in_array($fileExtension, $allowedExtensions)) {
+            // Generate a unique name for the file
+            $newFileName = $userid . '_profile.' . $fileExtension;
+            $uploadFileDir = '../assets/img/';
+            $destPath = $uploadFileDir . $newFileName;
+
+            // Move the file to the server directory
+            if (move_uploaded_file($fileTmpPath, $destPath)) {
+                // Update the user's image in the database
+                $sql = "UPDATE users SET image = ? WHERE id = ?";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("si", $newFileName, $userid);
+                $stmt->execute();
+                $stmt->close();
+            }
+        }
+    }
+
+    $_SESSION['success'] = "Profile updated successfully!";
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
+
+
+$conn->close();
 ?>
+
+
 
 <!DOCTYPE html>
 
@@ -13,11 +84,13 @@ validateSessionRole('instructor');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>P</title>
+    <title>Profile</title>
 
     <link rel="stylesheet" href="../assets/css/organization.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
     <link rel="stylesheet" href="../assets/css/profile.css">
+
+
 </head>
 <body>
     <div class="body">
@@ -143,8 +216,9 @@ validateSessionRole('instructor');
                         
                         <div class="infoContainer">
                             <div class="pictureContainer1" style="background-color: none;">
+                                
                                 <div class="pictureContainer">
-                                    <img class="picture" src="../assets/img/CSSPE.png" alt="">
+                                <img src="<?= '../assets/img/' . htmlspecialchars($user['image']) ?>" alt="Profile Picture" style="width: 100%" border-radius: 50%; object-fit: cover; margin-left: 10%;">
                                 </div>
 
                                 <div style="margin-top: 1rem;">
@@ -153,41 +227,39 @@ validateSessionRole('instructor');
                             </div>
 
                             <div class="subLoginContainer">
+
                                 <div class="inputContainer" style="flex-direction: column; height: 4rem;">
                                     <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Full Name:</label>
-                                    <input class="inputEmail" type="text">
+                                    <h3 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;"><?= htmlspecialchars($user['first_name'] . ' ' . $user['middle_name'] . ' ' . $user['last_name']) ?></h3>
                                 </div>
                                 
                                 <div class="inputContainer" style="flex-direction: column; height: 4rem;">
                                     <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Email:</label>
-                                    <input class="inputEmail" type="text">
+                                    <h3 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;"><?= htmlspecialchars($user['email']) ?></h3>
                                 </div>
                                 
                                 <div class="inputContainer" style="flex-direction: column; height: 4rem;">
                                     <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Contact No.:</label>
-                                    <input class="inputEmail" type="text">
+                                    <h3 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;"><?= htmlspecialchars($user['contact_no']) ?></h3>
                                 </div>
                                 
                                 <div class="inputContainer" style="flex-direction: column; height: 4rem;">
                                     <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Address:</label>
-                                    <input class="inputEmail" type="text">
+                                    <h3 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;"><?= htmlspecialchars($user['address']) ?></h3>
                                 </div>
                                 
                                 <div class="inputContainer" style="flex-direction: column; height: 4rem;">
                                     <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Position:</label>
-                                    <input class="inputEmail" type="text">
+                                    <h3 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;"><?= htmlspecialchars($user['rank']) ?></h3>
                                 </div>
                                 
-                                <div class="inputContainer" style="flex-direction: column; height: 4rem;">
+                                <!-- <div class="inputContainer" style="flex-direction: column; height: 4rem;">
                                     <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Department:</label>
-                                    <input class="inputEmail" type="text">
-                                </div>
+                                    <h3 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;"><?= htmlspecialchars($user['role']) ?></h3>
+                                </div> -->
                                 
-                                <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                                    <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Role:</label>
-                                    <input class="inputEmail" type="text">
-                                </div>
                             </div>
+
                         </div>
 
                         <div class="borrowContainer">
@@ -236,60 +308,71 @@ validateSessionRole('instructor');
             <div class="subProfileContainer size6">
                 <div class="infoContainer">
                     <div class="pictureContainer1" style="background-color: none;">
-                        <div class="pictureContainer">
-                            <img class="picture" src="/dionSe/assets/img/CSSPE.png" alt="">
-                        </div>
-    
-                        <div style="margin-top: 1rem; display: flex; justify-content: center; align-items: center;">
-                            <button onclick="triggerImageUpload()" class="addButton" id="imageUpload" style="width: 100%;">Change Profile</button>
-                        </div>
+
+                    <div class="pictureContainer">
+                        <img src="<?= '../assets/img/' . htmlspecialchars($user['image']) ?>" alt="Profile Picture" style="width: 100%; border-radius: 50%; object-fit: cover;">
+                    </div>
+
+                    <form action="../homePage/profile.php" method="POST" enctype="multipart/form-data">
+                        <input type="file" name="profile_image" accept="image/*" required>
+                        <button type="submit" class="addButton">Change Profile Image</button>
+                    </form>
+
+
                     </div>
     
                     <div class="subLoginContainer">
+
+                    <form action="../homePage/profile.php" method="POST" enctype="multipart/form-data">
+
                         <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                            <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Full Name:</label>
-                            <input class="inputEmail" type="text">
+                            <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">First Name:</label>
+                            <input class="inputEmail" name="first_name" value="<?= htmlspecialchars($user['first_name']) ?>" ="text">
+                        </div>
+
+                        <div class="inputContainer" style="flex-direction: column; height: 4rem;">
+                            <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Last Name:</label>
+                            <input class="inputEmail" name="last_name" value="<?= htmlspecialchars($user['last_name']) ?>" type="text">
+                        </div>
+
+                        <div class="inputContainer" style="flex-direction: column; height: 4rem;">
+                            <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Middle Name:</label>
+                            <input class="inputEmail" name="middle_name" value="<?= htmlspecialchars($user['middle_name']) ?>" type="text">
                         </div>
                         
                         <div class="inputContainer" style="flex-direction: column; height: 4rem;">
                             <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Email:</label>
-                            <input class="inputEmail" type="text">
+                            <input class="inputEmail" name="email" value="<?= htmlspecialchars($user['email']) ?>" type="text">
                         </div>
                         
                         <div class="inputContainer" style="flex-direction: column; height: 4rem;">
                             <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Contact No.:</label>
-                            <input class="inputEmail" type="text">
+                            <input class="inputEmail" name="contact_no" value="<?= htmlspecialchars($user['contact_no']) ?>" type="text">
                         </div>
                         
                         <div class="inputContainer" style="flex-direction: column; height: 4rem;">
                             <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Address:</label>
-                            <input class="inputEmail" type="text">
+                            <input class="inputEmail" name="address" value="<?= htmlspecialchars($user['address']) ?>" type="text">
                         </div>
                         
                         <div class="inputContainer" style="flex-direction: column; height: 4rem;">
                             <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Position:</label>
-                            <input class="inputEmail" type="text">
+                            <input class="inputEmail" name="rank" value="<?= htmlspecialchars($user['rank']) ?>" type="text">
                         </div>
-                        
-                        <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                            <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Department:</label>
-                            <input class="inputEmail" type="text">
-                        </div>
-                        
-                        <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                            <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Role:</label>
-                            <input class="inputEmail" type="text">
-                        </div>
-        
+                           
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
-                            <button class="addButton" style="width: 6rem;">Save</button>
+                            <button type="submit" class="addButton" style="width: 6rem;">Save</button>
                             <button onclick="profile()" class="addButton1" style="width: 6rem;">Cancel</button>
                         </div>
+                        
+                    </form>
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
     <script src="../assets/js/sidebar.js"></script>
     <script src="../assets/js/uploadImage.js"></script>
     <script src="../assets/js/profile.js"></script>

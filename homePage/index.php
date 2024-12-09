@@ -5,6 +5,8 @@ require_once '../conn/auth.php';
 
 validateSessionRole('instructor');
 
+$userid =  $_SESSION['user_id'];
+
 ?>
 
 
