@@ -7,7 +7,7 @@ validateSessionRole('instructor, information_admin');
 
 // Fetch user data
 $userid = $_SESSION['user_id'];
-$sql = "SELECT first_name, last_name, middle_name, email, address, contact_no, rank, role, image 
+$sql = "SELECT first_name, last_name, middle_name, email, address, contact_no, rank, role, image, department 
         FROM users WHERE id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $userid);
@@ -31,10 +31,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $address = $_POST['address'] ?? $user['address'];
     $contactNo = $_POST['contact_no'] ?? $user['contact_no'];
     $rank = $_POST['rank'] ?? $user['rank'];
+    $department = $_POST['department'] ?? $user['department'];
 
-    $sql = "UPDATE users SET first_name = ?, last_name = ?, middle_name = ?, email = ?, address = ?, contact_no = ?, rank = ? WHERE id = ?";
+    $sql = "UPDATE users SET first_name = ?, last_name = ?, middle_name = ?, email = ?, address = ?, contact_no = ?, rank = ?, department = ? WHERE id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sssssssi", $firstName, $lastName, $middleName, $email, $address, $contactNo, $rank, $userid);
+    $stmt->bind_param("ssssssssi", $firstName, $lastName, $middleName, $email, $address, $contactNo, $rank, $department, $userid);
     $stmt->execute();
     $stmt->close();
 
@@ -253,10 +254,10 @@ $conn->close();
                                     <h3 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;"><?= htmlspecialchars($user['rank']) ?></h3>
                                 </div>
                                 
-                                <!-- <div class="inputContainer" style="flex-direction: column; height: 4rem;">
+                                <div class="inputContainer" style="flex-direction: column; height: 4rem;">
                                     <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Department:</label>
-                                    <h3 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;"><?= htmlspecialchars($user['role']) ?></h3>
-                                </div> -->
+                                    <h3 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;"><?= htmlspecialchars($user['department']) ?></h3>
+                                </div>
                                 
                             </div>
 
@@ -313,7 +314,7 @@ $conn->close();
                         <img src="<?= '../assets/img/' . htmlspecialchars($user['image']) ?>" alt="Profile Picture" style="width: 100%; border-radius: 50%; object-fit: cover;">
                     </div>
 
-                    <form action="../homePage/profile.php" method="POST" enctype="multipart/form-data">
+                    <form action="" method="POST" enctype="multipart/form-data">
                         <input type="file" name="profile_image" accept="image/*" required>
                         <button type="submit" class="addButton">Change Profile Image</button>
                     </form>
@@ -323,7 +324,7 @@ $conn->close();
     
                     <div class="subLoginContainer">
 
-                    <form action="../homePage/profile.php" method="POST" enctype="multipart/form-data">
+                    <form action="" method="POST" enctype="multipart/form-data">
 
                         <div class="inputContainer" style="flex-direction: column; height: 4rem;">
                             <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">First Name:</label>
@@ -358,6 +359,12 @@ $conn->close();
                         <div class="inputContainer" style="flex-direction: column; height: 4rem;">
                             <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Position:</label>
                             <input class="inputEmail" name="rank" value="<?= htmlspecialchars($user['rank']) ?>" type="text">
+                        </div>
+
+                                                
+                        <div class="inputContainer" style="flex-direction: column; height: 4rem;">
+                            <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Department:</label>
+                            <input class="inputEmail" name="department" value="<?= htmlspecialchars($user['department']) ?>" type="text">
                         </div>
                            
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">

@@ -1,4 +1,60 @@
 <!DOCTYPE html>
+<?php
+session_start();
+require_once '../conn/conn.php';
+
+$query = "SELECT * FROM departments";
+$result = mysqli_query($conn, $query);
+
+// Check if the form was submitted
+if (isset($_POST['add_department'])) {
+    $department_name = mysqli_real_escape_string($conn, $_POST['department_name']);
+    $department_description = mysqli_real_escape_string($conn, $_POST['department_description']);
+
+    if (isset($_FILES['department_image']) && $_FILES['department_image']['error'] == 0) {
+        $image_name = $_FILES['department_image']['name'];
+        $image_tmp = $_FILES['department_image']['tmp_name'];
+        $image_size = $_FILES['department_image']['size'];
+
+        $image_ext = pathinfo($image_name, PATHINFO_EXTENSION);
+        $image_new_name = uniqid() . '.' . $image_ext;
+        $image_path = "../assets/img/" . $image_new_name;
+
+        if (in_array(strtolower($image_ext), ['jpg', 'jpeg', 'png', 'gif']) && $image_size < 5000000) {
+            move_uploaded_file($image_tmp, $image_path); 
+        } else {
+            echo "Invalid image format or size!";
+            exit();
+        }
+    } else {
+        $image_path = "../assets/img/CSSPE.png";
+    }
+
+    $query = "INSERT INTO departments (department_name, description, image) 
+              VALUES ('$department_name', '$department_description', '$image_path')";
+    
+    if (mysqli_query($conn, $query)) {
+        echo "Department added successfully!";
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit();
+    } else {
+        echo "Error: " . mysqli_error($conn);
+    }
+}
+
+// delete request
+if (isset($_GET['delete_id'])) {
+    $department_id = $_GET['delete_id'];
+    $delete_query = "DELETE FROM departments WHERE id = $department_id";
+    if (mysqli_query($conn, $delete_query)) {
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit();
+    } else {
+        echo "Error deleting record: " . mysqli_error($conn);
+    }
+}
+?>
+
 <html lang="en">
 
 <head>
@@ -8,6 +64,9 @@
 
     <link rel="stylesheet" href="../assets/css/program.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    
 </head>
 
 <body>
@@ -95,7 +154,7 @@
                 </div>
 
                 <div class="subUserContainer">
-                    <a href="../authentication/login.php">
+                    <a href="../logout.php">
                         <div style="margin-left: 1.5rem;" class="userPictureContainer1">
                             <p>Logout</p>
                         </div>
@@ -146,62 +205,70 @@
 
                         <tbody>
                             <tr>
-                                <td>Hakdog</td>
-                                <td>
-                                    <img class="image" src="../assets/img/CSSPE.png" alt="">
-                                </td>
-                                <td>Hakdog</td>
-                                <td class="button">
-                                    <button onclick="editProgram()" class="addButton" style="width: 5rem;">Edit</button>
-                                    <button class="addButton1" style="width: 5rem;">Delete</button>
-                                </td>
+                                <?php while($row = mysqli_fetch_assoc($result)): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($row['department_name']);?></td>
+                                    <td><img class="image" src="<?php echo htmlspecialchars($row['image']); ?>" alt=""></td>
+                                    <td><?php echo htmlspecialchars($row['description']); ?></td>
+                                    <td class="button">
+                                        <a href="#" onclick="editProgram(<?php echo $row['id']; ?>)">
+                                            <button class="addButton1" style="width: 6rem;">Edit</button>
+                                        </a>
+                                        <a href="#" onclick="deleteProgram(<?php echo $row['id']; ?>)">
+                                            <button class="addButton1" style="width: 6rem;">Delete</button>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <?php endwhile; ?>
                             </tr>
                         </tbody>
                     </table>
                 </div>
+
             </div>
         </div>
     </div>
 
-    <div class="addContainer" style="display: none; background-color: none;">
-        <div class="addContainer">
-            <div class="subAddContainer">
-                <div class="titleContainer">
-                    <p>Add Departments</p>
-                </div>
+    <form method="POST" action="" enctype="multipart/form-data">
+        <div class="addContainer" style="display: none; background-color: none;">
+            <div class="addContainer">
+                <div class="subAddContainer">
+                    <div class="titleContainer">
+                        <p>Add Departments</p>
+                    </div>
 
-                <div class="subLoginContainer">
-                    <div class="uploadContainer">
-                        <div class="subUploadContainer">
+                    <div class="subLoginContainer">
+                        <div class="uploadContainer">
+                            <div class="subUploadContainer">
                             <div class="displayImage">
-                                <img class="image1" src="" alt="">
+                                <img id="preview" class="image1" src="../assets/img/CSSPE.png" alt="Department Image" style="max-width: 200px; max-height: 200px;">
+                            </div>
+                            </div>
+
+                            <div class="uploadButton">
+                                <input id="imageUpload" type="file" name="department_image" accept="image/*" style="display: none;" onchange="previewImage()">
+                                <button type="button" onclick="triggerImageUpload()" class="addButton" style="height: 2rem; width: 5rem;">Upload</button>
                             </div>
                         </div>
 
-                        <div class="uploadButton">
-                            <input id="imageUpload" type="file" accept="image/*" style="display: none;"
-                                onchange="previewImage()">
-                            <button onclick="triggerImageUpload()" class="addButton"
-                                style="height: 2rem; width: 5rem;">Upload</button>
+                        <div class="inputContainer">
+                            <input class="inputEmail" type="text" name="department_name" placeholder="Department Name" required>
                         </div>
-                    </div>
 
-                    <div class="inputContainer">
-                        <input class="inputEmail" type="text" placeholder="Departments:">
-                    </div>
+                        <div class="inputContainer" style="height: 10rem;">
+                            <textarea class="inputEmail" name="department_description" placeholder="Description" required></textarea>
+                        </div>
 
-                    <div class="inputContainer" style="height: 10rem;">
-                        <textarea class="inputEmail" name="" id="" placeholder="Description"></textarea>
-                    </div>
-
-                    <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
-                        <button class="addButton" style="width: 6rem;">Add</button>
-                        <button onclick="addProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
+                        <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
+                            <button type="submit" name="add_department" class="addButton" style="width: 6rem;">Add</button>
+                            <button onclick="addProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </form>
+
 
     <div class="editContainer" style="display: none; background-color: none;">
         <div class="editContainer">
@@ -211,6 +278,9 @@
                 </div>
 
                 <div class="subLoginContainer">
+                    
+                
+                    
                     <div class="uploadContainer">
                         <div class="subUploadContainer">
                             <div class="displayImage">
@@ -239,6 +309,8 @@
                             placeholder="Description"></textarea>
                     </div>
 
+                   
+
                     <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
                         <button class="addButton" style="width: 6rem;">Save</button>
                         <button onclick="editProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
@@ -251,6 +323,47 @@
     <script src="../assets/js/sidebar.js"></script>
     <script src="../assets/js/program.js"></script>
     <script src="../assets/js/uploadImage.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+    <script>
+        function previewImage() {
+            const file = document.getElementById('imageUpload').files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const previewImage = document.getElementById('preview');
+                previewImage.src = e.target.result;
+            }
+
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function triggerImageUpload() {
+            document.getElementById('imageUpload').click();
+        }
+    </script>
+
+    <script>
+        function deleteProgram(userId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Do you want to delete this user?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete!',
+                cancelButtonText: 'No, cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "?delete_id=" + userId;
+                }
+            });
+        }
+    </script>
+
 </body>
 
 </html>
