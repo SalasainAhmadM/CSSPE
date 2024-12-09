@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once '../conn/conn.php';
-require_once '../conn/auth.php'; 
+require_once '../conn/auth.php';
 
 validateSessionRole('super_admin');
 
@@ -32,14 +32,15 @@ function registerUser($firstName, $lastName, $middleName, $email, $address, $con
     }
 
     $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-
+    $defaultImage = "CSSPE.png"; // Default image value
+    
     $insertQuery = "
-        INSERT INTO users (first_name, last_name, middle_name, email, address, contact_no, rank, password, role)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO users (first_name, last_name, middle_name, email, address, contact_no, rank, password, role, image)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ";
     $stmt = $conn->prepare($insertQuery);
     $stmt->bind_param(
-        "sssssssss",
+        "ssssssssss",
         $firstName,
         $lastName,
         $middleName,
@@ -48,7 +49,8 @@ function registerUser($firstName, $lastName, $middleName, $email, $address, $con
         $contactNo,
         $rank,
         $hashedPassword,
-        $role
+        $role,
+        $defaultImage
     );
 
     if ($stmt->execute()) {
@@ -72,6 +74,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $password = $_POST['password'];
         $confirmPassword = $_POST['confirm_password'];
         $role = $_POST['role'];
+
+        if (in_array($rank, ["Instructor", "Assistant Professor", "Associate Professor"])) {
+            $role = "instructor";
+        } else {
+            $role = $_POST['role'];
+        }
+
+        if ($role === "information_admin") {
+            $rank = "Information Admin";
+        } elseif ($role === "inventory_admin") {
+            $rank = "Inventory Admin";
+        } elseif ($role === "super_admin") {
+            $rank = "Super Admin";
+        } else {
+            $rank = $_POST['rank'];  
+        }
+        
 
         if ($password !== $confirmPassword) {
             $message = "Error: Passwords do not match.";
@@ -255,7 +274,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <option value="">Choose a rank</option>
                                             <option value="Assistant Professor">Assistant Professor</option>
                                             <option value="Associate Professor">Associate Professor</option>
-                                            <option value="Professor">Professor</option>
+                                            <option value="Instructor">Instructor</option>
                                         </select>
                                     </div>
                                 </div>

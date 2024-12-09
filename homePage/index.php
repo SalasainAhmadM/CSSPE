@@ -3,7 +3,9 @@ session_start();
 require_once '../conn/conn.php'; 
 require_once '../conn/auth.php'; 
 
-validateSessionRole('instructor');
+validateSessionRole('instructor, information_admin');
+
+$userid =  $_SESSION['user_id'];
 
 ?>
 

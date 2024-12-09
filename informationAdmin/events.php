@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 
-    <link rel="stylesheet" href="/dionSe/assets/css/events.css">
-    <link rel="stylesheet" href="/dionSe/assets/css/sidebar.css">
+    <link rel="stylesheet" href="../assets/css/events.css">
+    <link rel="stylesheet" href="../assets/css/sidebar.css">
 </head>
 
 <body>
@@ -16,7 +16,7 @@
             <div class="sidebarContent">
                 <div class="arrowContainer" style="margin-left: 80rem;" id="toggleButton">
                     <div class="subArrowContainer">
-                        <img class="hideIcon" src="/dionSe/assets/img/arrow.png" alt="">
+                        <img class="hideIcon" src="../assets/img/arrow.png" alt="">
                     </div>
                 </div>
             </div>
@@ -24,7 +24,7 @@
                 <div class="subUserContainer">
                     <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
-                            <img class="subUserPictureContainer" src="/dionSe/assets/img/CSSPE.png" alt="">
+                            <img class="subUserPictureContainer" src="../assets/img/CSSPE.png" alt="">
                         </div>
                     </div>
 
@@ -36,7 +36,7 @@
                 <div class="navContainer">
                     <div class="subNavContainer">
 
-                        <a href="../informationAdmin/homePage/announcement.php">
+                        <a href="../homePage/">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Home</p>
@@ -95,7 +95,7 @@
                 </div>
 
                 <div class="subUserContainer">
-                    <a href="/dionSe/authentication/login.php">
+                    <a href="../authentication/login.php">
                         <div style="margin-left: 1.5rem;" class="userPictureContainer1">
                             <p>Logout</p>
                         </div>
@@ -109,7 +109,7 @@
                 <div class="headerContainer">
                     <div class="subHeaderContainer">
                         <div class="logoContainer">
-                            <img class="logo" src="/dionSe/assets/img/CSSPE.png" alt="">
+                            <img class="logo" src="../assets/img/CSSPE.png" alt="">
                         </div>
 
                         <div class="collegeNameContainer">
@@ -237,8 +237,8 @@
         </div>
     </div>
 
-    <script src="/dionSe/assets/js/sidebar.js"></script>
-    <script src="/dionSe/assets/js/program.js"></script>
+    <script src="../assets/js/sidebar.js"></script>
+    <script src="../assets/js/program.js"></script>
 </body>
 
 </html>
