@@ -1,10 +1,20 @@
+<?php
+session_start();
+require_once '../conn/conn.php';
+require_once '../conn/auth.php';
+
+validateSessionRole('instructor');
+
+?>
+
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>P</title>
 
     <link rel="stylesheet" href="../assets/css/organization.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
@@ -103,7 +113,7 @@
                 </div>
 
                 <div class="subUserContainer">
-                    <a href="../login.php">
+                    <a href="../authentication/login.php">
                         <div style="margin-left: 1.5rem;" class="userPictureContainer1">
                             <p>Logout</p>
                         </div>
@@ -132,6 +142,7 @@
 
                 <div class="profileContainer">
                     <div class="subProfileContainer">
+
                         <div class="infoContainer">
                             <div class="pictureContainer1" style="background-color: none;">
                                 <div class="pictureContainer">
