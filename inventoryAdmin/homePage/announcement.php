@@ -1,3 +1,24 @@
+<?php
+session_start();
+require_once '../../conn/conn.php';
+require_once '../../conn/auth.php';
+
+validateSessionRole('inventory_admin');
+$inventoryAdminId = $_SESSION['user_id'];
+
+$query = "SELECT first_name, middle_name, last_name FROM users WHERE id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $inventoryAdminId);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $fullName = trim($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']);
+} else {
+    $fullName = "User Not Found";
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -30,13 +51,13 @@
                     </div>
 
                     <div class="userPictureContainer1">
-                        <p>Khriz marr l. falcatan</p>
+                        <p><?php echo $fullName; ?></p>
                     </div>
                 </div>
 
                 <div class="navContainer">
                     <div class="subNavContainer">
-                        <a href="../dashboard.php">
+                        <a href="../index.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Back to Inventory Admin Panel</p>
@@ -111,7 +132,7 @@
                 </div>
 
                 <div class="subUserContainer">
-                    <a href="/dionSe/authentication/login.php">
+                    <a href="../../logout.php">
                         <div style="margin-left: 1.5rem;" class="userPictureContainer1">
                             <p>Logout</p>
                         </div>

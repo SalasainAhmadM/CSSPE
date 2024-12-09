@@ -318,7 +318,8 @@ function fetchDepartments()
                             <input class="inputEmail" type="text" name="last_name" placeholder="Last Name:" required>
                         </div>
                         <div class="inputContainer">
-                            <input class="inputEmail" type="text" name="middle_name" placeholder="Middle Name (Optional):">
+                            <input class="inputEmail" type="text" name="middle_name"
+                                placeholder="Middle Name (Optional):">
                         </div>
                         <div class="inputContainer">
                             <input class="inputEmail" type="email" name="email" placeholder="Email:" required>
@@ -355,7 +356,8 @@ function fetchDepartments()
                             <input class="inputEmail" type="password" name="password" placeholder="Password:" required>
                         </div>
                         <div class="inputContainer">
-                            <input class="inputEmail" type="password" name="confirm_password" placeholder="Confirm Password:" required>
+                            <input class="inputEmail" type="password" name="confirm_password"
+                                placeholder="Confirm Password:" required>
                         </div>
                         <div class="inputContainer">
                             <button type="submit" name="register" class="login">Register</button>
@@ -376,7 +378,7 @@ function fetchDepartments()
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <?php if (!empty($message)) : ?>
+    <?php if (!empty($message)): ?>
         <script>
             Swal.fire({
                 icon: 'error',
