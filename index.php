@@ -2,7 +2,7 @@
 session_start();
 require_once './conn/conn.php';
 
-function registerUser($firstName, $lastName, $middleName, $email, $address, $contactNo, $rank, $password)
+function registerUser($firstName, $lastName, $middleName, $email, $address, $contactNo, $rank, $password, $department)
 {
     global $conn;
 
@@ -33,12 +33,12 @@ function registerUser($firstName, $lastName, $middleName, $email, $address, $con
     $defaultImage = "CSSPE.png"; // Default image value
 
     $insertQuery = "
-        INSERT INTO pending_users (first_name, last_name, middle_name, email, address, contact_no, rank, password, role, image)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO pending_users (first_name, last_name, middle_name, email, address, contact_no, rank, password, role, image, department)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ";
     $stmt = $conn->prepare($insertQuery);
     $stmt->bind_param(
-        "ssssssssss",
+        "sssssssssss",
         $firstName,
         $lastName,
         $middleName,
@@ -48,7 +48,8 @@ function registerUser($firstName, $lastName, $middleName, $email, $address, $con
         $rank,
         $hashedPassword,
         $role,
-        $defaultImage
+        $defaultImage,
+        $department
     );
 
     if ($stmt->execute()) {
@@ -110,13 +111,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $address = $_POST['address'];
         $contactNo = $_POST['contact_no'];
         $rank = $_POST['rank'];
+        $department = $_POST['department']; 
         $password = $_POST['password'];
         $confirmPassword = $_POST['confirm_password'];
 
         if ($password !== $confirmPassword) {
             $message = "Error: Passwords do not match.";
         } else {
-            $message = registerUser($firstName, $lastName, $middleName, $email, $address, $contactNo, $rank, $password);
+            $message = registerUser($firstName, $lastName, $middleName, $email, $address, $contactNo, $rank, $password, $department);
         }
 
 
@@ -126,6 +128,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = loginUser($email, $password);
     }
 }
+
+function insertDepartment($departmentName)
+{
+    global $conn;
+
+    $checkQuery = "SELECT * FROM departments WHERE department_name = ?";
+    $stmt = $conn->prepare($checkQuery);
+    $stmt->bind_param("s", $departmentName);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        return "Error: Department already exists.";
+    }
+
+    $insertQuery = "INSERT INTO departments (department_name) VALUES (?)";
+    $stmt = $conn->prepare($insertQuery);
+    $stmt->bind_param("s", $departmentName);
+
+    if ($stmt->execute()) {
+        return "Department added successfully!";
+    } else {
+        return "Error: " . $stmt->error;
+    }
+}
+
+// Fetch department list for the dropdown
+function fetchDepartments()
+{
+    global $conn;
+    $query = "SELECT id, department_name FROM departments";
+    $result = $conn->query($query);
+
+    $departments = [];
+    while ($row = $result->fetch_assoc()) {
+        $departments[] = $row;
+    }
+
+    return $departments;
+}
+
 ?>
 
 
@@ -287,13 +330,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="inputContainer">
                             <input class="inputEmail" type="text" name="contact_no" placeholder="Contact No.:" required>
                         </div>
-                        <!-- <div class="inputContainer" style="gap: 0.5rem;">
-                            <select class="inputEmail" name="department" required>
-                                <option value="">Choose a Department</option>
-                                <option value="College of Architecture">College of Architecture</option>
-                                <option value="College of Nursing">College of Nursing</option>
-                            </select>
-                        </div> -->
+                        <div class="inputContainer" style="gap: 0.5rem;">
+                        <select class="inputEmail" name="department" required>
+                            <option value="">Choose a Department</option>
+                            <?php
+                            // Fetch and display departments
+                            $departments = fetchDepartments();
+                            foreach ($departments as $department) {
+                                echo "<option value='" . $department['department_name'] . "'>" . $department['department_name'] . "</option>";
+                            }
+                            ?>
+                        </select>
+
+                        </div>
                         <div class="inputContainer" style="gap: 0.5rem;">
                             <select class="inputEmail" name="rank" required>
                                 <option value="">Choose a rank</option>
