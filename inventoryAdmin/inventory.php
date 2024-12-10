@@ -179,8 +179,13 @@ $itemResult = $itemStmt->get_result();
                                     <td><?php echo htmlspecialchars($item['brand']); ?></td>
                                     <td><?php echo htmlspecialchars($item['quantity']); ?></td>
                                     <td class="button">
-                                        <button onclick="editItem(<?php echo $item['id']; ?>)" class="addButton"
-                                            style="width: 5rem;">Edit</button>
+                                        <button onclick="editItem(this)" class="addButton" style="width: 5rem;"
+                                            data-id="<?php echo $item['id']; ?>"
+                                            data-name="<?php echo htmlspecialchars($item['name']); ?>"
+                                            data-description="<?php echo htmlspecialchars($item['description']); ?>"
+                                            data-brand="<?php echo htmlspecialchars($item['brand']); ?>"
+                                            data-quantity="<?php echo htmlspecialchars($item['quantity']); ?>"
+                                            data-image="../assets/uploads/<?php echo htmlspecialchars($item['image']); ?>">Edit</button>
                                         <button onclick="deleteItem(<?php echo $item['id']; ?>)" class="addButton1"
                                             style="width: 5rem;">Delete</button>
                                     </td>
@@ -203,52 +208,50 @@ $itemResult = $itemStmt->get_result();
                     </div>
 
                     <div class="sublogoutContainer">
-                        <div class="uploadContainer">
-                            <div class="subUploadContainer">
-                                <div class="displayImage">
-                                    <img class="image1" id="previewImage" src="../assets/img/CSSPE.png"
-                                        alt="Preview Image"
-                                        style="max-width: 100%; height: auto; border: 1px solid red;">
-                                </div>
-                            </div>
-                            <div class="uploadButton">
-                                <input id="imageUpload" type="file" accept="image/*" style="display: none;"
-                                    onchange="previewImage()">
-                                <button type="button" onclick="triggerImageUpload()" class="addButton"
-                                    style="height: 2rem; width: 5rem;">Upload</button>
+                        <div class="subUploadContainer">
+                            <div class="displayImage">
+                                <img class="image1" id="addPreviewImage" src="../assets/img/CSSPE.png"
+                                    alt="Preview Image" style="max-width: 100%; height: auto; border: 1px solid red;" />
                             </div>
                         </div>
-
-
-                        <div class="inputContainer">
-                            <input id="itemName" class="inputEmail" type="text" placeholder="Item Name:" required>
+                        <div class="uploadButton">
+                            <input id="addImageUpload" type="file" accept="image/*" style="display: none;"
+                                onchange="previewImage('addImageUpload', 'addPreviewImage')" />
+                            <button type="button" onclick="triggerImageUpload('addImageUpload')" class="addButton"
+                                style="height: 2rem; width: 5rem;">
+                                Upload
+                            </button>
                         </div>
-
-                        <div class="inputContainer">
-                            <input id="itemBrand" class="inputEmail" type="text" placeholder="Brand:" required>
-                        </div>
-
-                        <div class="inputContainer">
-                            <input id="itemQuantity" class="inputEmail" type="number" placeholder="Quantity:" required>
-                        </div>
-
-                        <div class="inputContainer" style="height: 10rem;">
-                            <textarea id="itemDescription" class="inputEmail" placeholder="Description"
-                                required></textarea>
-                        </div>
-
-                        <form id="addItemForm">
-                            <div class="inputContainer"
-                                style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
-                                <button type="submit" class="addButton" style="width: 6rem;">Add</button>
-                                <button type="button" onclick="addProgram()" class="addButton1"
-                                    style="width: 6rem;">Cancel</button>
-                            </div>
-                        </form>
-
                     </div>
+
+
+                    <div class="inputContainer">
+                        <input id="itemName" class="inputEmail" type="text" placeholder="Item Name:" required>
+                    </div>
+
+                    <div class="inputContainer">
+                        <input id="itemBrand" class="inputEmail" type="text" placeholder="Brand:" required>
+                    </div>
+
+                    <div class="inputContainer">
+                        <input id="itemQuantity" class="inputEmail" type="number" placeholder="Quantity:" required>
+                    </div>
+
+                    <div class="inputContainer" style="height: 10rem;">
+                        <textarea id="itemDescription" class="inputEmail" placeholder="Description" required></textarea>
+                    </div>
+
+                    <form id="addItemForm">
+                        <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
+                            <button type="submit" class="addButton" style="width: 6rem;">Add</button>
+                            <button type="button" onclick="addProgram()" class="addButton1"
+                                style="width: 6rem;">Cancel</button>
+                        </div>
+                    </form>
+
                 </div>
             </div>
+        </div>
         </div>
     </form>
 
@@ -265,7 +268,7 @@ $itemResult = $itemStmt->get_result();
                     <div class="uploadContainer">
                         <div class="subUploadContainer">
                             <div class="displayImage">
-                                <img class="image1" id="previewImage" src="" alt="Preview Image"
+                                <img class="image1" id="previewImage" src="../assets/img/CSSPE.png" alt="Preview Image"
                                     style="max-width: 100%; height: auto;">
                             </div>
                         </div>
@@ -307,6 +310,7 @@ $itemResult = $itemStmt->get_result();
                     <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
                         <button class="addButton" style="width: 6rem;" onclick="saveItem()">Save</button>
 
+
                         <button onclick="editProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
                     </div>
                 </div>
@@ -315,26 +319,26 @@ $itemResult = $itemStmt->get_result();
     </div>
 
     <script>
-        function triggerImageUpload() {
-            document.getElementById('imageUpload').click();
+        // Trigger file input click
+        function triggerImageUpload(inputId) {
+            document.querySelector(`#${inputId}`).click();
         }
 
-        function previewImage() {
-            const fileInput = document.getElementById('imageUpload');
-            const previewImage = document.getElementById('previewImage');
-            const file = fileInput.files[0]; // Get the first selected file
+        // Preview uploaded image
+        function previewImage(inputId, previewId) {
+            const fileInput = document.querySelector(`#${inputId}`);
+            const preview = document.querySelector(`#${previewId}`);
 
-            if (file) {
-                const reader = new FileReader(); // Initialize FileReader
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+
                 reader.onload = function (e) {
-                    previewImage.src = e.target.result; // Set the image src to the file's data URL
+                    preview.src = e.target.result; // Set the preview image source to the uploaded file
                 };
-                reader.readAsDataURL(file); // Read the file data
-            } else {
-                previewImage.src = ""; // Clear the preview if no file is selected
+
+                reader.readAsDataURL(fileInput.files[0]);
             }
         }
-
 
         document.getElementById('addItemForm').addEventListener('submit', function (e) {
             e.preventDefault();
@@ -381,64 +385,60 @@ $itemResult = $itemStmt->get_result();
                 });
         });
 
-        function cancelForm() {
-            document.getElementById('addItemForm').reset();
-            document.getElementById('previewImage').src = ""; // Clear preview
-        }
+        function editItem(button) {
+            // Get item details from data attributes
+            const id = button.getAttribute('data-id');
+            const name = button.getAttribute('data-name');
+            const description = button.getAttribute('data-description');
+            const brand = button.getAttribute('data-brand');
+            const quantity = button.getAttribute('data-quantity');
+            const image = button.getAttribute('data-image');
 
-        function triggerImageUpload() {
-            document.getElementById('imageUpload').click();
-        }
+            // Populate the edit form fields
+            document.querySelector('.editContainer').style.display = 'block';
+            document.querySelector('.editContainer input[placeholder="Item Name:"]').value = name;
+            document.querySelector('.editContainer input[placeholder="Brand:"]').value = brand;
+            document.querySelector('.editContainer input[placeholder="Quantity:"]').value = quantity;
+            document.querySelector('.editContainer textarea[placeholder="Description"]').value = description;
 
-        function previewImage() {
-            const fileInput = document.getElementById('imageUpload');
+            // Update preview image
             const previewImage = document.getElementById('previewImage');
-            const file = fileInput.files[0];
-
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    previewImage.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
+            if (image) {
+                previewImage.src = image;
             } else {
-                previewImage.src = ""; // Clear the preview
+                previewImage.src = '';
             }
+
+            // Save the ID for future use (e.g., saving changes)
+            previewImage.setAttribute('data-id', id);
         }
 
-        function editItem(itemId) {
-            fetch(`./endpoints/get_item.php?id=${itemId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.querySelector('.editContainer').style.display = 'block';
-                        document.querySelector('.editContainer input[placeholder="Item Name:"]').value = data.item.name;
-                        document.querySelector('.editContainer input[placeholder="Brand:"]').value = data.item.brand;
-                        document.querySelector('.editContainer input[placeholder="Quantity:"]').value = data.item.quantity;
-                        document.querySelector('.editContainer textarea[placeholder="Description"]').value = data.item.description;
-                        document.querySelector('#previewImage').src = `../assets/uploads/${data.item.image || 'default.jpg'}`;
+        function saveItem() {
+            const id = document.getElementById('previewImage').getAttribute('data-id');
+            const name = document.querySelector('.editContainer input[placeholder="Item Name:"]').value.trim();
+            const brand = document.querySelector('.editContainer input[placeholder="Brand:"]').value.trim();
+            const quantity = document.querySelector('.editContainer input[placeholder="Quantity:"]').value.trim();
+            const description = document.querySelector('.editContainer textarea[placeholder="Description"]').value.trim();
 
-                        // Set the Save button to call saveItem with the correct itemId
-                        document.querySelector('.addButton').setAttribute('onclick', `saveItem(${itemId})`);
-                    } else {
-                        alert('Failed to load item data.');
-                    }
-                })
-                .catch(error => console.error('Error fetching item:', error));
-        }
+            if (!id || !name || !brand || !quantity || !description) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Missing Information',
+                    text: 'Please fill all fields before saving!',
+                });
+                return;
+            }
 
-
-        function saveItem(itemId) {
             const formData = new FormData();
-            formData.append('id', itemId);
-            formData.append('name', document.querySelector('.editContainer input[placeholder="Item Name:"]').value);
-            formData.append('brand', document.querySelector('.editContainer input[placeholder="Brand:"]').value);
-            formData.append('quantity', document.querySelector('.editContainer input[placeholder="Quantity:"]').value);
-            formData.append('description', document.querySelector('.editContainer textarea[placeholder="Description"]').value);
+            formData.append('id', id);
+            formData.append('name', name);
+            formData.append('brand', brand);
+            formData.append('quantity', quantity);
+            formData.append('description', description);
 
-            const imageFile = document.querySelector('#imageUpload').files[0];
-            if (imageFile) {
-                formData.append('image', imageFile);
+            const imageInput = document.getElementById('imageUpload');
+            if (imageInput.files.length > 0) {
+                formData.append('image', imageInput.files[0]);
             }
 
             fetch('./endpoints/edit_item.php', {
@@ -447,17 +447,68 @@ $itemResult = $itemStmt->get_result();
             })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.success) {
-                        Swal.fire('Success', 'Item updated successfully!', 'success').then(() => {
-                            location.reload();
+                    if (data.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Item Updated',
+                            text: 'The item has been updated successfully!',
+                        }).then(() => {
+                            location.reload(); // Reload the page to reflect changes
                         });
                     } else {
-                        Swal.fire('Error', 'Failed to update item.', 'error');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Update Failed',
+                            text: data.message || 'An error occurred while updating the item.',
+                        });
                     }
                 })
-                .catch(error => console.error('Error saving item:', error));
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An unexpected error occurred. Please try again later.',
+                    });
+                });
         }
-
+        function deleteItem(itemId) {
+            // Use SweetAlert to confirm deletion
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'This action will permanently delete the item!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Proceed with deletion
+                    fetch('./endpoints/delete_item.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ id: itemId })
+                    })
+                        .then((response) => response.json())
+                        .then((data) => {
+                            if (data.status === 'success') {
+                                Swal.fire('Deleted!', data.message, 'success').then(() => {
+                                    // Reload the page or remove the row from the table
+                                    location.reload(); // or remove the row dynamically
+                                });
+                            } else {
+                                Swal.fire('Error!', data.message, 'error');
+                            }
+                        })
+                        .catch((error) => {
+                            Swal.fire('Error!', 'An unexpected error occurred.', 'error');
+                        });
+                }
+            });
+        }
 
     </script>
 

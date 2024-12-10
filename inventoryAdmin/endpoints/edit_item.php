@@ -1,75 +1,67 @@
 <?php
+session_start();
 require_once '../../conn/conn.php';
+require_once '../../conn/auth.php';
 
-$response = ['success' => false];
+validateSessionRole('inventory_admin');
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Validate input
-    $id = isset($_POST['id']) ? intval($_POST['id']) : null;
-    $name = isset($_POST['name']) ? trim($_POST['name']) : '';
-    $brand = isset($_POST['brand']) ? trim($_POST['brand']) : '';
-    $quantity = isset($_POST['quantity']) ? intval($_POST['quantity']) : 0;
-    $description = isset($_POST['description']) ? trim($_POST['description']) : '';
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $id = intval($_POST['id']);
+    $name = trim($_POST['name']);
+    $brand = trim($_POST['brand']);
+    $quantity = intval($_POST['quantity']);
+    $description = trim($_POST['description']);
+    $image = null;
 
-    if (!$id || empty($name) || empty($brand) || $quantity <= 0 || empty($description)) {
-        $response['error'] = 'All fields are required, and quantity must be greater than 0.';
-        echo json_encode($response);
+    // Validate input fields
+    if (empty($id) || empty($name) || empty($brand) || empty($quantity) || empty($description)) {
+        echo json_encode(['status' => 'error', 'message' => 'All fields are required!']);
         exit;
     }
 
-    // Handle file upload
-    $image = null;
-    if (!empty($_FILES['image']['name'])) {
-        $targetDir = "../../assets/uploads/";
+    // Check if a new image is uploaded
+    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        $targetDir = '../../assets/uploads/';
         $fileName = uniqid() . '-' . basename($_FILES['image']['name']);
         $targetFile = $targetDir . $fileName;
         $imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
 
-        // Validate file type
         $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
         if (!in_array($imageFileType, $allowedTypes)) {
-            $response['error'] = 'Invalid image format. Only JPG, JPEG, PNG, and GIF are allowed.';
-            echo json_encode($response);
+            echo json_encode(['status' => 'error', 'message' => 'Invalid image format!']);
             exit;
         }
 
-        // Move file to target directory
         if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
             $image = $fileName;
         } else {
-            $response['error'] = 'Failed to upload image.';
-            echo json_encode($response);
+            echo json_encode(['status' => 'error', 'message' => 'Failed to upload image.']);
             exit;
         }
     }
 
-    // Construct SQL query
-    $query = "UPDATE items SET name = ?, brand = ?, quantity = ?, description = ?";
-    $params = [$name, $brand, $quantity, $description];
-    $types = "sssi";
+    // Update query
+    $query = "UPDATE items SET name = ?, description = ?, brand = ?, quantity = ?" .
+        ($image ? ", image = ?" : "") .
+        " WHERE id = ?";
 
+    // Prepare and bind parameters
     if ($image) {
-        $query .= ", image = ?";
-        $params[] = $image;
-        $types .= "s";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("sssisi", $name, $description, $brand, $quantity, $image, $id);
+    } else {
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("sssii", $name, $description, $brand, $quantity, $id);
     }
 
-    $query .= " WHERE id = ?";
-    $params[] = $id;
-    $types .= "i";
-
-    // Execute the query
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param($types, ...$params);
-
+    // Execute and respond
     if ($stmt->execute()) {
-        $response['success'] = true;
+        echo json_encode(['status' => 'success', 'message' => 'Item updated successfully!']);
     } else {
-        $response['error'] = 'Failed to update item.';
+        echo json_encode(['status' => 'error', 'message' => 'Failed to update item.']);
     }
 
     $stmt->close();
+    $conn->close();
 }
-
-echo json_encode($response);
 ?>
