@@ -300,7 +300,7 @@ function fetchDepartments()
         </div>
     </div>
 
-    <div class="registerContainer" style="background-color: none; display: none;">
+    <div class="registerContainer" style="background-color: none; display: none; transform: scale(0.825);">
         <div class="registerContainer">
             <div class="loginContainer">
                 <div class="titleContainer">
@@ -330,6 +330,7 @@ function fetchDepartments()
                         <div class="inputContainer">
                             <input class="inputEmail" type="text" name="contact_no" placeholder="Contact No.:" required>
                         </div>
+
                         <div class="inputContainer" style="gap: 0.5rem;">
                         <select class="inputEmail" name="department" required>
                             <option value="">Choose a Department</option>
@@ -341,8 +342,8 @@ function fetchDepartments()
                             }
                             ?>
                         </select>
-
                         </div>
+                        
                         <div class="inputContainer" style="gap: 0.5rem;">
                             <select class="inputEmail" name="rank" required>
                                 <option value="">Choose a rank</option>
@@ -372,6 +373,7 @@ function fetchDepartments()
             </div>
         </div>
     </div>
+    
     </div>
 
     <script src="./assets/js/login.js"></script>

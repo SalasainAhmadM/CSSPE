@@ -364,7 +364,7 @@
     th, td{
         border: solid #b8b8b8 0.1px;
         height: 2rem;
-        padding: 1rem;
+        padding: 0.2rem;
         justify-content: center;
         align-items: center;
     }
@@ -405,9 +405,9 @@
         font-size: 2rem;
     }
 
-    .addContainer{
+    /* .addContainer{
         height: 100%;
-    }
+    } */
 
     .editContainer{
         height: 75rem;

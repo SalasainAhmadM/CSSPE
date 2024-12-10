@@ -6,7 +6,7 @@ require_once '../conn/auth.php';
 validateSessionRole('super_admin');
 
 // Fetch data from the pending_users table
-$query = "SELECT id, first_name, last_name, middle_name, email, address, contact_no, rank, password, created_at, role FROM pending_users";
+$query = "SELECT id, first_name, last_name, middle_name, email, address, contact_no, rank, password, created_at, role, department FROM pending_users";
 $result = mysqli_query($conn, $query);
 
 // delete request
@@ -28,7 +28,7 @@ if (isset($_GET['approve_id'])) {
     $result_select = mysqli_query($conn, $select_query);
     $pending_user = mysqli_fetch_assoc($result_select);
     
-    $insert_query = "INSERT INTO users (first_name, last_name, middle_name, email, address, contact_no, rank, password, role) 
+    $insert_query = "INSERT INTO users (first_name, last_name, middle_name, email, address, contact_no, rank, password, role, department) 
                      VALUES ('" . mysqli_real_escape_string($conn, $pending_user['first_name']) . "', 
                              '" . mysqli_real_escape_string($conn, $pending_user['last_name']) . "', 
                              '" . mysqli_real_escape_string($conn, $pending_user['middle_name']) . "', 
@@ -37,7 +37,9 @@ if (isset($_GET['approve_id'])) {
                              '" . mysqli_real_escape_string($conn, $pending_user['contact_no']) . "', 
                              '" . mysqli_real_escape_string($conn, $pending_user['rank']) . "', 
                              '" . mysqli_real_escape_string($conn, $pending_user['password']) . "', 
-                             '" . mysqli_real_escape_string($conn, $pending_user['role']) . "')";
+                             '" . mysqli_real_escape_string($conn, $pending_user['department']) . "',
+                             '" . mysqli_real_escape_string($conn, $pending_user['role']) . "')"
+                             ;
                              
     if (mysqli_query($conn, $insert_query)) {
         $delete_query = "DELETE FROM pending_users WHERE id = $user_id";
@@ -59,7 +61,7 @@ if (isset($_GET['approve_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Pending Users</title>
 
     <link rel="stylesheet" href="../assets/css/pendingAccount.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
@@ -203,8 +205,8 @@ if (isset($_GET['approve_id'])) {
                                     <td><?php echo htmlspecialchars($row['email']); ?></td>
                                     <td><?php echo htmlspecialchars($row['address']); ?></td>
                                     <td><?php echo htmlspecialchars($row['contact_no']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['department']); ?></td>
                                     <td><?php echo htmlspecialchars($row['rank']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['role']); ?></td>
                                     <td class="button">
                                         <a href="#" onclick="approveUser(<?php echo $row['id']; ?>)">
                                             <button class="addButton1" style="width: 6rem;">Approve</button>

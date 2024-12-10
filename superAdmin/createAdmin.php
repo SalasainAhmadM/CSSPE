@@ -107,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Create User</title>
 
     <link rel="stylesheet" href="../assets/css/createAdmin.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
@@ -221,8 +221,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div class="createContainer">
                     <div class="subAddContainer">
+
                         <form method="POST" action="">
                             <div class="subLoginContainer">
+                                
                                 <div class="inputContainer">
                                     <input class="inputEmail" name="first_name" type="text" placeholder="First Name:" required>
                                 </div>
@@ -292,6 +294,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
                             </div>
                         </form>
+
                     </div>
                 </div>
             </div>

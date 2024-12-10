@@ -192,7 +192,7 @@ span{
     position: fixed;
     top: 0;
     width: 100%;
-    background-color: rgba(0, 0, 0, 0.404);
+    /* background-color: rgba(0, 0, 0, 0.404); */
     height: 100%;
     display: flex;
     align-items: center;

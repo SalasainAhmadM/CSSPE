@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <?php
 session_start();
 require_once '../conn/conn.php';
@@ -55,6 +54,7 @@ if (isset($_GET['delete_id'])) {
 }
 ?>
 
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -211,7 +211,12 @@ if (isset($_GET['delete_id'])) {
                                     <td><img class="image" src="<?php echo htmlspecialchars($row['image']); ?>" alt=""></td>
                                     <td><?php echo htmlspecialchars($row['description']); ?></td>
                                     <td class="button">
-                                        <a href="#" onclick="editProgram(<?php echo $row['id']; ?>)">
+                                        <a href="#" onclick="editProgram(
+                                            <?php echo $row['id']; ?>, 
+                                            '<?php echo addslashes($row['department_name']); ?>', 
+                                            '<?php echo addslashes($row['description']); ?>', 
+                                            '<?php echo addslashes($row['image']); ?>'
+                                        )">
                                             <button class="addButton1" style="width: 6rem;">Edit</button>
                                         </a>
                                         <a href="#" onclick="deleteProgram(<?php echo $row['id']; ?>)">
@@ -229,6 +234,53 @@ if (isset($_GET['delete_id'])) {
         </div>
     </div>
 
+
+    <div class="editContainer" style="display: none; background-color: none;">
+        <div class="editContainer">
+            <div class="subAddContainer">
+                <div class="titleContainer">
+                    <p>Edit Departments</p>
+                </div>
+
+                <div class="subLoginContainer">
+                                   
+                    <div class="uploadContainer">
+                        <div class="subUploadContainer">
+                            <div class="displayImage">
+                                <img class="image1" src="" alt="">
+                            </div>
+                        </div>
+
+                        <div class="uploadButton">
+                            <input id="image" name="image" type="file" accept="image/*" style="display: none;"
+                                onchange="previewImage()">
+                            <button onclick="triggerImageUpload()" class="addButton"
+                                style="height: 2rem; width: 5rem;">Upload</button>
+                        </div>
+                    </div>
+
+                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                        <label for=""
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Departments:</label>
+                            <input class="inputEmail" type="text" id="department_name" name="department_name" placeholder="Departments:" required>
+                    </div>
+
+                    <div class="inputContainer" style="flex-direction: column; height: 5rem; min-height: 12rem;">
+                        <label for=""
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Description:</label>
+                            <textarea style="min-height: 10rem;" class="inputEmail" name="description"  id="description" placeholder="Description" required></textarea>
+                    </div>
+
+                    <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
+                        <button type="button" class="addButton" style="width: 6rem;" id="saveButton" name="update_department">Save</button>
+                        <button onclick="cancelEdit()" class="addButton1" style="width: 6rem;">Cancel</button>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
     <form method="POST" action="" enctype="multipart/form-data">
         <div class="addContainer" style="display: none; background-color: none;">
             <div class="addContainer">
@@ -240,9 +292,14 @@ if (isset($_GET['delete_id'])) {
                     <div class="subLoginContainer">
                         <div class="uploadContainer">
                             <div class="subUploadContainer">
-                            <div class="displayImage">
-                                <img id="preview" class="image1" src="../assets/img/CSSPE.png" alt="Department Image" style="max-width: 200px; max-height: 200px;">
+                            <div class="uploadContainer">
+                            <div class="subUploadContainer">
+                                <div class="displayImage">
+                                    <img class="image1" id="preview" src="" alt="Image Preview" style="max-width: 100%; display: none;">
+                                </div>
                             </div>
+                      
+                        </div>
                             </div>
 
                             <div class="uploadButton">
@@ -270,80 +327,42 @@ if (isset($_GET['delete_id'])) {
     </form>
 
 
-    <div class="editContainer" style="display: none; background-color: none;">
-        <div class="editContainer">
-            <div class="subAddContainer">
-                <div class="titleContainer">
-                    <p>Edit Departments</p>
-                </div>
-
-                <div class="subLoginContainer">
-                    
-                
-                    
-                    <div class="uploadContainer">
-                        <div class="subUploadContainer">
-                            <div class="displayImage">
-                                <img class="image1" src="" alt="">
-                            </div>
-                        </div>
-
-                        <div class="uploadButton">
-                            <input id="imageUpload" type="file" accept="image/*" style="display: none;"
-                                onchange="previewImage()">
-                            <button onclick="triggerImageUpload()" class="addButton"
-                                style="height: 2rem; width: 5rem;">Upload</button>
-                        </div>
-                    </div>
-
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Departments:</label>
-                        <input class="inputEmail" type="text" placeholder="Departments:">
-                    </div>
-
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem; min-height: 12rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Description:</label>
-                        <textarea style="min-height: 10rem;" class="inputEmail" name="" id=""
-                            placeholder="Description"></textarea>
-                    </div>
-
-                   
-
-                    <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
-                        <button class="addButton" style="width: 6rem;">Save</button>
-                        <button onclick="editProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script src="../assets/js/sidebar.js"></script>
     <script src="../assets/js/program.js"></script>
     <script src="../assets/js/uploadImage.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <script>      
+        function editProgram(id, name, description, image) {
+            document.querySelector('.editContainer .inputEmail[type="text"]').value = name; 
+            document.querySelector('.editContainer textarea').value = description;
+            document.querySelector('.editContainer .displayImage img').src = image; 
+
+            document.querySelector('.mainContainer').style.display = 'none';
+            document.querySelector('.editContainer').style.display = 'block';
+        }
+
+        function cancelEdit() {
+            document.querySelector('.editContainer').style.display = 'none';
+            document.querySelector('.mainContainer').style.display = 'block';
+        }
+    </script>
 
     <script>
         function previewImage() {
             const file = document.getElementById('imageUpload').files[0];
             const reader = new FileReader();
 
-            reader.onload = function(e) {
-                const previewImage = document.getElementById('preview');
-                previewImage.src = e.target.result;
-            }
+            reader.onloadend = function() {
+                const image = document.getElementById('preview');
+                image.src = reader.result;
+                image.style.display = 'block'; // Display the image after loading
+            };
 
             if (file) {
                 reader.readAsDataURL(file);
             }
-        }
-
-        function triggerImageUpload() {
-            document.getElementById('imageUpload').click();
         }
     </script>
 
@@ -351,7 +370,7 @@ if (isset($_GET['delete_id'])) {
         function deleteProgram(userId) {
             Swal.fire({
                 title: 'Are you sure?',
-                text: 'Do you want to delete this user?',
+                text: 'Do you want to delete this department?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, delete!',
