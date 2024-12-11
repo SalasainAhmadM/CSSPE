@@ -33,7 +33,7 @@ function fetchDepartments()
     return $departments;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (isset($_POST['add_faculty'])) {
 
     $first_name = mysqli_real_escape_string($conn, $_POST['first_name']);
     $last_name = mysqli_real_escape_string($conn, $_POST['last_name']);
@@ -51,19 +51,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Handle image upload
     if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] == 0) {
         $image = $_FILES['profile_image'];
-        $image_name = basename($image['name']); 
+        $image_name = basename($image['name']);
         $image_tmp_name = $image['tmp_name'];
         $image_size = $image['size'];
         $image_ext = pathinfo($image_name, PATHINFO_EXTENSION);
-    
+
         $allowed_ext = ['jpg', 'jpeg', 'png'];
-        if (in_array(strtolower($image_ext), $allowed_ext) && $image_size < 5000000) { 
-            $new_image_name = uniqid() . '.' . $image_ext; 
-            $image_path = '../assets/img/' . $new_image_name; 
-    
+        if (in_array(strtolower($image_ext), $allowed_ext) && $image_size < 5000000) {
+            $new_image_name = uniqid() . '.' . $image_ext;
+            $image_path = '../assets/img/' . $new_image_name;
+
             // Move uploaded image to the directory
             if (move_uploaded_file($image_tmp_name, $image_path)) {
-                $image_path = $new_image_name; 
+                $image_path = $new_image_name;
             } else {
                 echo "Error uploading the image.";
                 $image_path = 'CSSPE.png'; // default image
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $image_path = 'CSSPE.png';
     }
-    
+
 
     // Insert user data into the database
     $insert_query = "INSERT INTO users (first_name, last_name, middle_name, email, address, contact_no, department, rank, password, image)
@@ -82,7 +82,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (mysqli_query($conn, $insert_query)) {
         echo "New user added successfully!";
-        header("Location: facultyMember.php"); 
+        header("Location: facultyMember.php");
+        exit();
+    } else {
+        echo "Error: " . mysqli_error($conn);
+    }
+}
+
+
+
+
+if (isset($_POST['update_faculty'])) {
+    $faculty_id = $_POST['faculty_id'];
+
+    $first_name = mysqli_real_escape_string($conn, $_POST['first_name']);
+    $last_name = mysqli_real_escape_string($conn, $_POST['last_name']);
+    $middle_name = mysqli_real_escape_string($conn, $_POST['middle_name']);
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $address = mysqli_real_escape_string($conn, $_POST['address']);
+    $contact_no = mysqli_real_escape_string($conn, $_POST['contact_no']);
+    $department = mysqli_real_escape_string($conn, $_POST['department']);
+    $rank = mysqli_real_escape_string($conn, $_POST['rank']);
+
+    if (!empty($_POST['password'])) {
+        $password = mysqli_real_escape_string($conn, $_POST['password']);
+        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+    } else {
+        $hashedPassword = $_POST['current_password'];
+    }
+
+    // Handle image upload for update
+    if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] == 0) {
+        $image = $_FILES['profile_image'];
+        $image_name = basename($image['name']);
+        $image_tmp_name = $image['tmp_name'];
+        $image_size = $image['size'];
+        $image_ext = pathinfo($image_name, PATHINFO_EXTENSION);
+
+        $allowed_ext = ['jpg', 'jpeg', 'png'];
+        if (in_array(strtolower($image_ext), $allowed_ext) && $image_size < 5000000) {
+            $new_image_name = uniqid() . '.' . $image_ext;
+            $image_path = '../assets/img/' . $new_image_name;
+
+            // Move uploaded image to the directory
+            if (move_uploaded_file($image_tmp_name, $image_path)) {
+                $image_path = $new_image_name;
+            } else {
+                echo "Error uploading the image.";
+                $image_path = 'CSSPE.png'; // default image
+            }
+        } else {
+            $image_path = 'CSSPE.png';
+        }
+    } else {
+        // If no new image is uploaded, retain the current image
+        $query_image = "SELECT image FROM users WHERE id = $faculty_id";
+        $result_image = mysqli_query($conn, $query_image);
+        $row = mysqli_fetch_assoc($result_image);
+        $image_path = $row['image'];
+    }
+
+    $update_query = "UPDATE users 
+                     SET first_name = '$first_name', last_name = '$last_name', middle_name = '$middle_name', email = '$email', address = '$address', contact_no = '$contact_no', department = '$department', rank = '$rank', password = '$hashedPassword', image = '$image_path' 
+                     WHERE id = $faculty_id";
+
+    if (mysqli_query($conn, $update_query)) {
+        echo "Faculty member updated successfully!";
+        header("Location: facultyMember.php");
         exit();
     } else {
         echo "Error: " . mysqli_error($conn);
@@ -254,7 +320,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <td><?php echo htmlspecialchars($row['department']); ?></td>
                                     <td><?php echo htmlspecialchars($row['rank']); ?></td>
                                     <td class="button">
-                                        <a href="#" onclick="editUser(<?php echo $row['id']; ?>)">
+                                    <a href="#" onclick="editProgram(<?php echo $row['id']; ?>)">
                                             <button class="addButton1" style="width: 6rem;">Edit</button>
                                         </a>
                                         <a href="#" onclick="deleteUser(<?php echo $row['id']; ?>)">
@@ -289,8 +355,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
 
                             <div class="uploadButton">
-                                <input  id="imageUpload" type="file" name="profile_image" accept="image/*" onchange="previewImage()" required>
-                            </div>                          
+                                <input id="imageUpload" type="file" name="profile_image" accept="image/*" onchange="previewImage()" required>
+                            </div>
                         </div>
 
                         <div class="inputContainer">
@@ -344,7 +410,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
 
                         <div class="inputContainer">
-                            <button type="submit" class="addButton">Add Faculty Member</button>
+                            <button type="submit" name="add_faculty" class="addButton">Add Faculty Member</button>
                         </div>
                         <div class="inputContainer">
                             <button onclick="cancelEdit()" class="addButton1" style="width: 6rem;">Cancel</button>
@@ -353,105 +419,113 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     </div>
     </form>
+    
     </div>
     </div>
     </div>
 
-    <div class="editContainer" style="display: none; background-color: none;">
-        <div class="editContainer">
-            <div class="subAddContainer">
-                <div class="titleContainer">
-                    <p>Edit Faculty Member Information</p>
-                </div>
 
-                <div class="subLoginContainer">
 
-                    <div class="uploadContainer">
-                        <div class="subUploadContainer">
-                            <div class="displayImage">
-                                <img class="image1" src="" alt="">
+    <form method="POST" action="" enctype="multipart/form-data">
+        <div class="editContainer" style="display: none; background-color: none;">
+            <div class="editContainer">
+                <div class="subAddContainer">
+                    <div class="titleContainer">
+                        <p>Edit Faculty Member Information</p>
+                    </div>
+
+                    <div class="subLoginContainer">
+
+                        <!-- Hidden input to store event id -->
+                        <input type="hidden" name="faculty_id" id="faculty_id">
+
+                        <div class="uploadContainer">
+                            <div class="subUploadContainer">
+                                <div class="displayImage">
+                                    <img class="image1" id="preview" src="" alt="Image Preview" style="max-width: 100%; display: none;">
+                                </div>
+                            </div>
+
+                            <div class="uploadButton">
+                                <input id="imageUpload" type="file" name="profile_image" accept="image/*" onchange="previewImage()" required>
                             </div>
                         </div>
 
-                        <div class="uploadButton">
-                            <input id="imageUpload" type="file" accept="image/*" style="display: none;"
-                                onchange="previewImage()">
-
-                            <button onclick="triggerImageUpload()" class="addButton"
-                                style="height: 2rem; width: 5rem;">Upload</button>
+                        <div class="inputContainer">
+                            <input class="inputEmail" name="first_name" type="text" placeholder="First Name:" required>
                         </div>
-                    </div>
 
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">First
-                            Name:</label>
-                        <input class="inputEmail" type="text" placeholder="First Name:">
-                    </div>
+                        <div class="inputContainer">
+                            <input class="inputEmail" name="last_name" type="text" placeholder="Last Name:" required>
+                        </div>
 
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Last
-                            Name:</label>
-                        <input class="inputEmail" type="text" placeholder="Last Name:">
-                    </div>
+                        <div class="inputContainer">
+                            <input class="inputEmail" name="middle_name" type="text" placeholder="Middle Name (Optional):">
+                        </div>
 
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Middle
-                            Name:</label>
-                        <input class="inputEmail" type="text" placeholder="Middle Name (Optional):">
-                    </div>
+                        <div class="inputContainer">
+                            <input class="inputEmail" name="password" type="password" placeholder="Password:">
+                        </div>
 
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Email:</label>
-                        <input class="inputEmail" type="email" placeholder="Email:">
-                    </div>
+                        <div class="inputContainer">
+                            <input class="inputEmail" name="email" type="email" placeholder="Email:" required>
+                        </div>
 
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Address:</label>
-                        <input class="inputEmail" type="text" placeholder="Address:">
-                    </div>
+                        <div class="inputContainer">
+                            <input class="inputEmail" name="address" type="text" placeholder="Address:" required>
+                        </div>
 
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Contact
-                            No.:</label>
-                        <input class="inputEmail" type="text" placeholder="Contact No.:">
-                    </div>
+                        <div class="inputContainer">
+                            <input class="inputEmail" name="contact_no" type="text" placeholder="Contact No.:" required>
+                        </div>
 
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Department:</label>
-                        <input class="inputEmail" type="text" placeholder="Department:">
-                    </div>
+                        <div class="inputContainer">
+                            <select class="inputEmail" name="department" required>
+                                <option value="">Choose a Department</option>
+                                <?php
+                                $departments = fetchDepartments();
+                                foreach ($departments as $department) {
+                                    echo "<option value='" . $department['department_name'] . "'>" . $department['department_name'] . "</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
 
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Rank:</label>
-                        <select class="inputEmail" name="" id="">
-                            <option value="">Choose a rank</option>
-                            <option value="Instructor">Instructor</option>
-                            <option value="Assistant Professor">Assistant Professor</option>
-                            <option value="Associate Professor">Associate Professor</option>
-                            <option value="Professor">Professor</option>
-                        </select>
-                    </div>
+                        <div class="inputContainer">
+                            <select class="inputEmail" name="rank" required>
+                                <option value="">Choose a Rank</option>
+                                <option value="Instructor">Instructor</option>
+                                <option value="Assistant Professor">Assistant Professor</option>
+                                <option value="Associate Professor">Associate Professor</option>
+                                <option value="Professor">Professor</option>
+                            </select>
+                        </div>
 
-                    <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
-                        <button class="addButton" style="width: 6rem;">Save</button>
-                        <button onclick="editProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
+                        <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
+                            <button type="submit" name="update_faculty" class="addButton" style="width: 6rem;">Save</button>
+                            <button onclick="cancelContainer()" class="addButton1" style="width: 6rem;">Cancel</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </form>
 
-    <script>      
-        function cancelEdit() {
-            document.querySelector('.addContainer').style.display = 'none';
+
+
+    <script src="../assets/js/sidebar.js"></script>
+    <script src="../assets/js/program.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        function editProgram(id) {
+            document.getElementById('faculty_id').value = id;
+            document.querySelector('.editContainer').style.display = 'block';
+        }
+
+        function cancelContainer() {
+            document.querySelector('.editContainer').style.display = 'none';
         }
     </script>
 
@@ -489,10 +563,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <script src="../assets/js/sidebar.js"></script>
-    <script src="../assets/js/program.js"></script>
 </body>
 
 </html>

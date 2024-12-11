@@ -20,7 +20,7 @@ if (isset($_POST['add_department'])) {
         $image_path = "../assets/img/" . $image_new_name;
 
         if (in_array(strtolower($image_ext), ['jpg', 'jpeg', 'png', 'gif']) && $image_size < 5000000) {
-            move_uploaded_file($image_tmp, $image_path); 
+            move_uploaded_file($image_tmp, $image_path);
         } else {
             echo "Invalid image format or size!";
             exit();
@@ -31,7 +31,7 @@ if (isset($_POST['add_department'])) {
 
     $query = "INSERT INTO departments (department_name, description, image) 
               VALUES ('$department_name', '$department_description', '$image_path')";
-    
+
     if (mysqli_query($conn, $query)) {
         echo "Department added successfully!";
         header('Location: ' . $_SERVER['PHP_SELF']);
@@ -40,6 +40,51 @@ if (isset($_POST['add_department'])) {
         echo "Error: " . mysqli_error($conn);
     }
 }
+
+
+// Update department logic
+if (isset($_POST['update_department'])) {
+    $department_id = $_POST['department_id'];
+    $department_name = mysqli_real_escape_string($conn, $_POST['department_name']);
+    $department_description = mysqli_real_escape_string($conn, $_POST['department_description']);
+
+    if (isset($_FILES['department_image']) && $_FILES['department_image']['error'] == 0) {
+        $image_name = $_FILES['department_image']['name'];
+        $image_tmp = $_FILES['department_image']['tmp_name'];
+        $image_size = $_FILES['department_image']['size'];
+
+        $image_ext = pathinfo($image_name, PATHINFO_EXTENSION);
+        $image_new_name = uniqid() . '.' . $image_ext;
+        $image_path = "../assets/img/" . $image_new_name;
+
+        if (in_array(strtolower($image_ext), ['jpg', 'jpeg', 'png', 'gif']) && $image_size < 5000000) {
+            move_uploaded_file($image_tmp, $image_path);
+        } else {
+            echo "Invalid image format or size!";
+            exit();
+        }
+    } else {
+        // If no new image is uploaded, retain the current image
+        $query_image = "SELECT image FROM departments WHERE id = $department_id";
+        $result_image = mysqli_query($conn, $query_image);
+        $row = mysqli_fetch_assoc($result_image);
+        $image_path = $row['image'];
+    }
+
+    // Update department information
+    $update_query = "UPDATE departments 
+                     SET department_name = '$department_name', description = '$department_description', image = '$image_path' 
+                     WHERE id = $department_id";
+
+    if (mysqli_query($conn, $update_query)) {
+        echo "Department updated successfully!";
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit();
+    } else {
+        echo "Error: " . mysqli_error($conn);
+    }
+}
+
 
 // delete request
 if (isset($_GET['delete_id'])) {
@@ -60,13 +105,13 @@ if (isset($_GET['delete_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Department</title>
 
     <link rel="stylesheet" href="../assets/css/program.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
 
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-    
+
 </head>
 
 <body>
@@ -205,27 +250,27 @@ if (isset($_GET['delete_id'])) {
 
                         <tbody>
                             <tr>
-                                <?php while($row = mysqli_fetch_assoc($result)): ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($row['department_name']);?></td>
-                                    <td><img class="image" src="<?php echo htmlspecialchars($row['image']); ?>" alt=""></td>
-                                    <td><?php echo htmlspecialchars($row['description']); ?></td>
-                                    <td class="button">
-                                        <a href="#" onclick="editProgram(
+                                <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($row['department_name']); ?></td>
+                                <td><img class="image" src="<?php echo htmlspecialchars($row['image']); ?>" alt=""></td>
+                                <td><?php echo htmlspecialchars($row['description']); ?></td>
+                                <td class="button">
+                                    <a href="#" onclick="editProgram(
                                             <?php echo $row['id']; ?>, 
                                             '<?php echo addslashes($row['department_name']); ?>', 
                                             '<?php echo addslashes($row['description']); ?>', 
                                             '<?php echo addslashes($row['image']); ?>'
                                         )">
-                                            <button class="addButton1" style="width: 6rem;">Edit</button>
-                                        </a>
-                                        <a href="#" onclick="deleteProgram(<?php echo $row['id']; ?>)">
-                                            <button class="addButton1" style="width: 6rem;">Delete</button>
-                                        </a>
-                                    </td>
-                                </tr>
-                                <?php endwhile; ?>
+                                        <button class="addButton1" style="width: 6rem;">Edit</button>
+                                    </a>
+                                    <a href="#" onclick="deleteProgram(<?php echo $row['id']; ?>)">
+                                        <button class="addButton1" style="width: 6rem;">Delete</button>
+                                    </a>
+                                </td>
                             </tr>
+                        <?php endwhile; ?>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
@@ -234,52 +279,57 @@ if (isset($_GET['delete_id'])) {
         </div>
     </div>
 
+    <form method="POST" action="" enctype="multipart/form-data">
+        <div class="editContainer" style="display: none; background-color: none;">
+            <div class="editContainer">
+                <div class="subAddContainer">
+                    <div class="titleContainer">
+                        <p>Edit Departments</p>
+                    </div>
 
-    <div class="editContainer" style="display: none; background-color: none;">
-        <div class="editContainer">
-            <div class="subAddContainer">
-                <div class="titleContainer">
-                    <p>Edit Departments</p>
-                </div>
+                    <div class="subLoginContainer">
 
-                <div class="subLoginContainer">
-                                   
-                    <div class="uploadContainer">
-                        <div class="subUploadContainer">
-                            <div class="displayImage">
-                                <img class="image1" src="" alt="">
+                        <!-- Hidden input to store event id -->
+                        <input type="hidden" name="department_id" id="department_id">
+
+                        <div class="uploadContainer">
+                            <div class="subUploadContainer">
+                                <div class="displayImage">
+                                    <img class="image1" src="" alt="">
+                                </div>
+                            </div>
+
+                            <div class="uploadButton">
+                                <input id="image" name="image" type="file" accept="image/*" style="display: none;"
+                                    onchange="previewImage()">
+                                <button onclick="triggerImageUpload()" class="addButton"
+                                    style="height: 2rem; width: 5rem;">Upload</button>
                             </div>
                         </div>
 
-                        <div class="uploadButton">
-                            <input id="image" name="image" type="file" accept="image/*" style="display: none;"
-                                onchange="previewImage()">
-                            <button onclick="triggerImageUpload()" class="addButton"
-                                style="height: 2rem; width: 5rem;">Upload</button>
-                        </div>
-                    </div>
-
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Departments:</label>
+                        <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                            <label for=""
+                                style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Departments:</label>
                             <input class="inputEmail" type="text" id="department_name" name="department_name" placeholder="Departments:" required>
-                    </div>
+                        </div>
 
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem; min-height: 12rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Description:</label>
-                            <textarea style="min-height: 10rem;" class="inputEmail" name="description"  id="description" placeholder="Description" required></textarea>
-                    </div>
+                        <div class="inputContainer" style="flex-direction: column; height: 5rem; min-height: 12rem;">
+                            <label for=""
+                                style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Description:</label>
+                            <textarea style="min-height: 10rem;" class="inputEmail" name="department_description" id="description" placeholder="Description" required></textarea>
+                        </div>
 
-                    <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
-                        <button type="button" class="addButton" style="width: 6rem;" id="saveButton" name="update_department">Save</button>
-                        <button onclick="cancelEdit()" class="addButton1" style="width: 6rem;">Cancel</button>
+                        <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
+                            <button type="submit" name="update_department" type="button" class="addButton" style="width: 6rem;" id="saveButton" name="update_department">Save</button>
+                            <button onclick="cancelContainer()" class="addButton1" style="width: 6rem;">Cancel</button>
+                        </div>
+
                     </div>
-                    
                 </div>
             </div>
         </div>
-    </div>
+    </form>
+
 
     <form method="POST" action="" enctype="multipart/form-data">
         <div class="addContainer" style="display: none; background-color: none;">
@@ -290,16 +340,17 @@ if (isset($_GET['delete_id'])) {
                     </div>
 
                     <div class="subLoginContainer">
+
                         <div class="uploadContainer">
                             <div class="subUploadContainer">
-                            <div class="uploadContainer">
-                            <div class="subUploadContainer">
-                                <div class="displayImage">
-                                    <img class="image1" id="preview" src="" alt="Image Preview" style="max-width: 100%; display: none;">
+                                <div class="uploadContainer">
+                                    <div class="subUploadContainer">
+                                        <div class="displayImage">
+                                            <img class="image1" id="preview" src="" alt="Image Preview" style="max-width: 100%; display: none;">
+                                        </div>
+                                    </div>
+
                                 </div>
-                            </div>
-                      
-                        </div>
                             </div>
 
                             <div class="uploadButton">
@@ -333,19 +384,14 @@ if (isset($_GET['delete_id'])) {
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script>      
-        function editProgram(id, name, description, image) {
-            document.querySelector('.editContainer .inputEmail[type="text"]').value = name; 
-            document.querySelector('.editContainer textarea').value = description;
-            document.querySelector('.editContainer .displayImage img').src = image; 
-
-            document.querySelector('.mainContainer').style.display = 'none';
+    <script>
+        function editProgram(id) {
+            document.getElementById('department_id').value = id;
             document.querySelector('.editContainer').style.display = 'block';
         }
 
-        function cancelEdit() {
+        function cancelContainer() {
             document.querySelector('.editContainer').style.display = 'none';
-            document.querySelector('.mainContainer').style.display = 'block';
         }
     </script>
 

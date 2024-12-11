@@ -33,7 +33,46 @@ if (isset($_POST['add_organization'])) {
               VALUES ('$organization_name', '$department_description', '$image_path')";
 
     if (mysqli_query($conn, $query)) {
-        echo "Department added successfully!";
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit();
+    } else {
+        echo "Error: " . mysqli_error($conn);
+    }
+}
+
+
+// Check if the form was submitted for updating
+if (isset($_POST['update_organization'])) {
+    $organization_id = $_POST['organization_id'];
+    $organization_name = mysqli_real_escape_string($conn, $_POST['organization_name']);
+    $department_description = mysqli_real_escape_string($conn, $_POST['organization_description']);
+
+    if (isset($_FILES['organization_image']) && $_FILES['organization_image']['error'] == 0) {
+        $image_name = $_FILES['organization_image']['name'];
+        $image_tmp = $_FILES['organization_image']['tmp_name'];
+        $image_size = $_FILES['organization_image']['size'];
+
+        $image_ext = pathinfo($image_name, PATHINFO_EXTENSION);
+        $image_new_name = uniqid() . '.' . $image_ext;
+        $image_path = "../assets/img/" . $image_new_name;
+
+        if (in_array(strtolower($image_ext), ['jpg', 'jpeg', 'png', 'gif']) && $image_size < 5000000) {
+            move_uploaded_file($image_tmp, $image_path);
+        } else {
+            echo "Invalid image format or size!";
+            exit();
+        }
+    } else {
+        $result = mysqli_query($conn, "SELECT image FROM organizations WHERE id = '$organization_id'");
+        $row = mysqli_fetch_assoc($result);
+        $image_path = $row['image']; 
+    }
+
+    $query = "UPDATE organizations 
+              SET organization_name = '$organization_name', description = '$department_description', image = '$image_path' 
+              WHERE id = '$organization_id'";
+
+    if (mysqli_query($conn, $query)) {
         header('Location: ' . $_SERVER['PHP_SELF']);
         exit();
     } else {
@@ -204,12 +243,7 @@ if (isset($_GET['delete_id'])) {
                                     <td><img class="image" src="<?php echo htmlspecialchars($row['image']); ?>" alt=""></td>
                                     <td><?php echo htmlspecialchars($row['description']); ?></td>
                                     <td class="button">
-                                        <a href="#" onclick="editProgram(
-                                            <?php echo $row['id']; ?>, 
-                                            '<?php echo addslashes($row['organization_name']); ?>', 
-                                            '<?php echo addslashes($row['description']); ?>', 
-                                            '<?php echo addslashes($row['image']); ?>'
-                                        )">
+                                        <a href="#" onclick="editProgram(<?php echo $row['id']; ?>)">
                                             <button class="addButton1" style="width: 6rem;">Edit</button>
                                         </a>
                                         <a href="#" onclick="deleteProgram(<?php echo $row['id']; ?>)">
@@ -319,51 +353,60 @@ if (isset($_GET['delete_id'])) {
         </div>
     </form>
 
-    <div class="editContainer" style="display: none; background-color: none; position: fixed;">
-        <div class="editContainer">
-            <div class="subAddContainer">
-                <div class="titleContainer">
-                    <p>Edit Organization</p>
-                </div>
 
-                <div class="subLoginContainer">
-                    <div class="uploadContainer">
-                        <div class="subUploadContainer">
-                            <div class="displayImage">
-                                <img class="image1" src="" alt="">
+
+
+    <!-- Edit Container -->
+    <form method="POST" action="" enctype="multipart/form-data">
+        <div class="editContainer" style="display: none; background-color: none;">
+            <div class="editContainer">
+                <div class="subAddContainer">
+                    <div class="titleContainer">
+                        <p>Add Organization</p>
+                    </div>
+
+                    <div class="subLoginContainer">
+
+                        <!-- Hidden input to store event id -->
+                        <input type="hidden" name="organization_id" id="organization_id">
+
+                        <div class="uploadContainer">
+                            <div class="subUploadContainer">
+                                <div class="uploadContainer">
+                                    <div class="subUploadContainer">
+                                        <div class="displayImage">
+                                            <img class="image1" id="preview" src="" alt="Image Preview" style="max-width: 100%; display: none;">
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="uploadButton">
+                                <input id="imageUpload" type="file" name="organization_image" accept="image/*" style="display: none;" onchange="previewImage_edit()">
+                                <button type="button" onclick="triggerImageUpload()" class="addButton" style="height: 2rem; width: 5rem;">Upload</button>
                             </div>
                         </div>
 
-                        <div class="uploadButton">
-                            <input id="imageUpload" type="file" accept="image/*" style="display: none;"
-                                onchange="previewImage()">
-                            <button onclick="triggerImageUpload()" class="addButton"
-                                style="height: 2rem; width: 5rem;">Upload</button>
+                        <div class="inputContainer">
+                            <input class="inputEmail" type="text" name="organization_name" placeholder="Organization Name">
                         </div>
-                    </div>
 
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Organization
-                            Name:</label>
-                        <input class="inputEmail" type="text" placeholder="Program Name:">
-                    </div>
+                        <div class="inputContainer" style="height: 10rem;">
+                            <textarea class="inputEmail" name="organization_description" placeholder="Description"></textarea>
+                        </div>
 
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem; min-height: 12rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Description:</label>
-                        <textarea style="min-height: 10rem;" class="inputEmail" name="" id=""
-                            placeholder="Description"></textarea>
-                    </div>
-
-                    <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
-                        <button class="addButton" style="width: 6rem;">Save</button>
-                        <button onclick="editProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
+                        <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
+                            <button type="submit" name="update_organization" class="addButton" style="width: 6rem;">Add</button>
+                            <button onclick="addProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </form>
+
+
 
     <script src="../assets/js/sidebar.js"></script>
     <script src="../assets/js/program.js"></script>
@@ -371,19 +414,16 @@ if (isset($_GET['delete_id'])) {
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script>
-        function editProgram(id, name, description, image) {
-            document.querySelector('.editContainer .inputEmail[type="text"]').value = name;
-            document.querySelector('.editContainer textarea').value = description;
-            document.querySelector('.editContainer .displayImage img').src = image;
 
-            document.querySelector('.mainContainer').style.display = 'none';
+
+    <script>
+        function editProgram(id) {
+            document.getElementById('organization_id').value = id;
             document.querySelector('.editContainer').style.display = 'block';
         }
 
-        function cancelEdit() {
+        function cancelContainer() {
             document.querySelector('.editContainer').style.display = 'none';
-            document.querySelector('.mainContainer').style.display = 'block';
         }
     </script>
 
@@ -403,6 +443,7 @@ if (isset($_GET['delete_id'])) {
             }
         }
     </script>
+
 
     <script>
         function deleteProgram(userId) {

@@ -1,13 +1,83 @@
+<?php
+session_start();
+require_once '../conn/conn.php';
+
+$query = "SELECT * FROM events";
+$result = mysqli_query($conn, $query);
+
+if (isset($_POST['add_event'])) {
+    $title = mysqli_real_escape_string($conn, $_POST['title']);
+    $description = mysqli_real_escape_string($conn, $_POST['description']);
+    $date = mysqli_real_escape_string($conn, $_POST['date']);
+
+    $date_uploaded_at = date('Y-m-d H:i:s');
+
+    $query = "INSERT INTO events (title, description, date_uploaded_at) 
+              VALUES ('$title', '$description', '$date_uploaded_at')";
+
+    if (mysqli_query($conn, $query)) {
+        echo "Event added successfully!";
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit();
+    } else {
+        echo "Error: " . mysqli_error($conn);
+    }
+}
+
+
+// Update event logic
+if (isset($_POST['update_event'])) {
+    $event_id = $_POST['event_id'];
+    $title = mysqli_real_escape_string($conn, $_POST['title']);
+    $description = mysqli_real_escape_string($conn, $_POST['description']);
+    $date = mysqli_real_escape_string($conn, $_POST['date']);
+
+    // Get the current time in 'H:i:s' format
+    $current_time = date('H:i:s');
+
+    // Combine the date from $date with the current time
+    $date_uploaded_at = $date . ' ' . $current_time;
+
+    $query = "UPDATE events SET title = '$title', description = '$description', date_uploaded_at = '$date_uploaded_at' WHERE id = $event_id";
+
+    if (mysqli_query($conn, $query)) {
+        echo "Event updated successfully!";
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit();
+    } else {
+        echo "Error: " . mysqli_error($conn);
+    }
+}
+
+
+
+// delete request
+if (isset($_GET['delete_id'])) {
+    $event_id = $_GET['delete_id'];
+    $delete_query = "DELETE FROM events WHERE id = $event_id";
+    if (mysqli_query($conn, $delete_query)) {
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit();
+    } else {
+        echo "Error deleting record: " . mysqli_error($conn);
+    }
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Events</title>
 
     <link rel="stylesheet" href="../assets/css/events.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+
 </head>
 
 <body>
@@ -136,25 +206,27 @@
                             <tr>
                                 <th>Title</th>
                                 <th>Description</th>
-                                <th>Date</th>
-                                <th>location</th>
-                                <th>Uploaded At</th>
+                                <th>Date/Time</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
 
                         <tbody>
-                            <tr>
-                                <td>Hakdog</td>
-                                <td>Hakdog</td>
-                                <td>2021-10-05</td>
-                                <td>Hakdog</td>
-                                <td>Hakdog</td>
-                                <td class="button">
-                                    <button onclick="editProgram()" class="addButton" style="width: 5rem;">Edit</button>
-                                    <button class="addButton1" style="width: 5rem;">Delete</button>
-                                </td>
-                            </tr>
+                            <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($row['title']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['description']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['date_uploaded_at']); ?></td>
+                                    <td class="button">
+                                        <a href="#" onclick="editProgram(<?php echo $row['id']; ?>)">
+                                            <button class="addButton1" style="width: 6rem;">Edit</button>
+                                        </a>
+                                        <a href="#" onclick="deleteEvent(<?php echo $row['id']; ?>)">
+                                            <button class="addButton1" style="width: 6rem;">Delete</button>
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
                         </tbody>
                     </table>
                 </div>
@@ -162,83 +234,116 @@
         </div>
     </div>
 
-    <div class="addContainer" style="display: none; background-color: none;">
-        <div class="addContainer">
-            <div class="subAddContainer">
-                <div class="titleContainer">
-                    <p>Add Events</p>
-                </div>
 
-                <div class="subLoginContainer">
-                    <div class="inputContainer">
-                        <input class="inputEmail" type="text" placeholder="Title:">
+    <form method="POST" action="" enctype="multipart/form-data">
+        <div class="addContainer" style="display: none; background-color: none;">
+            <div class="addContainer">
+                <div class="subAddContainer">
+                    <div class="titleContainer">
+                        <p>Add Event</p>
                     </div>
 
-                    <div class="inputContainer">
-                        <input class="inputEmail" type="text" placeholder="Location:">
-                    </div>
+                    <div class="subLoginContainer">
+                        <div class="inputContainer">
+                            <input class="inputEmail" name="title" type="text" placeholder="Title:">
+                        </div>
 
-                    <div class="inputContainer">
-                        <input class="inputEmail" type="date" placeholder="Date:">
-                    </div>
+                        <div class="inputContainer">
+                            <input class="inputEmail" name="date" type="date" placeholder="Date:">
+                        </div>
 
-                    <div class="inputContainer" style="height: 10rem;">
-                        <textarea class="inputEmail" name="" id="" placeholder="Description"></textarea>
-                    </div>
+                        <div class="inputContainer" style="height: 10rem;">
+                            <textarea class="inputEmail" name="description" id="description" placeholder="Description"></textarea>
+                        </div>
 
-                    <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
-                        <button class="addButton" style="width: 6rem;">Add</button>
-                        <button onclick="addProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="editContainer" style="display: none; background-color: none;">
-        <div class="editContainer">
-            <div class="subAddContainer">
-                <div class="titleContainer">
-                    <p>Edit Events</p>
-                </div>
-
-                <div class="subLoginContainer">
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Title:</label>
-                        <input class="inputEmail" type="text" placeholder="Title:">
-                    </div>
-
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Location:</label>
-                        <input class="inputEmail" type="text" placeholder="Location:">
-                    </div>
-
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Date:</label>
-                        <input class="inputEmail" type="date" placeholder="Date:">
-                    </div>
-
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem; min-height: 12rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Content:</label>
-                        <textarea style="min-height: 10rem;" class="inputEmail" name="" id=""
-                            placeholder="Content"></textarea>
-                    </div>
-
-                    <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
-                        <button class="addButton" style="width: 6rem;">Save</button>
-                        <button onclick="editProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
+                        <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
+                            <button type="submit" name="add_event" class="addButton" style="width: 6rem;">Add</button>
+                            <button onclick="addProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </form>
+
+
+    <!-- Edit Container -->
+    <form method="POST" action="" enctype="multipart/form-data">
+        <div class="editContainer" style="display: none; background-color: none;">
+            <div class="editContainer">
+                <div class="subAddContainer">
+                    <div class="titleContainer">
+                        <p>Edit Events</p>
+                    </div>
+
+                    <div class="subLoginContainer">
+                        <!-- Hidden input to store event id -->
+                        <input type="hidden" name="event_id" id="event_id">
+
+                        <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                            <label for=""
+                                style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Title:</label>
+                            <input class="inputEmail" type="text" name="title" placeholder="Title:">
+                        </div>
+
+                        <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                            <label for=""
+                                style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Date:</label>
+                            <input class="inputEmail" type="date" name="date" placeholder="Date:">
+                        </div>
+
+                        <div class="inputContainer" style="flex-direction: column; height: 5rem; min-height: 12rem;">
+                            <label for=""
+                                style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Content:</label>
+                            <textarea style="min-height: 10rem;" class="inputEmail" name="description" id=""
+                                placeholder="Content"></textarea>
+                        </div>
+
+                        <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
+                            <button type="submit" name="update_event" class="addButton" style="width: 6rem;">Save</button>
+                            <button type="button" onclick="cancelContainer()" class="addButton1" style="width: 6rem;">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+
+
 
     <script src="../assets/js/sidebar.js"></script>
     <script src="../assets/js/program.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        function editProgram(id) {
+            document.getElementById('event_id').value = id;
+            document.querySelector('.editContainer').style.display = 'block';
+        }
+
+        function cancelContainer(){
+            document.querySelector('.editContainer').style.display = 'none';
+        }
+    </script>
+
+    <script>
+        function deleteEvent(userId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Do you want to delete this event?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete!',
+                cancelButtonText: 'No, cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "?delete_id=" + userId;
+                }
+            });
+        }
+    </script>
 </body>
 
 </html>
