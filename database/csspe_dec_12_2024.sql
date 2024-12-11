@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 10, 2024 at 06:20 PM
+-- Generation Time: Dec 11, 2024 at 07:28 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -40,7 +40,7 @@ CREATE TABLE `announcements` (
 --
 
 INSERT INTO `announcements` (`id`, `title`, `description`, `date_uploaded_at`, `location`) VALUES
-(6, 'qweqw', '123', '2024-12-10 18:14:12', 'eqwe');
+(6, 'd', 'asd', '2024-12-18 18:19:17', ' sdsad');
 
 -- --------------------------------------------------------
 
@@ -60,8 +60,27 @@ CREATE TABLE `departments` (
 --
 
 INSERT INTO `departments` (`id`, `department_name`, `description`, `image`) VALUES
-(5, 'College of Architecture', 'yes', '../assets/img/67586c75810c3.jpg'),
-(6, 'College of Nursing', 'tyes', '../assets/img/67586c846b288.png');
+(8, '123', '123', '../assets/img/6759d41ecf13c.png');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `events`
+--
+
+CREATE TABLE `events` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  `date_uploaded_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `events`
+--
+
+INSERT INTO `events` (`id`, `title`, `description`, `date_uploaded_at`) VALUES
+(3, '21312', '123', '2024-12-01 18:10:55');
 
 -- --------------------------------------------------------
 
@@ -99,7 +118,7 @@ CREATE TABLE `organizations` (
 --
 
 INSERT INTO `organizations` (`id`, `organization_name`, `description`, `image`) VALUES
-(2, '123', '123', '../assets/img/67586f2829bd0.png');
+(10, 'qwe', 'qwe', '../assets/img/6759d2dec6add.png');
 
 -- --------------------------------------------------------
 
@@ -157,10 +176,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `first_name`, `last_name`, `middle_name`, `email`, `address`, `contact_no`, `rank`, `password`, `created_at`, `role`, `image`, `department`) VALUES
-(10, 'Nadeer', 'Mukaram', 'R', 'nzro@gmail.com', 'Hannah Drive, Rio Hondo, Zamboanga City', '54141412', 'Instructor', '$2y$10$uHsRU8jwklQdKXBAULkATed9wj81iLjVQAZfwFfnbGUYs0imEROx.', '2024-12-08 12:19:51', 'instructor', '10_profile.png', 'College of Nursing'),
-(20, 'Casca', 'Nad', 'R', 'cascanad@gmail.com', 'Hannah Drive, Rio Hondo, Zamboanga City', '54141412', '', '$2y$10$b.eMiQeyKdy4qUG9rT/TB.w3o0Vmte53YbeA6WpQNnZF5LMTaHlTC', '2024-12-08 14:46:05', 'super_admin', NULL, ''),
-(36, 'Nzrosdad', 'sadasd', 'sadasds', 'nadeer123dasdsad@gmail.com', '12312', '1232', 'Assistant Professor', '$2y$10$RZrYhygmfos4ZxnEAYu7..xnqCeQjDHRoPfEP.o8nUgqOqPkPnHtq', '2024-12-10 15:52:30', 'Instructor', '675863be2bddf.jpeg', 'College of Nursing'),
-(39, 'Nzrowqeqwe', 'wqeqwe', 'R', 'nadeermukaramasdasd@gmail.com', 'dsadaqewe', '123123', 'Associate Professor', '$2y$10$Te4fNiZxksFZx8H8enJvQu5PF0cpslHH0F/D5epg4hjLdqODsjF2C', '2024-12-10 16:03:04', 'Instructor', '675866386c7c6.jpg', 'College of Architecture');
+(44, 'SA', 'WEWQ', 'ASD', 'nzWQEWQro@gmail.com', 'WQE', '123', 'Associate Professor', '$2y$10$umJTI41TMQtkwodBET1SDOrj7MewynzEMnQukSK5hs/3nSZcWz.wi', '2024-12-11 18:08:02', 'Instructor', '6759d89b85d26.jpg', '123');
 
 --
 -- Indexes for dumped tables
@@ -176,6 +192,12 @@ ALTER TABLE `announcements`
 -- Indexes for table `departments`
 --
 ALTER TABLE `departments`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `events`
+--
+ALTER TABLE `events`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -213,13 +235,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `announcements`
 --
 ALTER TABLE `announcements`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `departments`
 --
 ALTER TABLE `departments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT for table `events`
+--
+ALTER TABLE `events`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `items`
@@ -231,7 +259,7 @@ ALTER TABLE `items`
 -- AUTO_INCREMENT for table `organizations`
 --
 ALTER TABLE `organizations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `pending_users`
@@ -243,7 +271,7 @@ ALTER TABLE `pending_users`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- Constraints for dumped tables
