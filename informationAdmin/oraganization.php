@@ -243,7 +243,9 @@ if (isset($_GET['delete_id'])) {
                                     <td><img class="image" src="<?php echo htmlspecialchars($row['image']); ?>" alt=""></td>
                                     <td><?php echo htmlspecialchars($row['description']); ?></td>
                                     <td class="button">
-                                        <a href="#" onclick="editProgram(<?php echo $row['id']; ?>)">
+                                        <a href="#" onclick="editProgram(<?php echo $row['id']; ?>, 
+                                            '<?php echo addslashes($row['organization_name']); ?>',
+                                            '<?php echo addslashes($row['description']); ?>')">
                                             <button class="addButton1" style="width: 6rem;">Edit</button>
                                         </a>
                                         <a href="#" onclick="deleteProgram(<?php echo $row['id']; ?>)">
@@ -389,11 +391,11 @@ if (isset($_GET['delete_id'])) {
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" type="text" name="organization_name" placeholder="Organization Name">
+                            <input class="inputEmail" type="text" name="organization_name" id="organization_name" placeholder="Organization Name">
                         </div>
 
                         <div class="inputContainer" style="height: 10rem;">
-                            <textarea class="inputEmail" name="organization_description" placeholder="Description"></textarea>
+                            <textarea class="inputEmail" name="organization_description" id="organization_description" placeholder="Description"></textarea>
                         </div>
 
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
@@ -417,8 +419,11 @@ if (isset($_GET['delete_id'])) {
 
 
     <script>
-        function editProgram(id) {
+        function editProgram(id, name, description) {
             document.getElementById('organization_id').value = id;
+            document.getElementById('organization_name').value = name;
+            document.getElementById('organization_description').value = description;
+
             document.querySelector('.editContainer').style.display = 'block';
         }
 

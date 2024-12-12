@@ -259,9 +259,7 @@ if (isset($_GET['delete_id'])) {
                                     <a href="#" onclick="editProgram(
                                             <?php echo $row['id']; ?>, 
                                             '<?php echo addslashes($row['department_name']); ?>', 
-                                            '<?php echo addslashes($row['description']); ?>', 
-                                            '<?php echo addslashes($row['image']); ?>'
-                                        )">
+                                            '<?php echo addslashes($row['description']); ?>')">
                                         <button class="addButton1" style="width: 6rem;">Edit</button>
                                     </a>
                                     <a href="#" onclick="deleteProgram(<?php echo $row['id']; ?>)">
@@ -316,7 +314,7 @@ if (isset($_GET['delete_id'])) {
                         <div class="inputContainer" style="flex-direction: column; height: 5rem; min-height: 12rem;">
                             <label for=""
                                 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Description:</label>
-                            <textarea style="min-height: 10rem;" class="inputEmail" name="department_description" id="description" placeholder="Description" required></textarea>
+                            <textarea style="min-height: 10rem;" class="inputEmail" name="department_description" id="department_description" placeholder="Description" required></textarea>
                         </div>
 
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
@@ -385,8 +383,11 @@ if (isset($_GET['delete_id'])) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        function editProgram(id) {
+        function editProgram(id, name, description) {
             document.getElementById('department_id').value = id;
+            document.getElementById('department_name').value = name;
+            document.getElementById('department_description').value = description;
+
             document.querySelector('.editContainer').style.display = 'block';
         }
 
