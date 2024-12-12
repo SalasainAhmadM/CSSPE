@@ -206,7 +206,7 @@ if (isset($_POST['update_faculty'])) {
                             </div>
                         </a>
 
-                        <a href="../informationAdmin/program.php">
+                        <a href="../informationAdmin/">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Departments</p>
@@ -320,7 +320,7 @@ if (isset($_POST['update_faculty'])) {
                                     <td><?php echo htmlspecialchars($row['department']); ?></td>
                                     <td><?php echo htmlspecialchars($row['rank']); ?></td>
                                     <td class="button">
-                                    <a href="#" onclick="editProgram(<?php echo $row['id']; ?>)">
+                                        <a href="#" onclick="editProgram(<?php echo $row['id']; ?>)">
                                             <button class="addButton1" style="width: 6rem;">Edit</button>
                                         </a>
                                         <a href="#" onclick="deleteUser(<?php echo $row['id']; ?>)">
@@ -419,7 +419,7 @@ if (isset($_POST['update_faculty'])) {
 
                     </div>
     </form>
-    
+
     </div>
     </div>
     </div>

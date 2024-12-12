@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Memorandums</title>
 
     <link rel="stylesheet" href="../assets/css/memorandum.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
@@ -36,7 +36,7 @@
                 <div class="navContainer">
                     <div class="subNavContainer">
 
-                        <a href="../informationAdmin/homePage/announcement.php">
+                        <a href="../homePage/">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Home</p>
@@ -44,7 +44,7 @@
                             </div>
                         </a>
 
-                        <a href="../informationAdmin/program.php">
+                        <a href="../informationAdmin/">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Departments</p>

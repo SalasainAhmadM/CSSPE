@@ -121,7 +121,7 @@ if (isset($_GET['delete_id'])) {
                             </div>
                         </a>
 
-                        <a href="../informationAdmin/program.php">
+                        <a href="../informationAdmin/">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Departments</p>

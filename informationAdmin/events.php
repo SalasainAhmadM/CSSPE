@@ -114,7 +114,7 @@ if (isset($_GET['delete_id'])) {
                             </div>
                         </a>
 
-                        <a href="../informationAdmin/program.php">
+                        <a href="../informationAdmin/">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Departments</p>
@@ -323,7 +323,7 @@ if (isset($_GET['delete_id'])) {
             document.querySelector('.editContainer').style.display = 'block';
         }
 
-        function cancelContainer(){
+        function cancelContainer() {
             document.querySelector('.editContainer').style.display = 'none';
         }
     </script>

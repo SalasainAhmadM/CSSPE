@@ -107,7 +107,7 @@ if (isset($_GET['delete_id'])) {
 
 <body>
     <div class="body">
-        <div class="sidebar">
+    <div class="sidebar">
             <div class="sidebarContent">
                 <div class="arrowContainer" style="margin-left: 80rem;" id="toggleButton">
                     <div class="subArrowContainer">
@@ -131,7 +131,7 @@ if (isset($_GET['delete_id'])) {
                 <div class="navContainer">
                     <div class="subNavContainer">
 
-                        <a href="../informationAdmin/homePage/announcement.php">
+                        <a href="../homePage/">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Home</p>
@@ -139,7 +139,7 @@ if (isset($_GET['delete_id'])) {
                             </div>
                         </a>
 
-                        <a href="../informationAdmin/program.php">
+                        <a href="../informationAdmin/">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Departments</p>
