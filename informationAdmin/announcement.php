@@ -227,7 +227,11 @@ if (isset($_GET['delete_id'])) {
                                     <td><?php echo htmlspecialchars($row['date_uploaded_at']); ?></td>
                                     <td><?php echo htmlspecialchars($row['location']); ?></td>
                                     <td class="button">
-                                        <a href="#" onclick="editProgram(<?php echo $row['id']; ?>)">
+                                        <a href="#" onclick="editProgram(<?php echo $row['id']; ?>, 
+                                        '<?php echo addslashes($row['title']); ?>', 
+                                        '<?php echo addslashes($row['description']); ?>',
+                                        '<?php echo addslashes(date('Y-m-d', strtotime($row['date_uploaded_at']))); ?>',
+                                        '<?php echo addslashes($row['location']); ?>')">
                                             <button class="addButton1" style="width: 6rem;">Edit</button>
                                         </a>
                                         <a href="#" onclick="deleteAnnouncement(<?php echo $row['id']; ?>)">
@@ -279,6 +283,7 @@ if (isset($_GET['delete_id'])) {
     </form>
 
 
+    
     <!-- Edit Container -->
     <form method="POST" action="" enctype="multipart/form-data">
     <div class="editContainer" style="display: none; background-color: none;">
@@ -296,25 +301,25 @@ if (isset($_GET['delete_id'])) {
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
                         <label for=""
                             style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Title:</label>
-                        <input class="inputEmail" type="text" name="title" placeholder="Title:">
+                        <input class="inputEmail" type="text" id="announcement_title" name="title" value="" placeholder="Title:">
                     </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
                         <label for=""
                             style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Location:</label>
-                        <input class="inputEmail" type="text" name="location" placeholder="Location:">
+                        <input class="inputEmail" type="text" id="announcement_location" name="location" value="" placeholder="Location:">
                     </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
                         <label for=""
                             style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Date:</label>
-                        <input class="inputEmail" type="date" name="date" placeholder="Date:">
+                        <input class="inputEmail" type="date" id="announcement_date" name="date" value="" placeholder="Date:">
                     </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem; min-height: 12rem;">
                         <label for=""
                             style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Content:</label>
-                        <textarea style="min-height: 10rem;" class="inputEmail" name="description" id=""
+                        <textarea style="min-height: 10rem;" id="announcement_description" class="inputEmail" value="" name="description" id=""
                             placeholder="Content"></textarea>
                     </div>
 
@@ -328,14 +333,20 @@ if (isset($_GET['delete_id'])) {
     </div>
     </form>
 
+
     <script src="../assets/js/sidebar.js"></script>
     <script src="../assets/js/program.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        function editProgram(id) {
+        function editProgram(id, title, description, date, location) {
             document.getElementById('announcement_id').value = id;
+            document.getElementById('announcement_title').value = title;
+            document.getElementById('announcement_location').value = location;
+            document.getElementById('announcement_date').value = date;
+            document.getElementById('announcement_description').value = description;
+
             document.querySelector('.editContainer').style.display = 'block';
         }
 

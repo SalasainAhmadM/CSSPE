@@ -155,6 +155,8 @@ if (isset($_POST['update_faculty'])) {
     }
 }
 
+
+
 ?>
 
 <!DOCTYPE html>
@@ -320,7 +322,16 @@ if (isset($_POST['update_faculty'])) {
                                     <td><?php echo htmlspecialchars($row['department']); ?></td>
                                     <td><?php echo htmlspecialchars($row['rank']); ?></td>
                                     <td class="button">
-                                        <a href="#" onclick="editProgram(<?php echo $row['id']; ?>)">
+                                        <a href="#" onclick="editProgram(<?php echo $row['id']; ?>,
+                                        '<?php echo addslashes($row['first_name']); ?>',
+                                        '<?php echo addslashes($row['middle_name']); ?>',
+                                        '<?php echo addslashes($row['last_name']); ?>',
+                                        '<?php echo addslashes($row['email']); ?>',
+                                        '<?php echo addslashes($row['password']); ?>',
+                                        '<?php echo addslashes($row['address']); ?>',
+                                        '<?php echo addslashes($row['contact_no']); ?>',
+                                        '<?php echo addslashes($row['department']); ?>',
+                                        '<?php echo addslashes($row['rank']); ?>')">
                                             <button class="addButton1" style="width: 6rem;">Edit</button>
                                         </a>
                                         <a href="#" onclick="deleteUser(<?php echo $row['id']; ?>)">
@@ -442,45 +453,45 @@ if (isset($_POST['update_faculty'])) {
                         <div class="uploadContainer">
                             <div class="subUploadContainer">
                                 <div class="displayImage">
-                                    <img class="image1" id="preview" src="" alt="Image Preview" style="max-width: 100%; display: none;">
+                                    <img class="image1" name="preview" id="preview" src="" alt="Image Preview" style="max-width: 100%; display: none;">
                                 </div>
                             </div>
 
                             <div class="uploadButton">
-                                <input id="imageUpload" type="file" name="profile_image" accept="image/*" onchange="previewImage()" required>
+                                <input id="imageUpload" type="file" name="profile_image" id="profile_image" accept="image/*" onchange="previewImage()" >
                             </div>
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="first_name" type="text" placeholder="First Name:" required>
+                            <input class="inputEmail" name="first_name" id="first_name" type="text" placeholder="First Name:" >
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="last_name" type="text" placeholder="Last Name:" required>
+                            <input class="inputEmail" name="last_name" id="last_name" type="text" placeholder="Last Name:" >
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="middle_name" type="text" placeholder="Middle Name (Optional):">
+                            <input class="inputEmail" name="middle_name" id="middle_name" type="text" placeholder="Middle Name (Optional):">
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="password" type="password" placeholder="Password:">
+                            <input class="inputEmail" name="password" id="password" type="password" placeholder="Password:">
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="email" type="email" placeholder="Email:" required>
+                            <input class="inputEmail" name="email" id="email" type="email" placeholder="Email:" >
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="address" type="text" placeholder="Address:" required>
+                            <input class="inputEmail" name="address" id="address" type="text" placeholder="Address:" >
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="contact_no" type="text" placeholder="Contact No.:" required>
+                            <input class="inputEmail" name="contact_no" id="contact_no" type="text" placeholder="Contact No.:" >
                         </div>
 
                         <div class="inputContainer">
-                            <select class="inputEmail" name="department" required>
+                            <select class="inputEmail" name="department" id="department" >
                                 <option value="">Choose a Department</option>
                                 <?php
                                 $departments = fetchDepartments();
@@ -492,7 +503,7 @@ if (isset($_POST['update_faculty'])) {
                         </div>
 
                         <div class="inputContainer">
-                            <select class="inputEmail" name="rank" required>
+                            <select class="inputEmail" name="rank" id="rank" >
                                 <option value="">Choose a Rank</option>
                                 <option value="Instructor">Instructor</option>
                                 <option value="Assistant Professor">Assistant Professor</option>
@@ -519,8 +530,18 @@ if (isset($_POST['update_faculty'])) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        function editProgram(id) {
+        function editProgram(id, first_name, last_name, middle_name, email, password, address, contact_no, department, rank) {
             document.getElementById('faculty_id').value = id;
+            document.getElementById('first_name').value = first_name;
+            document.getElementById('last_name').value = last_name;
+            document.getElementById('middle_name').value = middle_name;
+            document.getElementById('password').value = password;
+            document.getElementById('email').value = email;
+            document.getElementById('address').value = address;
+            document.getElementById('contact_no').value = contact_no;
+            document.getElementById('department').value = department;
+            document.getElementById('rank').value = rank;
+
             document.querySelector('.editContainer').style.display = 'block';
         }
 

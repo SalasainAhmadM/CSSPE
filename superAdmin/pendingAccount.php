@@ -3,7 +3,7 @@ session_start();
 require_once '../conn/conn.php';
 require_once '../conn/auth.php'; 
 
-validateSessionRole('super_admin');
+// validateSessionRole('super_admin');
 
 // Fetch data from the pending_users table
 $query = "SELECT id, first_name, last_name, middle_name, email, address, contact_no, rank, password, created_at, role, department FROM pending_users";
@@ -37,8 +37,8 @@ if (isset($_GET['approve_id'])) {
                              '" . mysqli_real_escape_string($conn, $pending_user['contact_no']) . "', 
                              '" . mysqli_real_escape_string($conn, $pending_user['rank']) . "', 
                              '" . mysqli_real_escape_string($conn, $pending_user['password']) . "', 
-                             '" . mysqli_real_escape_string($conn, $pending_user['department']) . "',
-                             '" . mysqli_real_escape_string($conn, $pending_user['role']) . "')"
+                             '" . mysqli_real_escape_string($conn, $pending_user['role']) . "',
+                             '" . mysqli_real_escape_string($conn, $pending_user['department']) . "')"
                              ;
                              
     if (mysqli_query($conn, $insert_query)) {

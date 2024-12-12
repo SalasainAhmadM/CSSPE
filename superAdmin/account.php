@@ -3,7 +3,7 @@ session_start();
 require_once '../conn/conn.php';
 require_once '../conn/auth.php'; 
 
-validateSessionRole('super_admin');
+// validateSessionRole('super_admin');
 
 ?>
 

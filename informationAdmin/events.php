@@ -218,7 +218,10 @@ if (isset($_GET['delete_id'])) {
                                     <td><?php echo htmlspecialchars($row['description']); ?></td>
                                     <td><?php echo htmlspecialchars($row['date_uploaded_at']); ?></td>
                                     <td class="button">
-                                        <a href="#" onclick="editProgram(<?php echo $row['id']; ?>)">
+                                        <a href="#" onclick="editProgram(<?php echo $row['id'] ?>,
+                                        '<?php echo addslashes($row['title']); ?>',
+                                        '<?php echo addslashes($row['description']); ?>',
+                                        '<?php echo addslashes(date('Y-m-d', strtotime($row['date_uploaded_at']))); ?>')">
                                             <button class="addButton1" style="width: 6rem;">Edit</button>
                                         </a>
                                         <a href="#" onclick="deleteEvent(<?php echo $row['id']; ?>)">
@@ -283,19 +286,19 @@ if (isset($_GET['delete_id'])) {
                         <div class="inputContainer" style="flex-direction: column; height: 5rem;">
                             <label for=""
                                 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Title:</label>
-                            <input class="inputEmail" type="text" name="title" placeholder="Title:">
+                            <input class="inputEmail" type="text" id="event_title" name="title" placeholder="Title:">
                         </div>
 
                         <div class="inputContainer" style="flex-direction: column; height: 5rem;">
                             <label for=""
                                 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Date:</label>
-                            <input class="inputEmail" type="date" name="date" placeholder="Date:">
+                            <input class="inputEmail" type="date" id="event_date" name="date" placeholder="Date:">
                         </div>
 
                         <div class="inputContainer" style="flex-direction: column; height: 5rem; min-height: 12rem;">
                             <label for=""
                                 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Content:</label>
-                            <textarea style="min-height: 10rem;" class="inputEmail" name="description" id=""
+                            <textarea style="min-height: 10rem;" id="event_description" class="inputEmail" name="description" id=""
                                 placeholder="Content"></textarea>
                         </div>
 
@@ -318,8 +321,12 @@ if (isset($_GET['delete_id'])) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        function editProgram(id) {
+        function editProgram(id, title, description, date) {
             document.getElementById('event_id').value = id;
+            document.getElementById('event_title').value = title;
+            document.getElementById('event_date').value = date;
+            document.getElementById('event_description').value = description;
+
             document.querySelector('.editContainer').style.display = 'block';
         }
 
