@@ -195,7 +195,7 @@ if (isset($_GET['delete_id'])) {
                 <div class="searchContainer">
                     <input class="searchBar" type="text" placeholder="Search...">
                     <div class="printButton" style="gap: 1rem; display: flex; width: 90%;">
-                        <button class="addButton size">Print</button>
+                        <button class="addButton size" onclick="printTable()">Print</button>
                         <button onclick="addProgram()" class="addButton size">Add Events</button>
                     </div>
                 </div>
@@ -317,6 +317,7 @@ if (isset($_GET['delete_id'])) {
 
     <script src="../assets/js/sidebar.js"></script>
     <script src="../assets/js/program.js"></script>
+    <script src="../assets/js/printTable.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
