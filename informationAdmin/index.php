@@ -258,6 +258,7 @@ if (isset($_GET['delete_id'])) {
                                 <td class="button">
                                     <a href="#" onclick="editProgram(
                                             <?php echo $row['id']; ?>, 
+                                            '<?php echo addslashes($row['image']); ?>', 
                                             '<?php echo addslashes($row['department_name']); ?>', 
                                             '<?php echo addslashes($row['description']); ?>')">
                                         <button class="addButton1" style="width: 6rem;">Edit</button>
@@ -292,16 +293,17 @@ if (isset($_GET['delete_id'])) {
 
                         <div class="uploadContainer">
                             <div class="subUploadContainer">
-                                <div class="displayImage">
-                                    <img class="image1" src="" alt="">
+                                <div class="uploadContainer">
+                                    <div class="subUploadContainer">
+                                        <div class="displayImage">
+                                            <img class="image1" id="department_image" src="" alt="Image Preview" style="max-width: 100%; display: none;">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="uploadButton">
-                                <input id="image" name="image" type="file" accept="image/*" style="display: none;"
-                                    onchange="previewImage()">
-                                <button onclick="triggerImageUpload()" class="addButton"
-                                    style="height: 2rem; width: 5rem;">Upload</button>
+                                <input type="file" name="department_image" accept="image/*">
                             </div>
                         </div>
 
@@ -383,8 +385,12 @@ if (isset($_GET['delete_id'])) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        function editProgram(id, name, description) {
+        function editProgram(id, image, name, description) {
             document.getElementById('department_id').value = id;
+
+            document.getElementById('department_image').src = image; 
+            document.getElementById('department_image').style.display = 'block'; 
+
             document.getElementById('department_name').value = name;
             document.getElementById('department_description').value = description;
 

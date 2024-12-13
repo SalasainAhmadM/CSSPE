@@ -112,8 +112,8 @@ if (isset($_POST['update_faculty'])) {
     }
 
     // Handle image upload for update
-    if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] == 0) {
-        $image = $_FILES['profile_image'];
+    if (isset($_FILES['faculty_image']) && $_FILES['faculty_image']['error'] == 0) {
+        $image = $_FILES['faculty_image'];
         $image_name = basename($image['name']);
         $image_tmp_name = $image['tmp_name'];
         $image_size = $image['size'];
@@ -323,6 +323,7 @@ if (isset($_POST['update_faculty'])) {
                                     <td><?php echo htmlspecialchars($row['rank']); ?></td>
                                     <td class="button">
                                         <a href="#" onclick="editProgram(<?php echo $row['id']; ?>,
+                                        '<?php echo addslashes('../assets/img/' . $row['image']); ?>',
                                         '<?php echo addslashes($row['first_name']); ?>',
                                         '<?php echo addslashes($row['middle_name']); ?>',
                                         '<?php echo addslashes($row['last_name']); ?>',
@@ -436,7 +437,7 @@ if (isset($_POST['update_faculty'])) {
     </div>
 
 
-
+    <!-- Edit Container -->
     <form method="POST" action="" enctype="multipart/form-data">
         <div class="editContainer" style="display: none; background-color: none;">
             <div class="editContainer">
@@ -452,13 +453,17 @@ if (isset($_POST['update_faculty'])) {
 
                         <div class="uploadContainer">
                             <div class="subUploadContainer">
-                                <div class="displayImage">
-                                    <img class="image1" name="preview" id="preview" src="" alt="Image Preview" style="max-width: 100%; display: none;">
+                                <div class="uploadContainer">
+                                    <div class="subUploadContainer">
+                                        <div class="displayImage">
+                                            <img class="image1" id="faculty_image" src="" alt="Image Preview" style="max-width: 100%; display: none;">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="uploadButton">
-                                <input id="imageUpload" type="file" name="profile_image" id="profile_image" accept="image/*" onchange="previewImage()" >
+                                <input type="file" name="faculty_image" accept="image/*">
                             </div>
                         </div>
 
@@ -530,8 +535,12 @@ if (isset($_POST['update_faculty'])) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        function editProgram(id, first_name, last_name, middle_name, email, password, address, contact_no, department, rank) {
+        function editProgram(id, image, first_name, last_name, middle_name, email, password, address, contact_no, department, rank) {
             document.getElementById('faculty_id').value = id;
+
+            document.getElementById('faculty_image').src = image; 
+            document.getElementById('faculty_image').style.display = 'block'; 
+
             document.getElementById('first_name').value = first_name;
             document.getElementById('last_name').value = last_name;
             document.getElementById('middle_name').value = middle_name;

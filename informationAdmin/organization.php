@@ -65,7 +65,7 @@ if (isset($_POST['update_organization'])) {
     } else {
         $result = mysqli_query($conn, "SELECT image FROM organizations WHERE id = '$organization_id'");
         $row = mysqli_fetch_assoc($result);
-        $image_path = $row['image']; 
+        $image_path = $row['image'];
     }
 
     $query = "UPDATE organizations 
@@ -91,6 +91,7 @@ if (isset($_GET['delete_id'])) {
         echo "Error deleting record: " . mysqli_error($conn);
     }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -107,7 +108,7 @@ if (isset($_GET['delete_id'])) {
 
 <body>
     <div class="body">
-    <div class="sidebar">
+        <div class="sidebar">
             <div class="sidebarContent">
                 <div class="arrowContainer" style="margin-left: 80rem;" id="toggleButton">
                     <div class="subArrowContainer">
@@ -245,6 +246,7 @@ if (isset($_GET['delete_id'])) {
                                     <td class="button">
                                         <a href="#" onclick="editProgram(<?php echo $row['id']; ?>, 
                                             '<?php echo addslashes($row['organization_name']); ?>',
+                                            '<?php echo addslashes($row['image']); ?>',
                                             '<?php echo addslashes($row['description']); ?>')">
                                             <button class="addButton1" style="width: 6rem;">Edit</button>
                                         </a>
@@ -310,6 +312,8 @@ if (isset($_GET['delete_id'])) {
         </div>
     </div>
 
+
+
     <form method="POST" action="" enctype="multipart/form-data">
         <div class="addContainer" style="display: none; background-color: none;">
             <div class="addContainer">
@@ -327,7 +331,6 @@ if (isset($_GET['delete_id'])) {
                                             <img class="image1" id="preview" src="" alt="Image Preview" style="max-width: 100%; display: none;">
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
 
@@ -377,16 +380,14 @@ if (isset($_GET['delete_id'])) {
                                 <div class="uploadContainer">
                                     <div class="subUploadContainer">
                                         <div class="displayImage">
-                                            <img class="image1" id="preview" src="" alt="Image Preview" style="max-width: 100%; display: none;">
+                                            <img class="image1" id="organization_image" src="" alt="Image Preview" style="max-width: 100%; display: none;">
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
 
                             <div class="uploadButton">
-                                <input id="imageUpload" type="file" name="organization_image" accept="image/*" style="display: none;" onchange="previewImage_edit()">
-                                <button type="button" onclick="triggerImageUpload()" class="addButton" style="height: 2rem; width: 5rem;">Upload</button>
+                                <input type="file" name="organization_image" accept="image/*">
                             </div>
                         </div>
 
@@ -419,9 +420,13 @@ if (isset($_GET['delete_id'])) {
 
 
     <script>
-        function editProgram(id, name, description) {
+        function editProgram(id, name, image, description) {
             document.getElementById('organization_id').value = id;
             document.getElementById('organization_name').value = name;
+
+            document.getElementById('organization_image').src = image; 
+            document.getElementById('organization_image').style.display = 'block'; 
+
             document.getElementById('organization_description').value = description;
 
             document.querySelector('.editContainer').style.display = 'block';
