@@ -361,22 +361,28 @@ if (isset($_POST['update_faculty'])) {
 
                         <div class="uploadContainer">
                             <div class="subUploadContainer">
-                                <div class="displayImage">
-                                    <img class="image1" id="preview" src="" alt="Image Preview" style="max-width: 100%; display: none;">
+                                <div class="uploadContainer">
+                                    <div class="subUploadContainer">
+                                        <div class="displayImage">
+                                            <img class="image1" id="preview" src="" alt="Image Preview" style="max-width: 100%; display: none;">
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
 
                             <div class="uploadButton">
-                                <input id="imageUpload" type="file" name="profile_image" accept="image/*" onchange="previewImage()" required>
+                                <input id="imageUpload" type="file" name="profile_image" accept="image/*" style="display: none;" onchange="previewImage()">
+                                <button type="button" onclick="triggerImageUpload()" class="addButton" style="height: 2rem; width: 5rem;">Upload</button>
                             </div>
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="first_name" type="text" placeholder="First Name:" required>
+                            <input class="inputEmail" name="first_name" type="text" placeholder="First Name:" >
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="last_name" type="text" placeholder="Last Name:" required>
+                            <input class="inputEmail" name="last_name" type="text" placeholder="Last Name:" >
                         </div>
 
                         <div class="inputContainer">
@@ -388,19 +394,19 @@ if (isset($_POST['update_faculty'])) {
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="email" type="email" placeholder="Email:" required>
+                            <input class="inputEmail" name="email" type="email" placeholder="Email:" >
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="address" type="text" placeholder="Address:" required>
+                            <input class="inputEmail" name="address" type="text" placeholder="Address:" >
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="contact_no" type="text" placeholder="Contact No.:" required>
+                            <input class="inputEmail" name="contact_no" type="text" placeholder="Contact No.:" >
                         </div>
 
                         <div class="inputContainer">
-                            <select class="inputEmail" name="department" required>
+                            <select class="inputEmail" name="department" >
                                 <option value="">Choose a Department</option>
                                 <?php
                                 $departments = fetchDepartments();
@@ -412,7 +418,7 @@ if (isset($_POST['update_faculty'])) {
                         </div>
 
                         <div class="inputContainer">
-                            <select class="inputEmail" name="rank" required>
+                            <select class="inputEmail" name="rank" >
                                 <option value="">Choose a Rank</option>
                                 <option value="Instructor">Instructor</option>
                                 <option value="Assistant Professor">Assistant Professor</option>
@@ -463,9 +469,11 @@ if (isset($_POST['update_faculty'])) {
                             </div>
 
                             <div class="uploadButton">
-                                <input type="file" name="faculty_image" accept="image/*">
+                                <input type="file" name="faculty_image" accept="image/*" >
                             </div>
                         </div>
+                        
+                        
 
                         <div class="inputContainer">
                             <input class="inputEmail" name="first_name" id="first_name" type="text" placeholder="First Name:" >
@@ -531,11 +539,12 @@ if (isset($_POST['update_faculty'])) {
 
     <script src="../assets/js/sidebar.js"></script>
     <script src="../assets/js/program.js"></script>
+    <script src="../assets/js/uploadImage.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        function editProgram(id, image, first_name, last_name, middle_name, email, password, address, contact_no, department, rank) {
+        function editProgram(id, image, first_name, middle_name, last_name, email, password, address, contact_no, department, rank) {
             document.getElementById('faculty_id').value = id;
 
             document.getElementById('faculty_image').src = image; 

@@ -323,6 +323,7 @@ if (isset($_GET['delete_id'])) {
                     </div>
 
                     <div class="subLoginContainer">
+
                         <div class="uploadContainer">
                             <div class="subUploadContainer">
                                 <div class="uploadContainer">
@@ -331,6 +332,7 @@ if (isset($_GET['delete_id'])) {
                                             <img class="image1" id="preview" src="" alt="Image Preview" style="max-width: 100%; display: none;">
                                         </div>
                                     </div>
+
                                 </div>
                             </div>
 
@@ -424,8 +426,8 @@ if (isset($_GET['delete_id'])) {
             document.getElementById('organization_id').value = id;
             document.getElementById('organization_name').value = name;
 
-            document.getElementById('organization_image').src = image; 
-            document.getElementById('organization_image').style.display = 'block'; 
+            document.getElementById('organization_image').src = image;
+            document.getElementById('organization_image').style.display = 'block';
 
             document.getElementById('organization_description').value = description;
 

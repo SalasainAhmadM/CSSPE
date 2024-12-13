@@ -229,7 +229,7 @@ if (isset($_GET['delete_id'])) {
                 <div class="searchContainer">
                     <input class="searchBar" type="text" placeholder="Search...">
                     <div class="printButton" style="gap: 1rem; display: flex; width: 90%;">
-                        <button class="addButton size">Print</button>
+                        <button class="addButton size" onclick="printTable()">Print</button>
                         <button onclick="addProgram()" class="addButton size">Add Departments</button>
                         <select name="" class="addButton size" id="">
                             <option value="">Filter</option>
@@ -238,7 +238,7 @@ if (isset($_GET['delete_id'])) {
                 </div>
 
                 <div class="tableContainer">
-                    <table>
+                    <table id="departmentTable">
                         <thead>
                             <tr>
                                 <th>Department Name</th>
@@ -303,7 +303,7 @@ if (isset($_GET['delete_id'])) {
                             </div>
 
                             <div class="uploadButton">
-                                <input type="file" name="department_image" accept="image/*">
+                                <input type="file" name="department_image" accept="image/*" >
                             </div>
                         </div>
 
@@ -388,8 +388,8 @@ if (isset($_GET['delete_id'])) {
         function editProgram(id, image, name, description) {
             document.getElementById('department_id').value = id;
 
-            document.getElementById('department_image').src = image; 
-            document.getElementById('department_image').style.display = 'block'; 
+            document.getElementById('department_image').src = image;
+            document.getElementById('department_image').style.display = 'block';
 
             document.getElementById('department_name').value = name;
             document.getElementById('department_description').value = description;
@@ -435,6 +435,80 @@ if (isset($_GET['delete_id'])) {
             });
         }
     </script>
+
+<script>
+    function printTable() {
+        const tableContainer = document.querySelector('.tableContainer');
+        
+        // Temporarily hide the last column
+        const rows = tableContainer.querySelectorAll('tr');
+        rows.forEach(row => {
+            const cells = row.children;
+            if (cells.length > 0) {
+                cells[cells.length - 1].style.display = 'none'; // Hide the last cell
+            }
+        });
+
+        // Get the HTML for printing
+        const printContent = tableContainer.outerHTML;
+        const printWindow = window.open('', '', 'width=800, height=600');
+        printWindow.document.write(`
+        <html>
+        <head>
+            <title>Print Table</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 20px;
+                    color: #333;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 20px;
+                }
+                th, td {
+                    border: 1px solid black;
+                    padding: 8px;
+                    text-align: left;
+                }
+                th, td img {
+                    width:90px;
+                }                   
+                th {
+                    background-color: #f4f4f4;
+                    font-weight: bold;
+                }
+                tr:nth-child(even) {
+                    background-color: #f9f9f9;
+                }
+                .table-header {
+                    text-align: center;
+                    font-size: 24px;
+                    margin-bottom: 10px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="table-header">Departments Table</div>
+            ${printContent}
+        </body>
+        </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+
+        // Restore the visibility of the last column
+        rows.forEach(row => {
+            const cells = row.children;
+            if (cells.length > 0) {
+                cells[cells.length - 1].style.display = ''; // Restore visibility
+            }
+        });
+    }
+</script>
+
+
 
 </body>
 
