@@ -137,7 +137,7 @@ if (isset($_GET['delete_id'])) {
                             </div>
                         </a>
 
-                        <a href="../informationAdmin/oraganization.php">
+                        <a href="../informationAdmin/organization.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Organizations</p>
