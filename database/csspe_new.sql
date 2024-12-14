@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 11, 2024 at 07:28 PM
+-- Generation Time: Dec 14, 2024 at 01:04 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -40,7 +40,7 @@ CREATE TABLE `announcements` (
 --
 
 INSERT INTO `announcements` (`id`, `title`, `description`, `date_uploaded_at`, `location`) VALUES
-(6, 'd', 'asd', '2024-12-18 18:19:17', ' sdsad');
+(6, 'Nzro Day', 'nice', '2024-12-14 18:33:42', '     niceasdas');
 
 -- --------------------------------------------------------
 
@@ -60,7 +60,7 @@ CREATE TABLE `departments` (
 --
 
 INSERT INTO `departments` (`id`, `department_name`, `description`, `image`) VALUES
-(8, '123', '123', '../assets/img/6759d41ecf13c.png');
+(18, 'qwe', 'qwe', '../assets/img/675c709414b53.jpg');
 
 -- --------------------------------------------------------
 
@@ -80,7 +80,7 @@ CREATE TABLE `events` (
 --
 
 INSERT INTO `events` (`id`, `title`, `description`, `date_uploaded_at`) VALUES
-(3, '21312', '123', '2024-12-01 18:10:55');
+(3, 'bice', 'yes', '2024-12-01 18:34:25');
 
 -- --------------------------------------------------------
 
@@ -118,7 +118,8 @@ CREATE TABLE `organizations` (
 --
 
 INSERT INTO `organizations` (`id`, `organization_name`, `description`, `image`) VALUES
-(10, 'qwe', 'qwe', '../assets/img/6759d2dec6add.png');
+(10, 'qwed', 'qweas', '../assets/img/675c5398d477f.jpg'),
+(11, 'qwed', '123', '../assets/img/675c6ef4eed31.png');
 
 -- --------------------------------------------------------
 
@@ -141,13 +142,6 @@ CREATE TABLE `pending_users` (
   `image` varchar(255) DEFAULT NULL,
   `department` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `pending_users`
---
-
-INSERT INTO `pending_users` (`id`, `first_name`, `last_name`, `middle_name`, `email`, `address`, `contact_no`, `rank`, `password`, `created_at`, `role`, `image`, `department`) VALUES
-(3, 'Sam', 'Cena', '', 'binimaloi352@gmail.com', 'Hanapi Drive', '123', 'Instructor', '$2y$10$Ao7KJaLKeA0gOUi8aA73r.U7DNzPY73edZWj/0xav3SZKTfxn7.ji', '2024-12-09 13:42:39', 'instructor', NULL, '');
 
 -- --------------------------------------------------------
 
@@ -176,7 +170,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `first_name`, `last_name`, `middle_name`, `email`, `address`, `contact_no`, `rank`, `password`, `created_at`, `role`, `image`, `department`) VALUES
-(44, 'SA', 'WEWQ', 'ASD', 'nzWQEWQro@gmail.com', 'WQE', '123', 'Associate Professor', '$2y$10$umJTI41TMQtkwodBET1SDOrj7MewynzEMnQukSK5hs/3nSZcWz.wi', '2024-12-11 18:08:02', 'Instructor', '6759d89b85d26.jpg', '123');
+(47, 'Casca', 'Nadeer', 'R', 'nzro@gmail.com', 'Hannah Drive, Rio Hondo, Zamboanga City', '54141412', 'Instructor', '$2y$10$bgIY43.lS5YGOvMl2NajUea8PW8ntj357oYFGcpzbAGCubL9x0Wcm', '2024-12-12 15:41:00', 'instructor', '675c6f1032a0f.jpg', ''),
+(48, 'Nadeerrrrrr', 'Re', 'Mukaramrrrrrrrrrrrrrrr', 'zoro0wqewqewqe000@gmail.com', 'Hannah Drive, Rio Hondo, Zamboanga City', '12312312', 'Associate Professor', '$2y$10$jWoAT.aYeDvyj4i6VR6VNewlHLd.yEsrN9bCbur.bh5a1BE.vhgzS', '2024-12-13 15:52:27', 'Instructor', '675c66c8928f6.jpg', 'College of Architecture');
 
 --
 -- Indexes for dumped tables
@@ -241,7 +236,7 @@ ALTER TABLE `announcements`
 -- AUTO_INCREMENT for table `departments`
 --
 ALTER TABLE `departments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `events`
@@ -259,19 +254,19 @@ ALTER TABLE `items`
 -- AUTO_INCREMENT for table `organizations`
 --
 ALTER TABLE `organizations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `pending_users`
 --
 ALTER TABLE `pending_users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
 
 --
 -- Constraints for dumped tables
