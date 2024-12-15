@@ -287,7 +287,7 @@ if (isset($_POST['update_faculty'])) {
                 </div>
 
                 <div class="searchContainer">
-                    <input class="searchBar" type="text" placeholder="Search...">
+                    <input class="searchBar" id="search" type="text" placeholder="Search...">
                     <div class="printButton" style="gap: 1rem; display: flex; width: 90%;">
                         <button class="addButton size" onclick="printTable()">Print</button>
                         <button onclick="addProgram()" class="addButton size">Add Faculty Member</button>
@@ -541,6 +541,7 @@ if (isset($_POST['update_faculty'])) {
     <script src="../assets/js/program.js"></script>
     <script src="../assets/js/uploadImage.js"></script>
     <script src="../assets/js/printTable.js"></script>
+    <script src="../assets/js/search.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
