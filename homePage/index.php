@@ -1,11 +1,14 @@
 <?php
 session_start();
-require_once '../conn/conn.php'; 
-require_once '../conn/auth.php'; 
+require_once '../conn/conn.php';
+require_once '../conn/auth.php';
 
 validateSessionRole('instructor');
 
 $userid =  $_SESSION['user_id'];
+
+$query = "SELECT * FROM announcements";
+$result = mysqli_query($conn, $query);
 
 ?>
 
@@ -13,6 +16,7 @@ $userid =  $_SESSION['user_id'];
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,10 +26,11 @@ $userid =  $_SESSION['user_id'];
     <link rel="stylesheet" href="../assets/css/sidebar.css">
     <link rel="stylesheet" href="../assets/css/notification.css">
 </head>
+
 <body>
     <div class="body">
         <div class="sidebar">
-            <div  class="sidebarContent">
+            <div class="sidebarContent">
                 <div class="arrowContainer" style="margin-left: 80rem;" id="toggleButton">
                     <div class="subArrowContainer">
                         <img class="hideIcon" src="../assets/img/arrow.png" alt="">
@@ -34,17 +39,17 @@ $userid =  $_SESSION['user_id'];
             </div>
             <div class="userContainer">
                 <div class="subUserContainer">
-                    <div class="userPictureContainer" >
+                    <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
                             <img class="subUserPictureContainer" src="../assets/img/CSSPE.png" alt="">
                         </div>
                     </div>
-    
+
                     <div class="userPictureContainer1">
                         <p>Khriz marr l. falcatan</p>
                     </div>
                 </div>
-        
+
                 <div class="navContainer">
                     <div class="subNavContainer">
                         <a href="../homePage/profile.php">
@@ -54,7 +59,7 @@ $userid =  $_SESSION['user_id'];
                                 </div>
                             </div>
                         </a>
-        
+
                         <a href="../homePage/">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -62,7 +67,7 @@ $userid =  $_SESSION['user_id'];
                                 </div>
                             </div>
                         </a>
-        
+
                         <a href="../homePage/borrowing.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -70,7 +75,7 @@ $userid =  $_SESSION['user_id'];
                                 </div>
                             </div>
                         </a>
-        
+
                         <a href="../homePage/memorandumHome.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -78,7 +83,7 @@ $userid =  $_SESSION['user_id'];
                                 </div>
                             </div>
                         </a>
-    
+
                         <a href="../homePage/events.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -86,7 +91,7 @@ $userid =  $_SESSION['user_id'];
                                 </div>
                             </div>
                         </a>
-    
+
                         <a href="../homePage/members.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -94,7 +99,7 @@ $userid =  $_SESSION['user_id'];
                                 </div>
                             </div>
                         </a>
-    
+
                         <a href="../homePage/organization.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -102,7 +107,7 @@ $userid =  $_SESSION['user_id'];
                                 </div>
                             </div>
                         </a>
-    
+
                         <a href="../homePage/notification.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -112,7 +117,7 @@ $userid =  $_SESSION['user_id'];
                         </a>
                     </div>
                 </div>
-        
+
                 <div class="subUserContainer">
                     <a href="../logout.php">>
                         <div style="margin-left: 1.5rem;" class="userPictureContainer1">
@@ -122,7 +127,7 @@ $userid =  $_SESSION['user_id'];
                 </div>
             </div>
         </div>
-    
+
         <div class="mainContainer" style="margin-left: 250px;">
             <div class="container">
                 <div class="headerContainer">
@@ -130,7 +135,7 @@ $userid =  $_SESSION['user_id'];
                         <div class="logoContainer">
                             <img class="logo" src="/dionSe/assets/img/CSSPE.png" alt="">
                         </div>
-        
+
                         <div class="collegeNameContainer">
                             <p>CSSPE Inventory & Information System</p>
                         </div>
@@ -142,33 +147,28 @@ $userid =  $_SESSION['user_id'];
                 </div>
 
                 <div class="dashboardContainer">
-                    <div class="notificationContainer">
-                        <div class="subNotificaitonContainer">
-                            <div class="messageContainer">
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Excepturi eum quam id fuga! Dolore ex voluptates sint dignissimos ipsum molestias alias at quibusdam numquam, accusantium voluptatem minus! Aspernatur, blanditiis id!</p>
-                            </div>
 
-                            <div class="dateContainer">
-                                <p style="margin-left: 0.5rem;">2024-03-28</p>
+                    <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                        <div class="notificationContainer">
+                            <div class="subNotificaitonContainer">
+                                <div class="messageContainer">
+                                    <h5><?php echo htmlspecialchars($row['title']); ?></h5>
+                                    <p><?php echo htmlspecialchars($row['description']); ?></p>
+                                </div>
+
+                                <div class="dateContainer">
+                                    <p style="margin-left: 0.5rem;"><?php echo htmlspecialchars($row['location']); ?></p>
+                                    <h6 style="margin-left: 0.5rem;"><?php echo addslashes(date('Y-m-d', strtotime($row['date_uploaded_at']))); ?></h6>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    <?php endwhile; ?>
 
-                    <div class="notificationContainer">
-                        <div class="subNotificaitonContainer">
-                            <div class="messageContainer">
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Excepturi eum quam id fuga! Dolore ex voluptates sint dignissimos ipsum molestias alias at quibusdam numquam, accusantium voluptatem minus! Aspernatur, blanditiis id!</p>
-                            </div>
-
-                            <div class="dateContainer">
-                                <p style="margin-left: 0.5rem;">2024-03-28</p>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
     <script src="../assets/js/sidebar.js"></script>
 </body>
+
 </html>

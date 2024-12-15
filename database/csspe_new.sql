@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 14, 2024 at 01:04 PM
+-- Generation Time: Dec 15, 2024 at 07:02 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -60,7 +60,8 @@ CREATE TABLE `departments` (
 --
 
 INSERT INTO `departments` (`id`, `department_name`, `description`, `image`) VALUES
-(18, 'qwe', 'qwe', '../assets/img/675c709414b53.jpg');
+(18, 'qwe', 'qwe', '../assets/img/675c709414b53.jpg'),
+(20, 'yoboseyo', 'haaha', '../assets/img/CSSPE.png');
 
 -- --------------------------------------------------------
 
@@ -103,6 +104,20 @@ CREATE TABLE `items` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `memorandums`
+--
+
+CREATE TABLE `memorandums` (
+  `id` int(11) NOT NULL,
+  `file_path` varchar(255) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `uploaded_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `organizations`
 --
 
@@ -119,7 +134,7 @@ CREATE TABLE `organizations` (
 
 INSERT INTO `organizations` (`id`, `organization_name`, `description`, `image`) VALUES
 (10, 'qwed', 'qweas', '../assets/img/675c5398d477f.jpg'),
-(11, 'qwed', '123', '../assets/img/675c6ef4eed31.png');
+(11, 'qwedffff', '123', '../assets/img/675c6ef4eed31.png');
 
 -- --------------------------------------------------------
 
@@ -171,7 +186,8 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `first_name`, `last_name`, `middle_name`, `email`, `address`, `contact_no`, `rank`, `password`, `created_at`, `role`, `image`, `department`) VALUES
 (47, 'Casca', 'Nadeer', 'R', 'nzro@gmail.com', 'Hannah Drive, Rio Hondo, Zamboanga City', '54141412', 'Instructor', '$2y$10$bgIY43.lS5YGOvMl2NajUea8PW8ntj357oYFGcpzbAGCubL9x0Wcm', '2024-12-12 15:41:00', 'instructor', '675c6f1032a0f.jpg', ''),
-(48, 'Nadeerrrrrr', 'Re', 'Mukaramrrrrrrrrrrrrrrr', 'zoro0wqewqewqe000@gmail.com', 'Hannah Drive, Rio Hondo, Zamboanga City', '12312312', 'Associate Professor', '$2y$10$jWoAT.aYeDvyj4i6VR6VNewlHLd.yEsrN9bCbur.bh5a1BE.vhgzS', '2024-12-13 15:52:27', 'Instructor', '675c66c8928f6.jpg', 'College of Architecture');
+(48, 'Nadeerrrrrr', 'Re', 'Mukaramrrrrrrrrrrrrrrr', 'zoro0wqewqewqe000@gmail.com', 'Hannah Drive, Rio Hondo, Zamboanga City', '12312312', 'Associate Professor', '$2y$10$jWoAT.aYeDvyj4i6VR6VNewlHLd.yEsrN9bCbur.bh5a1BE.vhgzS', '2024-12-13 15:52:27', 'Instructor', '675c66c8928f6.jpg', 'College of Architecture'),
+(54, 'Nzrooooo', 'Mkrmmmm', 'C', 'nadeer12345@gmail.com', 'Rio Hondo', '123123', 'Instructor', '$2y$10$loaz6TFbBPejBv3HgJAU6e0C4MPea9BvfbI.zdwboTCe24PIqmxYW', '2024-12-15 15:38:55', 'instructor', 'CSSPE.png', '');
 
 --
 -- Indexes for dumped tables
@@ -201,6 +217,12 @@ ALTER TABLE `events`
 ALTER TABLE `items`
   ADD PRIMARY KEY (`id`),
   ADD KEY `fk_items_users` (`users_id`);
+
+--
+-- Indexes for table `memorandums`
+--
+ALTER TABLE `memorandums`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `organizations`
@@ -236,7 +258,7 @@ ALTER TABLE `announcements`
 -- AUTO_INCREMENT for table `departments`
 --
 ALTER TABLE `departments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `events`
@@ -249,6 +271,12 @@ ALTER TABLE `events`
 --
 ALTER TABLE `items`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `memorandums`
+--
+ALTER TABLE `memorandums`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `organizations`
@@ -266,7 +294,7 @@ ALTER TABLE `pending_users`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
 
 --
 -- Constraints for dumped tables
