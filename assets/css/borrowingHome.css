@@ -73,7 +73,8 @@
     width: 100%;
 }
 
-.searchBar{
+
+.searchBar2{
     height: 3rem;
     width: 90%;
     border-radius: 0.5rem;
@@ -81,6 +82,7 @@
     font-size: 1.2rem;
     border: solid rgba(0, 0, 0, 0.699) 1px;
     padding-left: 0.5rem;
+    width: 25rem;
 }
 
 .addButton{
@@ -218,6 +220,7 @@
     border-radius: 0.5rem;
     background-color: rgb(223, 222, 222);
     padding-bottom: 1rem;
+    transform: scale(0.9);
 }
 
 .titleContainer{

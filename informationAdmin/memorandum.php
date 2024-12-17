@@ -1,49 +1,56 @@
 <?php
 session_start();
 require_once '../conn/conn.php';
+require_once '../conn/auth.php';
 
-// Fetch existing memorandums
+validateSessionRole('information_admin');
+
 $query = "SELECT * FROM memorandums";
 $result = mysqli_query($conn, $query);
 
 // Handle adding a new memorandum
 if (isset($_POST['add_memorandum'])) {
 
-    // Retrieve and sanitize inputs
     $memorandum_title = mysqli_real_escape_string($conn, $_POST['memorandum_title']);
+    $memorandum_description = mysqli_real_escape_string($conn, $_POST['memorandum_description']);
     $uploaded_at = date('Y-m-d H:i:s'); // Current timestamp
 
-    // Check if a file is uploaded
+
     if (isset($_FILES['memorandum_file']) && $_FILES['memorandum_file']['error'] === 0) {
-        // File details
+
         $file_name = $_FILES['memorandum_file']['name'];
         $file_tmp = $_FILES['memorandum_file']['tmp_name'];
-        $upload_dir = '../assets/uploads/'; // Define upload directory
+        $upload_dir = '../assets/uploads/'; 
 
-        // Ensure the directory exists
         if (!is_dir($upload_dir)) {
             mkdir($upload_dir, 0777, true);
         }
 
-        // Generate unique file path
         $file_path = $upload_dir . uniqid() . '_' . basename($file_name);
 
         // Move file to upload directory
         if (move_uploaded_file($file_tmp, $file_path)) {
-            // Insert into database
-            $insert_query = "INSERT INTO memorandums (file_path, title, uploaded_at) VALUES (?, ?, ?)";
-            $stmt = $conn->prepare($insert_query);
-            $stmt->bind_param("sss", $file_path, $memorandum_title, $uploaded_at);
 
-            if ($stmt->execute()) {
-                $_SESSION['success'] = "Memorandum added successfully!";
+            $insert_query = "INSERT INTO memorandums (file_path, title, description, uploaded_at) VALUES (?, ?, ?, ?)";
+            $stmt = $conn->prepare($insert_query);
+            $stmt->bind_param("ssss", $file_path, $memorandum_title, $memorandum_description, $uploaded_at);
+
+            $notification_query = "INSERT INTO notifications (title, description, uploaded_at, type) 
+            VALUES (?, ?, ?, 'Memorandums')";
+            $stmt_notification = $conn->prepare($notification_query);
+            $stmt_notification->bind_param("sss", $memorandum_title, $memorandum_description, $uploaded_at);
+
+
+            if ($stmt->execute() && $stmt_notification->execute()) {
+                $_SESSION['success'] = "Memorandum and notification added successfully!";
                 header('Location: ' . $_SERVER['PHP_SELF']);
                 exit();
             } else {
-                $_SESSION['error'] = "Failed to add memorandum. Please try again.";
+                $_SESSION['error'] = "Failed to add memorandum and notification. Please try again.";
             }
 
             $stmt->close();
+            $stmt_notification->close();
         } else {
             $_SESSION['error'] = "File upload failed. Please try again.";
         }
@@ -54,31 +61,29 @@ if (isset($_POST['add_memorandum'])) {
 
 
 
+
 // Update event logic
 if (isset($_POST['update_memorandum'])) {
     $memorandum_id = $_POST['memorandum_id'];
     $memorandum_title = mysqli_real_escape_string($conn, $_POST['memorandum_title']);
-    $uploaded_at = date('Y-m-d H:i:s'); // Current timestamp
+    $memorandum_description = mysqli_real_escape_string($conn, $_POST['memorandum_description']);
+    $uploaded_at = date('Y-m-d H:i:s'); 
 
-    // Initialize file update flag
     $new_file_path = null;
 
     // Check if a new file is uploaded
     if (isset($_FILES['memorandum_file']) && $_FILES['memorandum_file']['error'] === 0) {
-        // File details
+
         $file_name = $_FILES['memorandum_file']['name'];
         $file_tmp = $_FILES['memorandum_file']['tmp_name'];
-        $upload_dir = '../assets/uploads/'; // Define upload directory
+        $upload_dir = '../assets/uploads/'; 
 
-        // Ensure the directory exists
         if (!is_dir($upload_dir)) {
             mkdir($upload_dir, 0777, true);
         }
 
-        // Generate unique file path
         $new_file_path = $upload_dir . uniqid() . '_' . basename($file_name);
 
-        // Move file to upload directory
         if (!move_uploaded_file($file_tmp, $new_file_path)) {
             $_SESSION['error'] = "File upload failed. Please try again.";
             header('Location: ' . $_SERVER['PHP_SELF']);
@@ -86,7 +91,6 @@ if (isset($_POST['update_memorandum'])) {
         }
     }
 
-    // If no new file is uploaded, keep the existing file path
     if ($new_file_path === null) {
         $existing_query = "SELECT file_path FROM memorandums WHERE id = ?";
         $stmt = $conn->prepare($existing_query);
@@ -100,9 +104,9 @@ if (isset($_POST['update_memorandum'])) {
     }
 
     // Update the memorandum record in the database
-    $update_query = "UPDATE memorandums SET title = ?, file_path = ?, updated_at = ? WHERE id = ?";
+    $update_query = "UPDATE memorandums SET title = ?, description = ?, file_path = ?, updated_at = ? WHERE id = ?";
     $stmt = $conn->prepare($update_query);
-    $stmt->bind_param("sssi", $memorandum_title, $new_file_path, $uploaded_at, $memorandum_id);
+    $stmt->bind_param("sssii", $memorandum_title, $memorandum_description, $new_file_path, $uploaded_at, $memorandum_id);
 
     if ($stmt->execute()) {
         $_SESSION['success'] = "Memorandum updated successfully!";
@@ -273,6 +277,7 @@ if (isset($_GET['delete_id'])) {
                             <tr>
                                 <th>File path</th>
                                 <th>Title</th>
+                                <th>Description</th>
                                 <th>Uploaded At</th>
                                 <th>Updated At</th>
                                 <th>Action</th>
@@ -288,11 +293,13 @@ if (isset($_GET['delete_id'])) {
                                         </a>
                                     </td>
                                     <td><?php echo htmlspecialchars($row['title']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['description']); ?></td>
                                     <td><?php echo htmlspecialchars($row['uploaded_at']); ?></td>
                                     <td><?php echo htmlspecialchars($row['updated_at']); ?></td>
                                     <td class="button">
                                         <a href="#" onclick="editProgram(<?php echo $row['id']; ?>, 
-                                        '<?php echo addslashes($row['title']); ?>')">
+                                        '<?php echo addslashes($row['title']); ?>', 
+                                        '<?php echo addslashes($row['description']); ?>')">
                                             <button class="addButton1" style="width: 6rem;">Edit</button>
                                         </a>
                                         <a href="#" onclick="deleteMemorandum(<?php echo $row['id']; ?>)">
@@ -322,9 +329,12 @@ if (isset($_GET['delete_id'])) {
                             <input class="inputEmail" name="memorandum_file" type="file" accept="application/pdf" placeholder="File path:">
                         </div>
 
-
                         <div class="inputContainer">
                             <input class="inputEmail" id="memorandum_title" name="memorandum_title" type="text" placeholder="Title:">
+                        </div>
+
+                        <div class="inputContainer">
+                            <input class="inputEmail" id="memorandum_description" name="memorandum_description" type="text" placeholder="Description:">
                         </div>
 
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
@@ -356,8 +366,13 @@ if (isset($_GET['delete_id'])) {
                         </div>
 
                         <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                            <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">TItle:</label>
+                            <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Title:</label>
                             <input class="inputEmail" id="memorandum_title" value="" name="memorandum_title" type="text">
+                        </div>
+
+                        <div class="inputContainer" style="flex-direction: column;">
+                            <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Description:</label>
+                            <input class="inputEmail" id="memorandum_description" value="" name="memorandum_description" type="text">
                         </div>
 
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
@@ -381,9 +396,10 @@ if (isset($_GET['delete_id'])) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        function editProgram(id, title) {
+        function editProgram(id, title, description) {
             document.getElementById('memorandum_id').value = id;
             document.getElementById('memorandum_title').value = title;
+            document.getElementById('memorandum_description').value = description;
 
             document.querySelector('.editContainer').style.display = 'block';
         }

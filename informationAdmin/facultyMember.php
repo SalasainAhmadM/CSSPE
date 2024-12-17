@@ -3,6 +3,8 @@ session_start();
 require_once '../conn/conn.php';
 require_once '../conn/auth.php';
 
+validateSessionRole('information_admin');
+
 // Fetch data from the pending_users table
 $query = "SELECT id, first_name, last_name, middle_name, email, address, contact_no, rank, password, created_at, role, department, image FROM users";
 $result = mysqli_query($conn, $query);
@@ -32,6 +34,7 @@ function fetchDepartments()
 
     return $departments;
 }
+
 
 if (isset($_POST['add_faculty'])) {
 
