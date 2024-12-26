@@ -5,8 +5,26 @@ require_once '../conn/auth.php';
 
 validateSessionRole('instructor');
 
-$query = "SELECT * FROM memorandums";
+$limit = 12;
+
+// Get the current page or default to 1
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+// Calculate the starting point for the query
+$offset = ($page - 1) * $limit;
+
+// Query with LIMIT and OFFSET
+$query = "SELECT * FROM memorandums LIMIT $limit OFFSET $offset";
 $result = mysqli_query($conn, $query);
+
+// Count total records
+$totalQuery = "SELECT COUNT(*) AS total FROM memorandums";
+$totalResult = mysqli_query($conn, $totalQuery);
+$totalRow = mysqli_fetch_assoc($totalResult);
+$totalItems = $totalRow['total'];
+
+// Calculate total pages
+$totalPages = ceil($totalItems / $limit);
 
 $query_notifications = "SELECT COUNT(*) AS notification_count FROM notifications WHERE is_read = 0";
 $result_notifications = mysqli_query($conn, $query_notifications);
@@ -27,6 +45,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
 
     <link rel="stylesheet" href="../assets/css/memorandumHome.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
+
 </head>
 
 <body>
@@ -182,17 +201,32 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                             <div class="buttonContainer">
                                 <button class="addButton" style="width: 6rem;"
                                     onclick="editProgram(
-                                        '<?php echo $row['title']; ?>', 
-                                        '<?php echo $row['description']; ?>',
-                                        '<?php echo $row['file_path']; ?>',
-                                        '<?php echo $row['uploaded_at']; ?>'
-                                    )">
+                        '<?php echo $row['title']; ?>', 
+                        '<?php echo $row['description']; ?>',
+                        '<?php echo $row['file_path']; ?>',
+                        '<?php echo $row['uploaded_at']; ?>'
+                    )">
                                     View
                                 </button>
                             </div>
                         </div>
                     <?php endwhile; ?>
                 </div>
+
+                <div class="pagination">
+                    <?php if ($page > 1): ?>
+                        <a href="?page=<?php echo $page - 1; ?>" class="prev">Previous</a>
+                    <?php endif; ?>
+
+                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                        <a href="?page=<?php echo $i; ?>" class="<?php echo ($i === $page) ? 'active' : ''; ?>"><?php echo $i; ?></a>
+                    <?php endfor; ?>
+
+                    <?php if ($page < $totalPages): ?>
+                        <a href="?page=<?php echo $page + 1; ?>" class="next">Next</a>
+                    <?php endif; ?>
+                </div>
+
 
             </div>
         </div>
@@ -236,7 +270,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
     <script>
         function editProgram(title, description, filePath, uploadedAt) {
             document.querySelector('.editContainer').style.display = 'block';
-            
+
             document.getElementById('memorandumDescription').textContent = description;
             document.getElementById('memorandumTitle').textContent = title;
             document.getElementById('memorandumUploadedAt').textContent = uploadedAt;
@@ -256,7 +290,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
 
             cards.forEach(card => {
                 const uploadedAtText = card.querySelector('.infoContainer2 p').textContent.replace('Uploaded at: ', '');
-                const uploadedAt = new Date(uploadedAtText); 
+                const uploadedAt = new Date(uploadedAtText);
                 let showCard = true;
 
                 if (filterValue === 'day') {
