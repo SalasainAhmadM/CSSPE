@@ -262,7 +262,7 @@ if (isset($_POST['update_faculty'])) {
                 </div>
 
                 <div class="subUserContainer">
-                    <a href="../authentication/login.php">
+                    <a href="../logout.php">
                         <div style="margin-left: 1.5rem;" class="userPictureContainer1">
                             <p>Logout</p>
                         </div>

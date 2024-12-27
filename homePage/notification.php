@@ -20,6 +20,19 @@ $notificationCount = 0;
 if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_notifications)) {
     $notificationCount = $row_notifications['notification_count'];
 }
+
+// delete request
+if (isset($_GET['delete_id'])) {
+    $notifications_id = $_GET['delete_id'];
+    $delete_query = "DELETE FROM notifications WHERE id = $notifications_id";
+    if (mysqli_query($conn, $delete_query)) {
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit();
+    } else {
+        echo "Error deleting record: " . mysqli_error($conn);
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -33,6 +46,8 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
     <link rel="stylesheet" href="../assets/css/organization.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
     <link rel="stylesheet" href="../assets/css/notificationHome.css">
+
+
 </head>
 
 <body>
@@ -132,7 +147,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                 </div>
 
                 <div class="subUserContainer">
-                    <a href="/dionSe/authentication/login.php">
+                    <a href="../logout.php">
                         <div style="margin-left: 1.5rem;" class="userPictureContainer1">
                             <p>Logout</p>
                         </div>
@@ -156,7 +171,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                 </div>
 
                 <div class="textContainer">
-                    <p class="text">Notification</p>
+                    <p class="text">Notifications</p>
                 </div>
 
 
@@ -166,10 +181,16 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
 
                         <div class="notificationContainer">
 
+                            <div style="text-align: right;">
+                                <a href="#" onclick="deleteNoti(<?php echo $row['id']; ?>)">
+                                    <button class="addButton1" style="width: 6rem;">X</button>
+                                </a>
+                            </div>
+
                             <div class="type">
                                 <p><?php echo htmlspecialchars($row['type']); ?></p>
                             </div>
-                            
+
                             <div class="subNotificaitonContainer">
                                 <div class="messageContainer" style="margin-bottom:1rem;">
                                     <h3><?php echo htmlspecialchars($row['title']); ?><h3>
@@ -182,17 +203,39 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                                 <div class="dateContainer">
                                     <p><?php echo htmlspecialchars($row['uploaded_at']); ?></p>
                                 </div>
+
                             </div>
 
                         </div>
-                        
+
                     <?php endwhile; ?>
 
                 </div>
             </div>
         </div>
     </div>
+
     <script src="../assets/js/sidebar.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 </body>
+
+<script>
+    function deleteNoti(userId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you want to delete this user?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete!',
+            cancelButtonText: 'No, cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "?delete_id=" + userId;
+            }
+        });
+    }
+</script>
 
 </html>

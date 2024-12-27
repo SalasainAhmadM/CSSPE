@@ -123,7 +123,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                 </div>
 
                 <div class="subUserContainer">
-                    <a href="/dionSe/authentication/login.php">
+                    <a href="../logout.php">
                         <div style="margin-left: 1.5rem;" class="userPictureContainer1">
                             <p>Logout</p>
                         </div>
