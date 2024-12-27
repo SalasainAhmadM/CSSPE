@@ -143,7 +143,7 @@ $itemResult = $itemStmt->get_result();
                 </div>
 
                 <div class="searchContainer">
-                    <input class="searchBar" type="text" placeholder="Search...">
+                    <input id="searchBar" class="searchBar" type="text" placeholder="Search...">
                     <div class="printButton" style="gap: 1rem; display: flex; width: 90%;">
                         <button class="addButton size">Print</button>
                         <button onclick="addProgram()" class="addButton size">Add Item</button>
@@ -162,7 +162,7 @@ $itemResult = $itemStmt->get_result();
                                 <th>Action</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="tableBody">
                             <?php while ($item = $itemResult->fetch_assoc()): ?>
                                 <tr>
                                     <td><?php echo htmlspecialchars($item['name']); ?></td>
@@ -319,6 +319,33 @@ $itemResult = $itemStmt->get_result();
     </div>
 
     <script>
+        // Get references to the search bar and table body
+        const searchBar = document.getElementById('searchBar');
+        const tableBody = document.getElementById('tableBody');
+
+        // Add an input event listener to the search bar
+        searchBar.addEventListener('input', function () {
+            const searchTerm = searchBar.value.toLowerCase(); // Get the input value in lowercase
+            const rows = tableBody.getElementsByTagName('tr'); // Get all table rows
+
+            // Loop through all rows and filter them
+            for (const row of rows) {
+                const cells = row.getElementsByTagName('td'); // Get all cells in the row
+                let match = false;
+
+                // Check if any cell in the row contains the search term
+                for (const cell of cells) {
+                    if (cell.textContent.toLowerCase().includes(searchTerm)) {
+                        match = true;
+                        break;
+                    }
+                }
+
+                // Show or hide the row based on the match result
+                row.style.display = match ? '' : 'none';
+            }
+        });
+
         // Trigger file input click
         function triggerImageUpload(inputId) {
             document.querySelector(`#${inputId}`).click();

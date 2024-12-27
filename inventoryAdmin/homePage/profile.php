@@ -6,7 +6,8 @@ require_once '../../conn/auth.php';
 validateSessionRole('inventory_admin');
 $inventoryAdminId = $_SESSION['user_id'];
 
-$query = "SELECT first_name, middle_name, last_name FROM users WHERE id = ?";
+// Fetch user details
+$query = "SELECT first_name, middle_name, last_name, email, address, contact_no, department, role, rank FROM users WHERE id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $inventoryAdminId);
 $stmt->execute();
@@ -15,8 +16,17 @@ $result = $stmt->get_result();
 if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
     $fullName = trim($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']);
+    $firstName = $row['first_name'];
+    $middleName = $row['middle_name'];
+    $lastName = $row['last_name'];
+    $email = $row['email'];
+    $address = $row['address'];
+    $contactNo = $row['contact_no'];
+    $department = $row['department'];
+    $role = $row['role'];
+    $rank = $row['rank'];
 } else {
-    $fullName = "User Not Found";
+    die("User not found.");
 }
 ?>
 <!DOCTYPE html>
@@ -30,6 +40,10 @@ if ($result->num_rows > 0) {
     <link rel="stylesheet" href="/dionSe/assets/css/organization.css">
     <link rel="stylesheet" href="/dionSe/assets/css/sidebar.css">
     <link rel="stylesheet" href="/dionSe/assets/css/profile.css">
+
+    <!-- Include SweetAlert2 CSS and JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -162,13 +176,13 @@ if ($result->num_rows > 0) {
                 <div class="profileContainer">
                     <div class="subProfileContainer">
                         <div class="infoContainer">
-                            <div class="pictureContainer1" style="background-color: none;">
+                            <div class="pictureContainer1">
                                 <div class="pictureContainer">
                                     <img class="picture" src="/dionSe/assets/img/CSSPE.png" alt="">
                                 </div>
 
                                 <div style="margin-top: 1rem;">
-                                    <button onclick="profile()" class="addButton">Edit Profile</button>
+                                    <button onclick="confirmEditProfile()" class="addButton">Edit Profile</button>
                                 </div>
                             </div>
 
@@ -177,44 +191,51 @@ if ($result->num_rows > 0) {
                                     <label for=""
                                         style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Full
                                         Name:</label>
-                                    <input class="inputEmail" type="text">
+                                    <input class="inputEmail" type="text" value="<?= htmlspecialchars($fullName) ?>"
+                                        readonly>
                                 </div>
 
                                 <div class="inputContainer" style="flex-direction: column; height: 4rem;">
                                     <label for=""
                                         style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Email:</label>
-                                    <input class="inputEmail" type="text">
+                                    <input class="inputEmail" type="text" value="<?= htmlspecialchars($email) ?>"
+                                        readonly>
                                 </div>
 
                                 <div class="inputContainer" style="flex-direction: column; height: 4rem;">
                                     <label for=""
                                         style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Contact
                                         No.:</label>
-                                    <input class="inputEmail" type="text">
+                                    <input class="inputEmail" type="text" value="<?= htmlspecialchars($contactNo) ?>"
+                                        readonly>
                                 </div>
 
                                 <div class="inputContainer" style="flex-direction: column; height: 4rem;">
                                     <label for=""
                                         style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Address:</label>
-                                    <input class="inputEmail" type="text">
+                                    <input class="inputEmail" type="text" value="<?= htmlspecialchars($address) ?>"
+                                        readonly>
                                 </div>
 
                                 <div class="inputContainer" style="flex-direction: column; height: 4rem;">
                                     <label for=""
                                         style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Position:</label>
-                                    <input class="inputEmail" type="text">
+                                    <input class="inputEmail" type="text" value="<?= htmlspecialchars($rank) ?>"
+                                        readonly>
                                 </div>
 
                                 <div class="inputContainer" style="flex-direction: column; height: 4rem;">
                                     <label for=""
                                         style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Department:</label>
-                                    <input class="inputEmail" type="text">
+                                    <input class="inputEmail" type="text" value="<?= htmlspecialchars($department) ?>"
+                                        readonly>
                                 </div>
 
                                 <div class="inputContainer" style="flex-direction: column; height: 4rem;">
                                     <label for=""
                                         style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Role:</label>
-                                    <input class="inputEmail" type="text">
+                                    <input class="inputEmail" type="text" value="<?= htmlspecialchars($role) ?>"
+                                        readonly>
                                 </div>
                             </div>
                         </div>
@@ -329,6 +350,23 @@ if ($result->num_rows > 0) {
             </div>
         </div>
     </div>
+
+    <script>
+        function confirmEditProfile() {
+            Swal.fire({
+                title: 'Edit Profile',
+                text: 'Are you sure you want to edit your profile?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, edit it!',
+                cancelButtonText: 'No, cancel',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '../endpoints/edit_profile.php';
+                }
+            });
+        }
+    </script>
     <script src="/dionSe/assets/js/sidebar.js"></script>
     <script src="/dionSe/assets/js/uploadImage.js"></script>
     <script src="/dionSe/assets/js/profile.js"></script>
