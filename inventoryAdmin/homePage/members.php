@@ -115,7 +115,7 @@ if ($result->num_rows > 0) {
                         <a href="../homePage/organization.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
-                                    <p>Organizations</p>
+                                    <p>Manage Inventory</p>
                                 </div>
                             </div>
                         </a>

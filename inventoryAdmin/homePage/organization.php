@@ -115,7 +115,7 @@ if ($result->num_rows > 0) {
                         <a href="../homePage/organization.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
-                                    <p>Organizations</p>
+                                    <p>Manage Inventory</p>
                                 </div>
                             </div>
                         </a>
@@ -155,7 +155,7 @@ if ($result->num_rows > 0) {
                 </div>
 
                 <div class="textContainer">
-                    <p class="text">Organizations</p>
+                    <p class="text">Manage Inventory</p>
                 </div>
 
                 <div class="searchContainer">
@@ -166,7 +166,7 @@ if ($result->num_rows > 0) {
                     <table>
                         <thead>
                             <tr>
-                                <th>Project Name</th>
+                                <th>Item Name</th>
                                 <th>Image</th>
                                 <th>Description</th>
                                 <th>Action</th>
@@ -182,7 +182,7 @@ if ($result->num_rows > 0) {
                                 <td>Hakdog</td>
                                 <td class="button">
                                     <button onclick="popup12()" class="addButton" style="width: 10rem;">Manage
-                                        Project</button>
+                                        Item</button>
                                 </td>
                             </tr>
                         </tbody>

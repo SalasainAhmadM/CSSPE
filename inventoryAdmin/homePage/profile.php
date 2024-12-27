@@ -130,7 +130,7 @@ if ($result->num_rows > 0) {
                         <a href="../homePage/organization.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
-                                    <p>Organizations</p>
+                                    <p>Manage Inventory</p>
                                 </div>
                             </div>
                         </a>
@@ -187,56 +187,78 @@ if ($result->num_rows > 0) {
                             </div>
 
                             <div class="subLoginContainer">
-                                <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                                    <label for=""
-                                        style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Full
-                                        Name:</label>
-                                    <input class="inputEmail" type="text" value="<?= htmlspecialchars($fullName) ?>"
-                                        readonly>
-                                </div>
+                                <form id="editProfileForm">
+                                    <div class="inputContainer"
+                                        style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; height: 4rem;">
+                                        <div style="flex: 10 0 30%; padding-left: 30px;">
+                                            <label for="firstName"
+                                                style="display: block; font-size: 1.2rem; margin-bottom: 0.5rem;">First
+                                                Name:</label>
+                                            <input class="inputEmail" id="firstName" name="first_name" type="text"
+                                                value="<?= htmlspecialchars($firstName) ?>" style="width: 100%;"
+                                                required>
+                                        </div>
+                                        <div style="flex: 10 0 20%;">
+                                            <label for="middleName"
+                                                style="display: block; font-size: 1.2rem; margin-bottom: 0.5rem;">Middle
+                                                Name:</label>
+                                            <input class="inputEmail" id="middleName" name="middle_name" type="text"
+                                                value="<?= htmlspecialchars($middleName) ?>" style="width: 100%;">
+                                        </div>
+                                        <div style="flex: 10 0 35%; padding-right: 50px;">
+                                            <label for="lastName"
+                                                style="display: block; font-size: 1.2rem; margin-bottom: 0.5rem;">Last
+                                                Name:</label>
+                                            <input class="inputEmail" id="lastName" name="last_name" type="text"
+                                                value="<?= htmlspecialchars($lastName) ?>" style="width: 100%;"
+                                                required>
+                                        </div>
+                                    </div>
 
-                                <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                                    <label for=""
-                                        style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Email:</label>
-                                    <input class="inputEmail" type="text" value="<?= htmlspecialchars($email) ?>"
-                                        readonly>
-                                </div>
 
-                                <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                                    <label for=""
-                                        style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Contact
-                                        No.:</label>
-                                    <input class="inputEmail" type="text" value="<?= htmlspecialchars($contactNo) ?>"
-                                        readonly>
-                                </div>
+                                    <div class="inputContainer" style="flex-direction: column; height: 4rem;">
+                                        <label for="email"
+                                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Email:</label>
+                                        <input class="inputEmail" id="email" name="email" type="text"
+                                            value="<?= htmlspecialchars($email) ?>" required>
+                                    </div>
 
-                                <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                                    <label for=""
-                                        style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Address:</label>
-                                    <input class="inputEmail" type="text" value="<?= htmlspecialchars($address) ?>"
-                                        readonly>
-                                </div>
+                                    <div class="inputContainer" style="flex-direction: column; height: 4rem;">
+                                        <label for="contactNo"
+                                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Contact
+                                            No.:</label>
+                                        <input class="inputEmail" id="contactNo" name="contact_no" type="text"
+                                            value="<?= htmlspecialchars($contactNo) ?>" required>
+                                    </div>
 
-                                <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                                    <label for=""
-                                        style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Position:</label>
-                                    <input class="inputEmail" type="text" value="<?= htmlspecialchars($rank) ?>"
-                                        readonly>
-                                </div>
+                                    <div class="inputContainer" style="flex-direction: column; height: 4rem;">
+                                        <label for="address"
+                                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Address:</label>
+                                        <input class="inputEmail" id="address" name="address" type="text"
+                                            value="<?= htmlspecialchars($address) ?>" required>
+                                    </div>
 
-                                <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                                    <label for=""
-                                        style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Department:</label>
-                                    <input class="inputEmail" type="text" value="<?= htmlspecialchars($department) ?>"
-                                        readonly>
-                                </div>
+                                    <div class="inputContainer" style="flex-direction: column; height: 4rem;">
+                                        <label for="rank"
+                                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Position:</label>
+                                        <input class="inputEmail" id="rank" name="rank" type="text"
+                                            value="<?= htmlspecialchars($rank) ?>" readonly>
+                                    </div>
 
-                                <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                                    <label for=""
-                                        style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Role:</label>
-                                    <input class="inputEmail" type="text" value="<?= htmlspecialchars($role) ?>"
-                                        readonly>
-                                </div>
+                                    <div class="inputContainer" style="flex-direction: column; height: 4rem;">
+                                        <label for="department"
+                                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Department:</label>
+                                        <input class="inputEmail" id="department" name="department" type="text"
+                                            value="<?= htmlspecialchars($department) ?>" required>
+                                    </div>
+
+                                    <div class="inputContainer" style="flex-direction: column; height: 4rem;">
+                                        <label for="role"
+                                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Role:</label>
+                                        <input class="inputEmail" id="role" name="role" type="text"
+                                            value="<?= htmlspecialchars($role) ?>" readonly>
+                                    </div>
+                                </form>
                             </div>
                         </div>
 
@@ -355,18 +377,42 @@ if ($result->num_rows > 0) {
         function confirmEditProfile() {
             Swal.fire({
                 title: 'Edit Profile',
-                text: 'Are you sure you want to edit your profile?',
+                text: 'Are you sure you want to save these changes?',
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonText: 'Yes, edit it!',
+                confirmButtonText: 'Yes, save it!',
                 cancelButtonText: 'No, cancel',
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.location.href = '../endpoints/edit_profile.php';
+                    const form = document.getElementById('editProfileForm');
+                    const formData = new FormData(form);
+
+                    fetch('../endpoints/edit_profile.php', {
+                        method: 'POST',
+                        body: formData,
+                    })
+                        .then((response) => response.json())
+                        .then((data) => {
+                            if (data.success) {
+                                Swal.fire('Success', data.message, 'success').then(() => {
+                                    location.reload(); // Reload page to reflect changes
+                                });
+                            } else {
+                                Swal.fire('Error', data.message, 'error');
+                            }
+                        })
+                        .catch((error) => {
+                            Swal.fire('Error', 'An unexpected error occurred. Please try again.', 'error');
+                        });
                 }
             });
         }
     </script>
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <!-- SweetAlert2 JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
     <script src="/dionSe/assets/js/sidebar.js"></script>
     <script src="/dionSe/assets/js/uploadImage.js"></script>
     <script src="/dionSe/assets/js/profile.js"></script>

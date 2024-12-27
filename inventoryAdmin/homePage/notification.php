@@ -18,6 +18,22 @@ if ($result->num_rows > 0) {
 } else {
     $fullName = "User Not Found";
 }
+
+$query = "SELECT type, title, description, DATE_FORMAT(uploaded_at, '%Y-%m-%d %H:%i:%s') AS formatted_date 
+          FROM notifications 
+          ORDER BY uploaded_at DESC";
+$result = $conn->query($query);
+
+$notifications = [
+    'Announcements' => [],
+    'Memorandums' => []
+];
+
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $notifications[$row['type']][] = $row;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -116,7 +132,7 @@ if ($result->num_rows > 0) {
                         <a href="../homePage/organization.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
-                                    <p>Organizations</p>
+                                    <p>Manage Inventory</p>
                                 </div>
                             </div>
                         </a>
@@ -160,41 +176,28 @@ if ($result->num_rows > 0) {
                 </div>
 
                 <div class="dashboardContainer">
-                    <div class="notificationContainer">
-                        <div class="subNotificaitonContainer">
-                            <div class="type">
-                                <p>Announcements</p>
-                            </div>
-
-                            <div class="messageContainer">
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Excepturi eum quam id fuga!
-                                    Dolore ex voluptates sint dignissimos ipsum molestias alias at quibusdam numquam,
-                                    accusantium voluptatem minus! Aspernatur, blanditiis id!</p>
-                            </div>
-
-                            <div class="dateContainer">
-                                <p>2024-03-28</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="notificationContainer">
-                        <div class="subNotificaitonContainer">
-                            <div class="type">
-                                <p>Memorandums</p>
-                            </div>
-
-                            <div class="messageContainer">
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Excepturi eum quam id fuga!
-                                    Dolore ex voluptates sint dignissimos ipsum molestias alias at quibusdam numquam,
-                                    accusantium voluptatem minus! Aspernatur, blanditiis id!</p>
-                            </div>
-
-                            <div class="dateContainer">
-                                <p>2024-03-28</p>
-                            </div>
-                        </div>
-                    </div>
+                    <?php foreach ($notifications as $type => $notificationList): ?>
+                        <?php if (!empty($notificationList)): ?>
+                            <?php foreach ($notificationList as $notification): ?>
+                                <div class="notificationContainer">
+                                    <div class="subNotificaitonContainer">
+                                        <div class="type">
+                                            <p><?php echo htmlspecialchars($type); ?></p>
+                                        </div>
+                                        <div class="messageContainer">
+                                            <p><strong><?php echo htmlspecialchars($notification['title']); ?></strong></p>
+                                            <p><?php echo htmlspecialchars($notification['description']); ?></p>
+                                        </div>
+                                        <div class="dateContainer">
+                                            <p><?php echo $notification['formatted_date']; ?></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p>No <?php echo htmlspecialchars($type); ?> available.</p>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </div>

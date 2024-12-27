@@ -18,6 +18,11 @@ if ($result->num_rows > 0) {
 } else {
     $fullName = "User Not Found";
 }
+
+$query = "SELECT title, description, DATE_FORMAT(date_uploaded_at, '%Y-%m-%d %H:%i:%s') AS formatted_date 
+          FROM announcements 
+          ORDER BY date_uploaded_at DESC";
+$result = $conn->query($query);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -116,7 +121,7 @@ if ($result->num_rows > 0) {
                         <a href="../homePage/organization.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
-                                    <p>Organizations</p>
+                                    <p>Manage Inventory</p>
                                 </div>
                             </div>
                         </a>
@@ -160,33 +165,23 @@ if ($result->num_rows > 0) {
                 </div>
 
                 <div class="dashboardContainer">
-                    <div class="notificationContainer">
-                        <div class="subNotificaitonContainer">
-                            <div class="messageContainer">
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Excepturi eum quam id fuga!
-                                    Dolore ex voluptates sint dignissimos ipsum molestias alias at quibusdam numquam,
-                                    accusantium voluptatem minus! Aspernatur, blanditiis id!</p>
+                    <?php if ($result->num_rows > 0): ?>
+                        <?php while ($row = $result->fetch_assoc()): ?>
+                            <div class="notificationContainer">
+                                <div class="subNotificaitonContainer">
+                                    <div class="messageContainer">
+                                        <h3><?php echo htmlspecialchars($row['title']); ?></h3>
+                                        <p><?php echo htmlspecialchars($row['description']); ?></p>
+                                    </div>
+                                    <div class="dateContainer">
+                                        <p style="margin-left: 0.5rem;"><?php echo $row['formatted_date']; ?></p>
+                                    </div>
+                                </div>
                             </div>
-
-                            <div class="dateContainer">
-                                <p style="margin-left: 0.5rem;">2024-03-28</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="notificationContainer">
-                        <div class="subNotificaitonContainer">
-                            <div class="messageContainer">
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Excepturi eum quam id fuga!
-                                    Dolore ex voluptates sint dignissimos ipsum molestias alias at quibusdam numquam,
-                                    accusantium voluptatem minus! Aspernatur, blanditiis id!</p>
-                            </div>
-
-                            <div class="dateContainer">
-                                <p style="margin-left: 0.5rem;">2024-03-28</p>
-                            </div>
-                        </div>
-                    </div>
+                        <?php endwhile; ?>
+                    <?php else: ?>
+                        <p>No announcements available.</p>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

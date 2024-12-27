@@ -18,6 +18,8 @@ if ($result->num_rows > 0) {
 } else {
     $fullName = "User Not Found";
 }
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">

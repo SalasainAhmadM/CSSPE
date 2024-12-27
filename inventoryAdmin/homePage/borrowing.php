@@ -115,7 +115,7 @@ if ($result->num_rows > 0) {
                         <a href="../homePage/organization.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
-                                    <p>Organizations</p>
+                                    <p>Manage Inventory</p>
                                 </div>
                             </div>
                         </a>
@@ -165,7 +165,7 @@ if ($result->num_rows > 0) {
                 <div class="inventoryContainer">
                     <div class="subInventoryContainer">
                         <div class="imageContainer" style="border-bottom: solid gray 1px;">
-                            <img class="image" src="/dionSe/assets/img/CSSPE.png" alt="">
+                            <img style="height: 50px;" class="image" src="/dionSe/assets/img/CSSPE.png" alt="">
                         </div>
 
                         <div class="infoContainer">

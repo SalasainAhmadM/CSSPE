@@ -199,7 +199,7 @@ $itemResult = $itemStmt->get_result();
     </div>
 
 
-    <form id="addItemForm">
+    <form id="addItemForm" method="POST" enctype="multipart/form-data">
         <div class="addContainer" style="display: none; background-color: none;">
             <div class="addContainer">
                 <div class="subAddContainer">
@@ -360,7 +360,7 @@ $itemResult = $itemStmt->get_result();
                 const reader = new FileReader();
 
                 reader.onload = function (e) {
-                    preview.src = e.target.result; // Set the preview image source to the uploaded file
+                    preview.src = e.target.result;
                 };
 
                 reader.readAsDataURL(fileInput.files[0]);
@@ -376,7 +376,7 @@ $itemResult = $itemStmt->get_result();
             formData.append('quantity', document.getElementById('itemQuantity').value);
             formData.append('description', document.getElementById('itemDescription').value.trim());
 
-            const imageUpload = document.getElementById('imageUpload');
+            const imageUpload = document.getElementById('addImageUpload');
             if (imageUpload.files.length > 0) {
                 formData.append('image', imageUpload.files[0]);
             }
@@ -394,7 +394,7 @@ $itemResult = $itemStmt->get_result();
                             text: data.message
                         });
                         document.getElementById('addItemForm').reset();
-                        document.getElementById('previewImage').src = ""; // Reset image preview
+                        document.getElementById('addPreviewImage').src = "../assets/img/CSSPE.png";
                     } else {
                         Swal.fire({
                             icon: 'error',
@@ -412,8 +412,27 @@ $itemResult = $itemStmt->get_result();
                 });
         });
 
+        // Function to preview the selected image
+        function previewImage() {
+            const fileInput = document.getElementById('imageUpload');
+            const preview = document.getElementById('previewImage');
+            const file = fileInput.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result; // Update the image preview
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Function to trigger the file input
+        function triggerImageUpload() {
+            document.getElementById('imageUpload').click();
+        }
+        // Edit Item Function
         function editItem(button) {
-            // Get item details from data attributes
             const id = button.getAttribute('data-id');
             const name = button.getAttribute('data-name');
             const description = button.getAttribute('data-description');
@@ -421,25 +440,21 @@ $itemResult = $itemStmt->get_result();
             const quantity = button.getAttribute('data-quantity');
             const image = button.getAttribute('data-image');
 
-            // Populate the edit form fields
+            // Show the edit container
             document.querySelector('.editContainer').style.display = 'block';
+
+            // Populate fields
             document.querySelector('.editContainer input[placeholder="Item Name:"]').value = name;
             document.querySelector('.editContainer input[placeholder="Brand:"]').value = brand;
             document.querySelector('.editContainer input[placeholder="Quantity:"]').value = quantity;
             document.querySelector('.editContainer textarea[placeholder="Description"]').value = description;
 
-            // Update preview image
             const previewImage = document.getElementById('previewImage');
-            if (image) {
-                previewImage.src = image;
-            } else {
-                previewImage.src = '';
-            }
-
-            // Save the ID for future use (e.g., saving changes)
-            previewImage.setAttribute('data-id', id);
+            previewImage.src = image ? image : ''; // Update preview or reset to default
+            previewImage.setAttribute('data-id', id); // Store the ID for saving
         }
 
+        // Save Item Function
         function saveItem() {
             const id = document.getElementById('previewImage').getAttribute('data-id');
             const name = document.querySelector('.editContainer input[placeholder="Item Name:"]').value.trim();
@@ -480,7 +495,7 @@ $itemResult = $itemStmt->get_result();
                             title: 'Item Updated',
                             text: 'The item has been updated successfully!',
                         }).then(() => {
-                            location.reload(); // Reload the page to reflect changes
+                            location.reload(); // Reload to reflect changes
                         });
                     } else {
                         Swal.fire({
