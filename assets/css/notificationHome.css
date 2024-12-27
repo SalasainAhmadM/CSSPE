@@ -25,6 +25,7 @@
 .subNotificaitonContainer{
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
 .messageContainer{
@@ -58,7 +59,7 @@
 /*tablet*/
 @media only screen and (min-width: 601px) and (max-width: 1024px) {
   .notificationContainer{
-    flex-direction: row;
+    flex-direction: column;
   }
 
   .deleteContainer{
@@ -78,7 +79,7 @@
   }
 
   .notificationContainer{
-    flex-direction: row;
+    flex-direction: column;
   }
 
   .deleteContainer{
@@ -98,7 +99,7 @@
   }
   
   .notificationContainer{
-    flex-direction: row;
+    flex-direction: column;
   }
 
   .deleteContainer{

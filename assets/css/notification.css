@@ -34,12 +34,13 @@
 }
 
 .dateContainer{
-  height: 2rem;
+  /* height: 2rem; */
   font-size: 1.2rem;
   text-align: left;
   display: flex;
   align-items: center;
   color: gray;
+  display: inline;
 }
 
 .deleteContainer{

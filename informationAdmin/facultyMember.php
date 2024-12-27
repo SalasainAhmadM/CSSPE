@@ -3,6 +3,8 @@ session_start();
 require_once '../conn/conn.php';
 require_once '../conn/auth.php';
 
+validateSessionRole('information_admin');
+
 // Fetch data from the pending_users table
 $query = "SELECT id, first_name, last_name, middle_name, email, address, contact_no, rank, password, created_at, role, department, image FROM users";
 $result = mysqli_query($conn, $query);
@@ -32,6 +34,7 @@ function fetchDepartments()
 
     return $departments;
 }
+
 
 if (isset($_POST['add_faculty'])) {
 
@@ -287,7 +290,7 @@ if (isset($_POST['update_faculty'])) {
                 </div>
 
                 <div class="searchContainer">
-                    <input class="searchBar" type="text" placeholder="Search...">
+                    <input class="searchBar" id="search" type="text" placeholder="Search...">
                     <div class="printButton" style="gap: 1rem; display: flex; width: 90%;">
                         <button class="addButton size" onclick="printTable()">Print</button>
                         <button onclick="addProgram()" class="addButton size">Add Faculty Member</button>
@@ -541,6 +544,7 @@ if (isset($_POST['update_faculty'])) {
     <script src="../assets/js/program.js"></script>
     <script src="../assets/js/uploadImage.js"></script>
     <script src="../assets/js/printTable.js"></script>
+    <script src="../assets/js/search.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

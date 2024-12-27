@@ -73,6 +73,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 
+$query_notifications = "SELECT COUNT(*) AS notification_count FROM notifications WHERE is_read = 0";
+$result_notifications = mysqli_query($conn, $query_notifications);
+$notificationCount = 0;
+
+if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_notifications)) {
+    $notificationCount = $row_notifications['notification_count'];
+}
 
 $conn->close();
 ?>
@@ -177,7 +184,12 @@ $conn->close();
                         <a href="../homePage/notification.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
-                                    <p>Notificaitons</p>
+                                    <p>
+                                        Notifications
+                                        <span style="background-color:#1a1a1a; padding:5px; border-radius:4px;">
+                                            <?php echo $notificationCount; ?>
+                                        </span>
+                                    </p>
                                 </div>
                             </div>
                         </a>

@@ -1,6 +1,9 @@
 <?php
 session_start();
 require_once '../conn/conn.php';
+require_once '../conn/auth.php';
+
+validateSessionRole('information_admin');
 
 $query = "SELECT * FROM announcements";
 $result = mysqli_query($conn, $query);
@@ -11,21 +14,27 @@ if (isset($_POST['add_announcement'])) {
     $location = mysqli_real_escape_string($conn, $_POST['location']);
     $date = mysqli_real_escape_string($conn, $_POST['date']);
 
-    // Use the current date and time for Date_Uploaded_At
     $date_uploaded_at = date('Y-m-d H:i:s');
 
-    $query = "INSERT INTO announcements (title, description, location, date_uploaded_at) 
-              VALUES ('$title', '$description', '$location', '$date_uploaded_at')";
+    // Insert into announcements table
+    $query_announcements = "INSERT INTO announcements (title, description, location, date_uploaded_at) 
+                            VALUES ('$title', '$description', '$location', '$date_uploaded_at')";
 
-    if (mysqli_query($conn, $query)) {
-        echo "Announcement added successfully!";
+    $query_notifications = "INSERT INTO notifications (title, description, uploaded_at, type) 
+                            VALUES ('$title', '$description', '$date_uploaded_at', 'Announcements')";
+
+
+    $success_announcements = mysqli_query($conn, $query_announcements);
+    $success_notifications = mysqli_query($conn, $query_notifications);
+
+    if ($success_announcements && $success_notifications) {
+        echo "Announcement and notification added successfully!";
         header('Location: ' . $_SERVER['PHP_SELF']);
         exit();
     } else {
         echo "Error: " . mysqli_error($conn);
     }
 }
-
 
 
 // Update event logic
@@ -200,7 +209,7 @@ if (isset($_GET['delete_id'])) {
                 </div>
 
                 <div class="searchContainer">
-                    <input class="searchBar" type="text" placeholder="Search...">
+                    <input class="searchBar" id="search" type="text" placeholder="Search...">
                     <div class="printButton" style="gap: 1rem; display: flex; width: 90%;">
                         <button class="addButton size" onclick="printTable()">Print</button>
                         <button onclick="addProgram()" class="addButton size">Add Announcement</button>
@@ -283,60 +292,61 @@ if (isset($_GET['delete_id'])) {
     </form>
 
 
-    
+
     <!-- Edit Container -->
     <form method="POST" action="" enctype="multipart/form-data">
-    <div class="editContainer" style="display: none; background-color: none;">
-        <div class="editContainer">
-            <div class="subAddContainer">
-                <div class="titleContainer">
-                    <p>Edit Events</p>
-                </div>
-
-                <div class="subLoginContainer">
-
-                    <!-- Hidden input to store event id -->
-                    <input type="hidden" name="announcement_id" id="announcement_id">
-
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Title:</label>
-                        <input class="inputEmail" type="text" id="announcement_title" name="title" value="" placeholder="Title:">
+        <div class="editContainer" style="display: none; background-color: none;">
+            <div class="editContainer">
+                <div class="subAddContainer">
+                    <div class="titleContainer">
+                        <p>Edit Events</p>
                     </div>
 
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Location:</label>
-                        <input class="inputEmail" type="text" id="announcement_location" name="location" value="" placeholder="Location:">
-                    </div>
+                    <div class="subLoginContainer">
 
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Date:</label>
-                        <input class="inputEmail" type="date" id="announcement_date" name="date" value="" placeholder="Date:">
-                    </div>
+                        <!-- Hidden input to store event id -->
+                        <input type="hidden" name="announcement_id" id="announcement_id">
 
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem; min-height: 12rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Content:</label>
-                        <textarea style="min-height: 10rem;" id="announcement_description" class="inputEmail" value="" name="description" id=""
-                            placeholder="Content"></textarea>
-                    </div>
+                        <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                            <label for=""
+                                style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Title:</label>
+                            <input class="inputEmail" type="text" id="announcement_title" name="title" value="" placeholder="Title:">
+                        </div>
 
-                    <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
-                        <button type="submit" name="update_announcement" class="addButton" style="width: 6rem;">Save</button>
-                        <button onclick="cancelContainer()" class="addButton1" style="width: 6rem;">Cancel</button>
+                        <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                            <label for=""
+                                style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Location:</label>
+                            <input class="inputEmail" type="text" id="announcement_location" name="location" value="" placeholder="Location:">
+                        </div>
+
+                        <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                            <label for=""
+                                style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Date:</label>
+                            <input class="inputEmail" type="date" id="announcement_date" name="date" value="" placeholder="Date:">
+                        </div>
+
+                        <div class="inputContainer" style="flex-direction: column; height: 5rem; min-height: 12rem;">
+                            <label for=""
+                                style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Content:</label>
+                            <textarea style="min-height: 10rem;" id="announcement_description" class="inputEmail" value="" name="description" id=""
+                                placeholder="Content"></textarea>
+                        </div>
+
+                        <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
+                            <button type="submit" name="update_announcement" class="addButton" style="width: 6rem;">Save</button>
+                            <button onclick="cancelContainer()" class="addButton1" style="width: 6rem;">Cancel</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     </form>
 
 
     <script src="../assets/js/sidebar.js"></script>
     <script src="../assets/js/program.js"></script>
     <script src="../assets/js/printTable.js"></script>
+    <script src="../assets/js/search.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
