@@ -3,7 +3,7 @@ session_start();
 require_once '../conn/conn.php';
 require_once '../conn/auth.php';
 
-// validateSessionRole('super_admin');
+validateSessionRole('super_admin');
 
 function registerUser($firstName, $lastName, $middleName, $email, $address, $contactNo, $rank, $password, $role)
 {
@@ -104,9 +104,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($role === "super_admin") {
             $rank = "Super Admin";
         } else {
-            $rank = $_POST['rank'];  
+            $rank = $_POST['rank'];
         }
-        
+
 
         if ($password !== $confirmPassword) {
             $message = "Error: Passwords do not match.";
@@ -151,14 +151,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
 
                     <div class="userPictureContainer1">
-                        <p>Khriz marr l. falcatan</p>
+                        <?php echo ($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?><br>
+                        <?php echo $_SESSION['user_role'] ?>
                     </div>
                 </div>
 
                 <div class="navContainer">
                     <div class="subNavContainer">
 
-                        <a href="../superAdmin/homePage/announcement.php">
+                        <a href="../homePage/">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Home</p>
@@ -166,7 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                         </a>
 
-                        <a href="../superAdmin/account.php">
+                        <a href="../superAdmin/">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Accounts</p>
@@ -190,7 +191,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                         </a>
 
-                        <a href="../superAdmin/informationAdmin/program.php">
+                        <a href="../informationAdmin/">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Information Admin Panel</p>
@@ -198,7 +199,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                         </a>
 
-                        <a href="../superAdmin/inventoryAdmin/dashboard.php">
+                        <a href="../inventoryAdmin/">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Inventory Admin Panel</p>
@@ -241,7 +242,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         <form method="POST" action="">
                             <div class="subLoginContainer">
-                                
+
                                 <div class="inputContainer">
                                     <input class="inputEmail" name="first_name" type="text" placeholder="First Name:" required>
                                 </div>

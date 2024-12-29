@@ -201,7 +201,8 @@ if (isset($_POST['update_faculty'])) {
                     </div>
 
                     <div class="userPictureContainer1">
-                        <?php echo ($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?>
+                        <?php echo ($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?><br>
+                        <?php echo $_SESSION['user_role'] ?>
                     </div>
                 </div>
 
