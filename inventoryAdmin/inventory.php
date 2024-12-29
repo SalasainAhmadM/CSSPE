@@ -145,7 +145,7 @@ $itemResult = $itemStmt->get_result();
                 <div class="searchContainer">
                     <input id="searchBar" class="searchBar" type="text" placeholder="Search...">
                     <div class="printButton" style="gap: 1rem; display: flex; width: 90%;">
-                        <button class="addButton size">Print</button>
+                        <button class="addButton size" onclick="printTable()">Print</button>
                         <button onclick="addProgram()" class="addButton size">Add Item</button>
                     </div>
                 </div>
@@ -273,12 +273,15 @@ $itemResult = $itemStmt->get_result();
                             </div>
                         </div>
                         <div class="uploadButton">
-                            <input id="imageUpload" type="file" accept="image/*" onchange="previewImage()"
-                                style="display: none;">
+                            <input id="imageUpload" type="file" accept="image/*" style="display: none;"
+                                onchange="previewImage('imageUpload', 'previewImage')" />
 
-                            <button type="button" onclick="triggerImageUpload()" class="addButton"
-                                style="height: 2rem; width: 5rem;">Upload</button>
+                            <button type="button" onclick="triggerImageUpload('imageUpload')" class="addButton"
+                                style="height: 2rem; width: 5rem;">
+                                Upload
+                            </button>
                         </div>
+
                     </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
@@ -325,15 +328,14 @@ $itemResult = $itemStmt->get_result();
 
         // Add an input event listener to the search bar
         searchBar.addEventListener('input', function () {
-            const searchTerm = searchBar.value.toLowerCase(); // Get the input value in lowercase
-            const rows = tableBody.getElementsByTagName('tr'); // Get all table rows
+            const searchTerm = searchBar.value.toLowerCase();
+            const rows = tableBody.getElementsByTagName('tr');
 
-            // Loop through all rows and filter them
+
             for (const row of rows) {
-                const cells = row.getElementsByTagName('td'); // Get all cells in the row
+                const cells = row.getElementsByTagName('td');
                 let match = false;
 
-                // Check if any cell in the row contains the search term
                 for (const cell of cells) {
                     if (cell.textContent.toLowerCase().includes(searchTerm)) {
                         match = true;
@@ -341,32 +343,31 @@ $itemResult = $itemStmt->get_result();
                     }
                 }
 
-                // Show or hide the row based on the match result
                 row.style.display = match ? '' : 'none';
             }
         });
 
-        // Trigger file input click
-        function triggerImageUpload(inputId) {
-            document.querySelector(`#${inputId}`).click();
-        }
-
-        // Preview uploaded image
+        // Trigger file input click dynamically
         function previewImage(inputId, previewId) {
-            const fileInput = document.querySelector(`#${inputId}`);
-            const preview = document.querySelector(`#${previewId}`);
+            const fileInput = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
 
             if (fileInput.files && fileInput.files[0]) {
                 const reader = new FileReader();
-
                 reader.onload = function (e) {
-                    preview.src = e.target.result;
+                    preview.src = e.target.result; // Update the image preview
                 };
-
                 reader.readAsDataURL(fileInput.files[0]);
             }
         }
 
+        // Trigger file input click for Add and Edit functionality
+        function triggerImageUpload(inputId) {
+            document.getElementById(inputId).click();
+        }
+
+
+        // Add Item Form Submission
         document.getElementById('addItemForm').addEventListener('submit', function (e) {
             e.preventDefault();
 
@@ -394,7 +395,7 @@ $itemResult = $itemStmt->get_result();
                             text: data.message
                         });
                         document.getElementById('addItemForm').reset();
-                        document.getElementById('addPreviewImage').src = "../assets/img/CSSPE.png";
+                        document.getElementById('addPreviewImage').src = "../assets/img/CSSPE.png"; // Reset preview
                     } else {
                         Swal.fire({
                             icon: 'error',
@@ -412,25 +413,6 @@ $itemResult = $itemStmt->get_result();
                 });
         });
 
-        // Function to preview the selected image
-        function previewImage() {
-            const fileInput = document.getElementById('imageUpload');
-            const preview = document.getElementById('previewImage');
-            const file = fileInput.files[0];
-
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    preview.src = e.target.result; // Update the image preview
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        // Function to trigger the file input
-        function triggerImageUpload() {
-            document.getElementById('imageUpload').click();
-        }
         // Edit Item Function
         function editItem(button) {
             const id = button.getAttribute('data-id');
@@ -440,21 +422,19 @@ $itemResult = $itemStmt->get_result();
             const quantity = button.getAttribute('data-quantity');
             const image = button.getAttribute('data-image');
 
-            // Show the edit container
             document.querySelector('.editContainer').style.display = 'block';
 
-            // Populate fields
             document.querySelector('.editContainer input[placeholder="Item Name:"]').value = name;
             document.querySelector('.editContainer input[placeholder="Brand:"]').value = brand;
             document.querySelector('.editContainer input[placeholder="Quantity:"]').value = quantity;
             document.querySelector('.editContainer textarea[placeholder="Description"]').value = description;
 
             const previewImage = document.getElementById('previewImage');
-            previewImage.src = image ? image : ''; // Update preview or reset to default
-            previewImage.setAttribute('data-id', id); // Store the ID for saving
+            previewImage.src = image ? image : "../assets/img/CSSPE.png"; // Reset if no image provided
+            previewImage.setAttribute('data-id', id);
         }
 
-        // Save Item Function
+        // Save Edited Item Function
         function saveItem() {
             const id = document.getElementById('previewImage').getAttribute('data-id');
             const name = document.querySelector('.editContainer input[placeholder="Item Name:"]').value.trim();
@@ -495,7 +475,7 @@ $itemResult = $itemStmt->get_result();
                             title: 'Item Updated',
                             text: 'The item has been updated successfully!',
                         }).then(() => {
-                            location.reload(); // Reload to reflect changes
+                            location.reload();
                         });
                     } else {
                         Swal.fire({
@@ -505,8 +485,7 @@ $itemResult = $itemStmt->get_result();
                         });
                     }
                 })
-                .catch(error => {
-                    console.error('Error:', error);
+                .catch(() => {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
@@ -514,6 +493,8 @@ $itemResult = $itemStmt->get_result();
                     });
                 });
         }
+
+
         function deleteItem(itemId) {
             // Use SweetAlert to confirm deletion
             Swal.fire({
@@ -552,6 +533,66 @@ $itemResult = $itemStmt->get_result();
             });
         }
 
+        function printTable() {
+            const tableContainer = document.querySelector('.tableContainer');
+            const rows = tableContainer.querySelectorAll('tr');
+
+            // Hide the last column (Actions)
+            rows.forEach(row => {
+                const cells = row.children;
+                if (cells.length > 0) {
+                    cells[cells.length - 1].style.display = 'none'; // Hide last column
+                }
+            });
+
+            // Prepare the print content
+            const printContent = tableContainer.outerHTML;
+            const printWindow = window.open('', '', 'width=800, height=600');
+            printWindow.document.write(`
+    <html>
+    <head>
+        <title>Print Table</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+                color: #333;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 20px;
+            }
+            th, td {
+                border: 1px solid black;
+                padding: 8px;
+                text-align: left;
+            }
+            th {
+                background-color: #f4f4f4;
+                font-weight: bold;
+            }
+            tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+        </style>
+    </head>
+    <body>
+        ${printContent}
+    </body>
+    </html>
+    `);
+            printWindow.document.close();
+            printWindow.print();
+
+            // Restore visibility of the last column
+            rows.forEach(row => {
+                const cells = row.children;
+                if (cells.length > 0) {
+                    cells[cells.length - 1].style.display = ''; // Restore last column visibility
+                }
+            });
+        }
     </script>
 
     <!-- SweetAlert2 CSS -->

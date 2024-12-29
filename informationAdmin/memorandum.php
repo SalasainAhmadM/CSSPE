@@ -20,7 +20,7 @@ if (isset($_POST['add_memorandum'])) {
 
         $file_name = $_FILES['memorandum_file']['name'];
         $file_tmp = $_FILES['memorandum_file']['tmp_name'];
-        $upload_dir = '../assets/uploads/'; 
+        $upload_dir = '../assets/uploads/';
 
         if (!is_dir($upload_dir)) {
             mkdir($upload_dir, 0777, true);
@@ -67,16 +67,18 @@ if (isset($_POST['update_memorandum'])) {
     $memorandum_id = $_POST['memorandum_id'];
     $memorandum_title = mysqli_real_escape_string($conn, $_POST['memorandum_title']);
     $memorandum_description = mysqli_real_escape_string($conn, $_POST['memorandum_description']);
-    $uploaded_at = date('Y-m-d H:i:s'); 
+
+    // Set timezone to Philippine time
+    date_default_timezone_set('Asia/Manila');
+    $updated_at = date('Y-m-d H:i:s');
 
     $new_file_path = null;
 
     // Check if a new file is uploaded
     if (isset($_FILES['memorandum_file']) && $_FILES['memorandum_file']['error'] === 0) {
-
         $file_name = $_FILES['memorandum_file']['name'];
         $file_tmp = $_FILES['memorandum_file']['tmp_name'];
-        $upload_dir = '../assets/uploads/'; 
+        $upload_dir = '../assets/uploads/';
 
         if (!is_dir($upload_dir)) {
             mkdir($upload_dir, 0777, true);
@@ -91,6 +93,7 @@ if (isset($_POST['update_memorandum'])) {
         }
     }
 
+    // If no new file, retain the existing file path
     if ($new_file_path === null) {
         $existing_query = "SELECT file_path FROM memorandums WHERE id = ?";
         $stmt = $conn->prepare($existing_query);
@@ -106,7 +109,7 @@ if (isset($_POST['update_memorandum'])) {
     // Update the memorandum record in the database
     $update_query = "UPDATE memorandums SET title = ?, description = ?, file_path = ?, updated_at = ? WHERE id = ?";
     $stmt = $conn->prepare($update_query);
-    $stmt->bind_param("sssii", $memorandum_title, $memorandum_description, $new_file_path, $uploaded_at, $memorandum_id);
+    $stmt->bind_param("ssssi", $memorandum_title, $memorandum_description, $new_file_path, $updated_at, $memorandum_id);
 
     if ($stmt->execute()) {
         $_SESSION['success'] = "Memorandum updated successfully!";
@@ -118,6 +121,7 @@ if (isset($_POST['update_memorandum'])) {
 
     $stmt->close();
 }
+
 
 
 
@@ -283,7 +287,6 @@ if (isset($_GET['delete_id'])) {
                                 <th>Action</th>
                             </tr>
                         </thead>
-
                         <tbody>
                             <?php while ($row = mysqli_fetch_assoc($result)): ?>
                                 <tr>
@@ -297,20 +300,19 @@ if (isset($_GET['delete_id'])) {
                                     <td><?php echo htmlspecialchars($row['uploaded_at']); ?></td>
                                     <td><?php echo htmlspecialchars($row['updated_at']); ?></td>
                                     <td class="button">
-                                        <a href="#" onclick="editProgram(<?php echo $row['id']; ?>, 
+                                        <button onclick="editProgram(<?php echo $row['id']; ?>, 
                                         '<?php echo addslashes($row['title']); ?>', 
-                                        '<?php echo addslashes($row['description']); ?>')">
-                                            <button class="addButton1" style="width: 6rem;">Edit</button>
-                                        </a>
-                                        <a href="#" onclick="deleteMemorandum(<?php echo $row['id']; ?>)">
-                                            <button class="addButton1" style="width: 6rem;">Delete</button>
-                                        </a>
+                                        '<?php echo addslashes($row['description']); ?>')" class="addButton1"
+                                            style="width: 6rem;">Edit</button>
+                                        <button onclick="deleteMemorandum(<?php echo $row['id']; ?>)" class="addButton1"
+                                            style="width: 6rem;">Delete</button>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>
                         </tbody>
                     </table>
                 </div>
+
             </div>
         </div>
     </div>
@@ -326,19 +328,23 @@ if (isset($_GET['delete_id'])) {
 
                     <div class="subLoginContainer">
                         <div class="inputContainer">
-                            <input class="inputEmail" name="memorandum_file" type="file" accept="application/pdf" placeholder="File path:">
+                            <input class="inputEmail" name="memorandum_file" type="file" accept="application/pdf"
+                                placeholder="File path:">
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" id="memorandum_title" name="memorandum_title" type="text" placeholder="Title:">
+                            <input class="inputEmail" id="memorandum_title" name="memorandum_title" type="text"
+                                placeholder="Title:">
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" id="memorandum_description" name="memorandum_description" type="text" placeholder="Description:">
+                            <input class="inputEmail" id="memorandum_description" name="memorandum_description"
+                                type="text" placeholder="Description:">
                         </div>
 
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
-                            <button type="submit" name="add_memorandum" class="addButton" style="width: 6rem;">Add</button>
+                            <button type="submit" name="add_memorandum" class="addButton"
+                                style="width: 6rem;">Add</button>
                             <button onclick="addProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
                         </div>
                     </div>
@@ -357,26 +363,33 @@ if (isset($_GET['delete_id'])) {
                         <p>Edit Memorandums</p>
                     </div>
 
-                    <input type="hidden" name="memorandum_id" id="memorandum_id">
+                    <input type="hidden" name="memorandum_id" id="edit_memorandum_id">
 
                     <div class="subLoginContainer">
                         <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                            <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">File path:</label>
+                            <label for=""
+                                style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">File
+                                path:</label>
                             <input class="inputEmail" id="memorandum_file" name="memorandum_file" type="file">
                         </div>
 
                         <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                            <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Title:</label>
-                            <input class="inputEmail" id="memorandum_title" value="" name="memorandum_title" type="text">
+                            <label for=""
+                                style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Title:</label>
+                            <input class="inputEmail" id="edit_memorandum_title" value="" name="memorandum_title"
+                                type="text">
                         </div>
 
                         <div class="inputContainer" style="flex-direction: column;">
-                            <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Description:</label>
-                            <input class="inputEmail" id="memorandum_description" value="" name="memorandum_description" type="text">
+                            <label for=""
+                                style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Description:</label>
+                            <input class="inputEmail" id="edit_memorandum_description" value=""
+                                name="memorandum_description" type="text">
                         </div>
 
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
-                            <button type="submit" name="update_memorandum" class="addButton" style="width: 6rem;">Save</button>
+                            <button type="submit" name="update_memorandum" class="addButton"
+                                style="width: 6rem;">Save</button>
                             <button onclick="cancelContainer()" class="addButton1" style="width: 6rem;">Cancel</button>
                         </div>
                     </div>
@@ -397,9 +410,9 @@ if (isset($_GET['delete_id'])) {
 
     <script>
         function editProgram(id, title, description) {
-            document.getElementById('memorandum_id').value = id;
-            document.getElementById('memorandum_title').value = title;
-            document.getElementById('memorandum_description').value = description;
+            document.getElementById('edit_memorandum_id').value = id;
+            document.getElementById('edit_memorandum_title').value = title;
+            document.getElementById('edit_memorandum_description').value = description;
 
             document.querySelector('.editContainer').style.display = 'block';
         }
@@ -425,6 +438,33 @@ if (isset($_GET['delete_id'])) {
             });
         }
     </script>
+
+    <script>
+        // Check if success message is set
+        <?php if (isset($_SESSION['success'])): ?>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: '<?= $_SESSION['success']; ?>',
+                showConfirmButton: false,
+                timer: 2000
+            });
+            <?php unset($_SESSION['success']); ?>
+        <?php endif; ?>
+
+        // Check if error message is set
+        <?php if (isset($_SESSION['error'])): ?>
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: '<?= $_SESSION['error']; ?>',
+                showConfirmButton: true
+            });
+            <?php unset($_SESSION['error']); ?>
+        <?php endif; ?>
+
+    </script>
+
 </body>
 
 </html>

@@ -18,6 +18,9 @@ if ($result->num_rows > 0) {
 } else {
     $fullName = "User Not Found";
 }
+
+$eventsQuery = "SELECT title, description, date_uploaded_at FROM events";
+$eventsResult = $conn->query($eventsQuery);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -160,9 +163,9 @@ if ($result->num_rows > 0) {
 
                 <div class="searchContainer">
                     <input class="searchBar" type="text" placeholder="Search...">
-                    <select name="" class="addButton size" id="">
+                    <!-- <select name="" class="addButton size" id="">
                         <option value="">Choose a status</option>
-                    </select>
+                    </select> -->
                 </div>
 
                 <div class="tableContainer">
@@ -172,20 +175,26 @@ if ($result->num_rows > 0) {
                                 <th>Title</th>
                                 <th>Description</th>
                                 <th>Date</th>
-                                <th>location</th>
                             </tr>
                         </thead>
-
                         <tbody>
-                            <tr>
-                                <td>Hakdog</td>
-                                <td>Hakdog</td>
-                                <td>2021-10-05</td>
-                                <td>Hakdog</td>
-                            </tr>
+                            <?php if ($eventsResult->num_rows > 0): ?>
+                                <?php while ($event = $eventsResult->fetch_assoc()): ?>
+                                    <tr>
+                                        <td><?= htmlspecialchars($event['title']) ?></td>
+                                        <td><?= htmlspecialchars($event['description']) ?></td>
+                                        <td><?= date('F d, Y', strtotime($event['date_uploaded_at'])) ?></td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="3">No events found.</td>
+                                </tr>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
+
             </div>
         </div>
     </div>
