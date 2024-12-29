@@ -38,18 +38,23 @@ function fetchDepartments()
 
 if (isset($_POST['add_faculty'])) {
 
-    $first_name = mysqli_real_escape_string($conn, $_POST['first_name']);
-    $last_name = mysqli_real_escape_string($conn, $_POST['last_name']);
-    $middle_name = mysqli_real_escape_string($conn, $_POST['middle_name']);
-    $email = mysqli_real_escape_string($conn, $_POST['email']);
-    $address = mysqli_real_escape_string($conn, $_POST['address']);
-    $contact_no = mysqli_real_escape_string($conn, $_POST['contact_no']);
-    $department = mysqli_real_escape_string($conn, $_POST['department']);
-    $rank = mysqli_real_escape_string($conn, $_POST['rank']);
+    // Function to handle empty values
+    function checkEmpty($value) {
+        return empty(trim($value)) ? "N/A" : mysqli_real_escape_string($GLOBALS['conn'], $value);
+    }
+
+    // Process form data
+    $first_name = checkEmpty($_POST['first_name']);
+    $last_name = checkEmpty($_POST['last_name']);
+    $middle_name = checkEmpty($_POST['middle_name']);
+    $email = checkEmpty($_POST['email']);
+    $address = checkEmpty($_POST['address']);
+    $contact_no = checkEmpty($_POST['contact_no']);
+    $department = checkEmpty($_POST['department']);
+    $rank = checkEmpty($_POST['rank']);
 
     $password = mysqli_real_escape_string($conn, $_POST['password']);
     $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-
 
     // Handle image upload
     if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] == 0) {
@@ -78,10 +83,9 @@ if (isset($_POST['add_faculty'])) {
         $image_path = 'CSSPE.png';
     }
 
-
     // Insert user data into the database
     $insert_query = "INSERT INTO users (first_name, last_name, middle_name, email, address, contact_no, department, rank, password, image)
-                 VALUES ('$first_name', '$last_name', '$middle_name', '$email', '$address', '$contact_no', '$department', '$rank', '$hashedPassword', '$image_path')";
+                     VALUES ('$first_name', '$last_name', '$middle_name', '$email', '$address', '$contact_no', '$department', '$rank', '$hashedPassword', '$image_path')";
 
     if (mysqli_query($conn, $insert_query)) {
         echo "New user added successfully!";
@@ -91,6 +95,7 @@ if (isset($_POST['add_faculty'])) {
         echo "Error: " . mysqli_error($conn);
     }
 }
+
 
 
 
@@ -151,7 +156,7 @@ if (isset($_POST['update_faculty'])) {
 
     if (mysqli_query($conn, $update_query)) {
         echo "Faculty member updated successfully!";
-        header("Location: facultyMember.php");
+        header('Location: ' . $_SERVER['PHP_SELF']);
         exit();
     } else {
         echo "Error: " . mysqli_error($conn);
@@ -196,7 +201,7 @@ if (isset($_POST['update_faculty'])) {
                     </div>
 
                     <div class="userPictureContainer1">
-                        <p>Khriz marr l. falcatan</p>
+                        <?php echo ($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?>
                     </div>
                 </div>
 

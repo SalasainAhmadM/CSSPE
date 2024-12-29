@@ -128,7 +128,7 @@ if (isset($_GET['delete_id'])) {
                     </div>
 
                     <div class="userPictureContainer1">
-                        <p>Khriz marr l. falcatan</p>
+                        <?php echo ($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?>
                     </div>
                 </div>
 
@@ -229,7 +229,7 @@ if (isset($_GET['delete_id'])) {
                     </div>
                 </div>
 
-                <div class="tableContainer">
+                <div class="tableContainer" style="height:475px">
                     <table>
                         <thead>
                             <tr>

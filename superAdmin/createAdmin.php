@@ -9,6 +9,21 @@ function registerUser($firstName, $lastName, $middleName, $email, $address, $con
 {
     global $conn;
 
+    // Helper function to handle empty values
+    function checkEmpty($value)
+    {
+        return empty(trim($value)) ? "N/A" : $value;
+    }
+
+    // Apply checkEmpty to all fields
+    $firstName = checkEmpty($firstName);
+    $lastName = checkEmpty($lastName);
+    $middleName = checkEmpty($middleName);
+    $email = checkEmpty($email);
+    $address = checkEmpty($address);
+    $contactNo = checkEmpty($contactNo);
+    $rank = checkEmpty($rank);
+
     // Check for existing email
     $emailQuery = "SELECT * FROM users WHERE email = ?";
     $emailStmt = $conn->prepare($emailQuery);
@@ -33,7 +48,7 @@ function registerUser($firstName, $lastName, $middleName, $email, $address, $con
 
     $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
     $defaultImage = "CSSPE.png"; // Default image value
-    
+
     $insertQuery = "
         INSERT INTO users (first_name, last_name, middle_name, email, address, contact_no, rank, password, role, image)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -59,6 +74,7 @@ function registerUser($firstName, $lastName, $middleName, $email, $address, $con
         return "Error: " . $stmt->error;
     }
 }
+
 
 
 $message = "";
@@ -99,6 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
 ?>
 
 <!DOCTYPE html>
