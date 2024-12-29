@@ -184,7 +184,7 @@ if (isset($_GET['approve_id'])) {
                     </div>
                 </div>
 
-                <div class="tableContainer">
+                <div class="tableContainer" style="height:475px">
                     <table>
                         <thead>
                             <tr>

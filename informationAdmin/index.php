@@ -136,7 +136,7 @@ if (isset($_GET['delete_id'])) {
                     </div>
 
                     <div class="userPictureContainer1">
-                        <p>Khriz marr l. falcatan</p>
+                        <p><?php echo ($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?></p>
                     </div>
                 </div>
 
@@ -234,13 +234,13 @@ if (isset($_GET['delete_id'])) {
                     <div class="printButton" style="gap: 1rem; display: flex; width: 90%;">
                         <button class="addButton size" onclick="printTable()">Print</button>
                         <button onclick="addProgram()" class="addButton size">Add Departments</button>
-                        <select name="" class="addButton size" id="">
+                        <!-- <select name="" class="addButton size" id="">
                             <option value="">Filter</option>
-                        </select>
+                        </select> -->
                     </div>
                 </div>
 
-                <div class="tableContainer">
+                <div class="tableContainer" style="height:475px">
                     <table id="departmentTable">
                         <thead>
                             <tr>
