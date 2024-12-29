@@ -18,6 +18,9 @@ if ($result->num_rows > 0) {
 } else {
     $fullName = "User Not Found";
 }
+
+$memoQuery = "SELECT * FROM memorandums";
+$memoResult = $conn->query($memoQuery);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -139,7 +142,28 @@ if ($result->num_rows > 0) {
                 </div>
             </div>
         </div>
+        <style>
+            .inventoryGrid {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                padding: 50px;
+                justify-content: space-between;
+            }
 
+            .inventoryContainer {
+                flex: 0 0 calc(16.6% - 20px);
+                box-sizing: border-box;
+                background-color: #f9f9f9;
+                border: 1px solid #ddd;
+                padding: 10px;
+                text-align: center;
+            }
+
+            .inventoryContainer img {
+                object-fit: cover;
+            }
+        </style>
         <div class="mainContainer" style="margin-left: 250px;">
             <div class="container">
                 <div class="headerContainer">
@@ -164,33 +188,32 @@ if ($result->num_rows > 0) {
                         <option value="">Filter</option>
                         <option value="">All</option>
                         <option value="">This day</option>
-                        <option value=""> This week</option>
+                        <option value="">This week</option>
                         <option value="">This month</option>
                     </select>
                 </div>
 
-                <div class="inventoryContainer1">
-                    <div class="subInventoryContainer1">
-                        <div class="imageContainer1" style="border-bottom: solid gray 1px;">
-                            <img class="image2" src="/dionSe/assets/img/CSSPE.png" alt="">
-                        </div>
-
-                        <div class="infoContainer1">
-                            <p>Item Name</p>
-                        </div>
-
-                        <div class="infoContainer2">
-                            <p>lorem aisdgak askjdg akjs d</p>
-                        </div>
-
-                        <div class="infoContainer2">
-                            <p>Available: 6</p>
-                        </div>
-
-                        <div class="buttonContainer">
-                            <button onclick="editProgram()" class="addButton">View more</button>
-                        </div>
-                    </div>
+                <!-- Main inventory grid -->
+                <div class="inventoryGrid">
+                    <?php if ($memoResult->num_rows > 0): ?>
+                        <?php while ($memo = $memoResult->fetch_assoc()): ?>
+                            <div class="inventoryContainer">
+                                <h3><?= htmlspecialchars($memo['title']) ?></h3>
+                                <p><?= htmlspecialchars($memo['description'] ?? 'No Description Available') ?></p>
+                                <p><strong>Uploaded At:</strong> <?= htmlspecialchars($memo['uploaded_at']) ?></p>
+                                <div class="buttonContainer">
+                                    <button class="addButton" onclick="viewMemo(
+                        '<?= addslashes($memo['title']) ?>',
+                        '<?= addslashes($memo['description'] ?? 'No Description Available') ?>',
+                        '<?= addslashes($memo['uploaded_at']) ?>',
+                        '<?= addslashes($memo['file_path']) ?>'
+                    )">View</button>
+                                </div>
+                            </div>
+                        <?php endwhile; ?>
+                    <?php else: ?>
+                        <p>No memorandums available</p>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -215,19 +238,19 @@ if ($result->num_rows > 0) {
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
                         <label for=""
                             style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Title:</label>
-                        <input class="inputEmail" type="text">
+                        <input class="inputEmail" type="text" readonly>
                     </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
                         <label for=""
                             style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Description:</label>
-                        <textarea name="" id="" class="inputEmail"></textarea>
+                        <textarea name="" id="" class="inputEmail" readonly></textarea>
                     </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
                         <label for=""
                             style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Date:</label>
-                        <input class="inputEmail" type="text">
+                        <input class="inputEmail" type="text" readonly>
                     </div>
 
                     <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
@@ -238,6 +261,46 @@ if ($result->num_rows > 0) {
             </div>
         </div>
     </div>
+    <script>
+        function viewMemo(title, description, uploadedAt, filePath) {
+            // Find modal elements
+            const editContainer = document.querySelector('.editContainer');
+            const titleInput = editContainer.querySelector('input[type="text"]');
+            const descriptionTextarea = editContainer.querySelector('textarea');
+            const dateInput = editContainer.querySelectorAll('input[type="text"]')[1]; // Second text input for date
+            const downloadButton = editContainer.querySelector('button.addButton');
+
+            // Update modal content with the memo data
+            titleInput.value = title || 'No Title';
+            descriptionTextarea.value = description || 'No Description Available';
+            dateInput.value = uploadedAt || 'No Date';
+
+            // Set up the download button to download the file
+            downloadButton.onclick = () => {
+                if (filePath) {
+                    const absolutePath = filePath.startsWith('http') ? filePath : `http://localhost/CSSPE/${filePath}`;
+                    const link = document.createElement('a');
+                    link.href = absolutePath;
+                    link.download = absolutePath.split('/').pop(); // Extracts the file name from the path
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } else {
+                    alert('No file available for download');
+                }
+            };
+
+            // Show the modal
+            editContainer.style.display = 'block';
+        }
+
+        // Function to close the modal
+        function editProgram() {
+            const editContainer = document.querySelector('.editContainer');
+            editContainer.style.display = 'none';
+        }
+
+    </script>
 
     <script src="/dionSe/assets/js/sidebar.js"></script>
     <script src="/dionSe/assets/js/program.js"></script>

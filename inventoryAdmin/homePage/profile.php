@@ -177,8 +177,11 @@ if ($result->num_rows > 0) {
                     <div class="subProfileContainer">
                         <div class="infoContainer">
                             <div class="pictureContainer1">
-                                <div class="pictureContainer">
-                                    <img class="picture" src="/dionSe/assets/img/CSSPE.png" alt="">
+                                <div class="pictureContainer" style="cursor: pointer;" onclick="triggerImageUpload()">
+                                    <img id="profileImage" class="picture" src="/dionSe/assets/img/CSSPE.png"
+                                        alt="Profile Picture">
+                                    <input type="file" id="imageInput" accept="image/*" style="display: none;"
+                                        onchange="previewImage(event)">
                                 </div>
 
                                 <div style="margin-top: 1rem;">
@@ -308,10 +311,12 @@ if ($result->num_rows > 0) {
             <div class="subProfileContainer size6">
                 <div class="infoContainer">
                     <div class="pictureContainer1" style="background-color: none;">
-                        <div class="pictureContainer">
-                            <img class="picture" src="/dionSe/assets/img/CSSPE.png" alt="">
+                        <div class="pictureContainer" style="cursor: pointer;" onclick="triggerImageUpload()">
+                            <img id="profileImage" class="picture" src="/dionSe/assets/img/CSSPE.png"
+                                alt="Profile Picture">
+                            <input type="file" id="imageInput" accept="image/*" style="display: none;"
+                                onchange="previewImage(event)">
                         </div>
-
                         <div style="margin-top: 1rem; display: flex; justify-content: center; align-items: center;">
                             <button onclick="triggerImageUpload()" class="addButton" id="imageUpload"
                                 style="width: 100%;">Change Profile</button>
@@ -374,6 +379,27 @@ if ($result->num_rows > 0) {
     </div>
 
     <script>
+        function triggerImageUpload() {
+            const imageInput = document.getElementById('imageInput');
+            if (imageInput) {
+                imageInput.click();
+            }
+        }
+
+        // Display a preview of the selected image
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const profileImage = document.getElementById('profileImage');
+                    if (profileImage) {
+                        profileImage.src = e.target.result;
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
         function confirmEditProfile() {
             Swal.fire({
                 title: 'Edit Profile',
@@ -386,6 +412,11 @@ if ($result->num_rows > 0) {
                 if (result.isConfirmed) {
                     const form = document.getElementById('editProfileForm');
                     const formData = new FormData(form);
+
+                    const imageInput = document.getElementById('imageInput');
+                    if (imageInput.files.length > 0) {
+                        formData.append('profile_image', imageInput.files[0]);
+                    }
 
                     fetch('../endpoints/edit_profile.php', {
                         method: 'POST',

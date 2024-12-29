@@ -18,6 +18,10 @@ if ($result->num_rows > 0) {
 } else {
     $fullName = "User Not Found";
 }
+
+$instructorsQuery = "SELECT first_name, middle_name, last_name, email, address, contact_no, rank, image, department FROM users WHERE role = 'Instructor'";
+$instructorsResult = $conn->query($instructorsQuery);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -159,9 +163,13 @@ if ($result->num_rows > 0) {
                 </div>
 
                 <div class="searchContainer">
-                    <input class="searchBar" type="text" placeholder="Search...">
-                    <select name="" class="addButton size" id="">
-                        <option value="">Choose a Department</option>
+                    <input class="searchBar" id="searchBar" type="text" placeholder="Search by name...">
+                    <select name="" class="addButton size" id="rankFilter">
+                        <option value="">Choose a Rank</option>
+                        <option value="Instructor">Instructor</option>
+                        <option value="Assistant Professor">Assistant Professor</option>
+                        <option value="Associate Professor">Associate Professor</option>
+                        <option value="Professor">Professor</option>
                     </select>
                 </div>
 
@@ -178,26 +186,67 @@ if ($result->num_rows > 0) {
                                 <th>Position</th>
                             </tr>
                         </thead>
-
-                        <tbody>
-                            <tr>
-                                <td>km falcatan</td>
-                                <td>
-                                    <img class="image" src="/dionSe/assets/img/CSSPE.png" alt="">
-                                </td>
-                                <td>Teacher</td>
-                                <td>Verified</td>
-                                <td>Verified</td>
-                                <td>Verified</td>
-                                <td>Verified</td>
-                            </tr>
+                        <tbody id="instructorTableBody">
+                            <?php if ($instructorsResult->num_rows > 0): ?>
+                                <?php while ($instructor = $instructorsResult->fetch_assoc()): ?>
+                                    <tr>
+                                        <td><?= htmlspecialchars($instructor['first_name'] . ' ' . ($instructor['middle_name'] ? $instructor['middle_name'] . ' ' : '') . $instructor['last_name']) ?>
+                                        </td>
+                                        <td>
+                                            <img class="image"
+                                                src="../../assets/img/<?= htmlspecialchars($instructor['image'] ?: '../../assets/img/CSSPE.png') ?>"
+                                                alt="Instructor Image" style="width: 50px; height: 50px; object-fit: cover;">
+                                        </td>
+                                        <td><?= htmlspecialchars($instructor['email']) ?></td>
+                                        <td><?= htmlspecialchars($instructor['address']) ?></td>
+                                        <td><?= htmlspecialchars($instructor['contact_no']) ?></td>
+                                        <td><?= htmlspecialchars($instructor['department']) ?></td>
+                                        <td><?= htmlspecialchars($instructor['rank']) ?></td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="7">No instructors found</td>
+                                </tr>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
+
             </div>
         </div>
     </div>
 
+    <script>
+        // Get references to the search bar, rank filter, and table body
+        const searchBar = document.getElementById('searchBar');
+        const rankFilter = document.getElementById('rankFilter');
+        const tableBody = document.getElementById('instructorTableBody');
+
+        // Add an input event listener to the search bar
+        searchBar.addEventListener('input', filterTable);
+
+        // Add a change event listener to the rank filter
+        rankFilter.addEventListener('change', filterTable);
+
+        function filterTable() {
+            const searchTerm = searchBar.value.toLowerCase();
+            const selectedRank = rankFilter.value;
+            const rows = tableBody.getElementsByTagName('tr');
+
+            for (const row of rows) {
+                const nameCell = row.cells[0]?.textContent.toLowerCase();
+                const rankCell = row.cells[6]?.textContent;
+
+                // Check if the row matches both filters
+                const matchesSearch = !searchTerm || nameCell.includes(searchTerm);
+                const matchesRank = !selectedRank || rankCell === selectedRank;
+
+                row.style.display = matchesSearch && matchesRank ? '' : 'none';
+            }
+        }
+
+    </script>
     <script src="/dionSe/assets/js/sidebar.js"></script>
     <script src="/dionSe/assets/js/program.js"></script>
 </body>
