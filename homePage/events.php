@@ -155,8 +155,12 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
 
                 <div class="searchContainer">
                     <input class="searchBar" id="search" type="text" placeholder="Search...">
-                    <select name="" class="addButton size" id="">
-                        <option value="">Choose a status</option>
+                    <select name="" class="addButton size" id="filterDropdown" onchange="filterByDate()">
+                        <option value="">Filter</option>
+                        <option value="all">All</option>
+                        <option value="day">This day</option>
+                        <option value="week">This week</option>
+                        <option value="month">This month</option>
                     </select>
                 </div>
 
@@ -184,6 +188,39 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
             </div>
         </div>
     </div>
+
+    <script>
+        function filterByDate() {
+            const filterValue = document.getElementById('filterDropdown').value;
+            const rows = document.querySelectorAll('.tableContainer table tbody tr');
+            const today = new Date();
+
+            rows.forEach(row => {
+                const dateCellText = row.querySelector('td:nth-child(3)').textContent.trim(); // Assuming 'Date/Time' is the third column
+                const eventDate = new Date(dateCellText);
+                let showRow = true;
+
+                if (filterValue === 'day') {
+                    showRow = eventDate.toDateString() === today.toDateString();
+                } else if (filterValue === 'week') {
+                    // Calculate the start and end of the current week (Sunday as the start)
+                    const weekStart = new Date(today);
+                    weekStart.setDate(today.getDate() - today.getDay()); // Sunday
+                    const weekEnd = new Date(weekStart);
+                    weekEnd.setDate(weekStart.getDate() + 6); // Saturday
+                    showRow = eventDate >= weekStart && eventDate <= weekEnd;
+                } else if (filterValue === 'month') {
+                    showRow = eventDate.getMonth() === today.getMonth() && eventDate.getFullYear() === today.getFullYear();
+                } else if (filterValue === 'all') {
+                    showRow = true;
+                }
+
+                // Show or hide the row based on the filter
+                row.style.display = showRow ? '' : 'none';
+            });
+        }
+    </script>
+
 
     <script src="../assets/js/search.js"></script>
     <script src="../assets/js/sidebar.js"></script>

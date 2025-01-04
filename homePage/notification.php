@@ -226,7 +226,7 @@ if (isset($_GET['delete_id'])) {
     function deleteNoti(userId) {
         Swal.fire({
             title: 'Are you sure?',
-            text: 'Do you want to delete this user?',
+            text: 'Do you want to delete this notification?',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Yes, delete!',
