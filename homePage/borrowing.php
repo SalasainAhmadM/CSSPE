@@ -3,7 +3,7 @@ session_start();
 require_once '../conn/conn.php';
 require_once '../conn/auth.php';
 
-validateSessionRole('instructor');
+validateSessionRole(['instructor', 'information_admin', 'inventory_admin']);
 
 $query_notifications = "SELECT COUNT(*) AS notification_count FROM notifications WHERE is_read = 0";
 $result_notifications = mysqli_query($conn, $query_notifications);
@@ -220,7 +220,9 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
 
                 <div class="subLoginContainer">
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Item Name:</label>
+                        <label for=""
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Item
+                            Name:</label>
                         <input class="inputEmail" type="text">
                     </div>
 
@@ -231,27 +233,36 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                     </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Quantity:</label>
+                        <label for=""
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Quantity:</label>
                         <input class="inputEmail" type="Number" placeholder="Quantity:">
                     </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Borrow Date:</label>
+                        <label for=""
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Borrow
+                            Date:</label>
                         <input class="inputEmail" type="date" placeholder="Date:">
                     </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Return Date:</label>
+                        <label for=""
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Return
+                            Date:</label>
                         <input class="inputEmail" type="date" placeholder="Date:">
                     </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Class schedule time from:</label>
+                        <label for=""
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Class
+                            schedule time from:</label>
                         <input class="inputEmail" type="time" placeholder="From:">
                     </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Class schedule time to:</label>
+                        <label for=""
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Class
+                            schedule time to:</label>
                         <input class="inputEmail" type="time" placeholder="To">
                     </div>
 

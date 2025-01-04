@@ -1,9 +1,9 @@
 <?php
 session_start();
-require_once '../conn/conn.php'; 
-require_once '../conn/auth.php'; 
+require_once '../conn/conn.php';
+require_once '../conn/auth.php';
 
-// validateSessionRole('instructor, information_admin');
+validateSessionRole(['instructor', 'information_admin', 'inventory_admin']);
 
 // Fetch user data
 $userid = $_SESSION['user_id'];
@@ -16,9 +16,6 @@ $result = $stmt->get_result();
 $user = $result->fetch_assoc();
 
 $stmt->close();
-
-
-
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $userid = $_SESSION['user_id'];
@@ -47,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $fileType = $_FILES['profile_image']['type'];
         $fileNameCmps = explode(".", $fileName);
         $fileExtension = strtolower(end($fileNameCmps));
-        
+
         // Allowed extensions
         $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
         if (in_array($fileExtension, $allowedExtensions)) {
@@ -89,6 +86,7 @@ $conn->close();
 <!DOCTYPE html>
 
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -100,10 +98,11 @@ $conn->close();
 
 
 </head>
+
 <body>
     <div class="body">
         <div class="sidebar">
-            <div  class="sidebarContent">
+            <div class="sidebarContent">
                 <div class="arrowContainer" style="margin-left: 80rem;" id="toggleButton">
                     <div class="subArrowContainer">
                         <img class="hideIcon" src="../assets/img/arrow.png" alt="">
@@ -112,17 +111,17 @@ $conn->close();
             </div>
             <div class="userContainer">
                 <div class="subUserContainer">
-                    <div class="userPictureContainer" >
+                    <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
                             <img class="subUserPictureContainer" src="../assets/img/CSSPE.png" alt="">
                         </div>
                     </div>
-    
+
                     <div class="userPictureContainer1">
                         <p>Khriz marr l. falcatan</p>
                     </div>
                 </div>
-        
+
                 <div class="navContainer">
                     <div class="subNavContainer">
                         <a href="../homePage/profile.php">
@@ -132,7 +131,7 @@ $conn->close();
                                 </div>
                             </div>
                         </a>
-        
+
                         <a href="../homePage/">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -140,7 +139,7 @@ $conn->close();
                                 </div>
                             </div>
                         </a>
-        
+
                         <a href="../homePage/borrowing.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -148,7 +147,7 @@ $conn->close();
                                 </div>
                             </div>
                         </a>
-        
+
                         <a href="../homePage/memorandumHome.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -156,7 +155,7 @@ $conn->close();
                                 </div>
                             </div>
                         </a>
-    
+
                         <a href="../homePage/events.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -164,7 +163,7 @@ $conn->close();
                                 </div>
                             </div>
                         </a>
-    
+
                         <a href="../homePage/members.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -172,7 +171,7 @@ $conn->close();
                                 </div>
                             </div>
                         </a>
-    
+
                         <a href="../homePage/organization.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -180,7 +179,7 @@ $conn->close();
                                 </div>
                             </div>
                         </a>
-    
+
                         <a href="../homePage/notification.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -195,7 +194,7 @@ $conn->close();
                         </a>
                     </div>
                 </div>
-        
+
                 <div class="subUserContainer">
                     <a href="../logout.php">
                         <div style="margin-left: 1.5rem;" class="userPictureContainer1">
@@ -205,7 +204,7 @@ $conn->close();
                 </div>
             </div>
         </div>
-    
+
         <div class="mainContainer" style="margin-left: 250px;">
             <div class="container">
                 <div class="headerContainer">
@@ -213,7 +212,7 @@ $conn->close();
                         <div class="logoContainer">
                             <img class="logo" src="../assets/img/CSSPE.png" alt="">
                         </div>
-        
+
                         <div class="collegeNameContainer">
                             <p>CSSPE Inventory & Information System</p>
                         </div>
@@ -226,12 +225,14 @@ $conn->close();
 
                 <div class="profileContainer">
                     <div class="subProfileContainer">
-                        
+
                         <div class="infoContainer">
                             <div class="pictureContainer1" style="background-color: none;">
-                                
+
                                 <div class="pictureContainer">
-                                <img src="<?= '../assets/img/' . htmlspecialchars($user['image']) ?>" alt="Profile Picture" style="width: 100%" border-radius: 50%; object-fit: cover; margin-left: 10%;">
+                                    <img src="<?= '../assets/img/' . htmlspecialchars($user['image']) ?>"
+                                        alt="Profile Picture" style="width: 100%" border-radius: 50%; object-fit: cover;
+                                        margin-left: 10%;">
                                 </div>
 
                                 <div style="margin-top: 1rem;">
@@ -242,35 +243,61 @@ $conn->close();
                             <div class="subLoginContainer">
 
                                 <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                                    <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Full Name:</label>
-                                    <h3 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;"><?= htmlspecialchars($user['first_name'] . ' ' . $user['middle_name'] . ' ' . $user['last_name']) ?></h3>
+                                    <label for=""
+                                        style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Full
+                                        Name:</label>
+                                    <h3
+                                        style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">
+                                        <?= htmlspecialchars($user['first_name'] . ' ' . $user['middle_name'] . ' ' . $user['last_name']) ?>
+                                    </h3>
                                 </div>
-                                
+
                                 <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                                    <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Email:</label>
-                                    <h3 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;"><?= htmlspecialchars($user['email']) ?></h3>
+                                    <label for=""
+                                        style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Email:</label>
+                                    <h3
+                                        style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">
+                                        <?= htmlspecialchars($user['email']) ?>
+                                    </h3>
                                 </div>
-                                
+
                                 <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                                    <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Contact No.:</label>
-                                    <h3 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;"><?= htmlspecialchars($user['contact_no']) ?></h3>
+                                    <label for=""
+                                        style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Contact
+                                        No.:</label>
+                                    <h3
+                                        style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">
+                                        <?= htmlspecialchars($user['contact_no']) ?>
+                                    </h3>
                                 </div>
-                                
+
                                 <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                                    <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Address:</label>
-                                    <h3 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;"><?= htmlspecialchars($user['address']) ?></h3>
+                                    <label for=""
+                                        style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Address:</label>
+                                    <h3
+                                        style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">
+                                        <?= htmlspecialchars($user['address']) ?>
+                                    </h3>
                                 </div>
-                                
+
                                 <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                                    <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Position:</label>
-                                    <h3 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;"><?= htmlspecialchars($user['rank']) ?></h3>
+                                    <label for=""
+                                        style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Position:</label>
+                                    <h3
+                                        style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">
+                                        <?= htmlspecialchars($user['rank']) ?>
+                                    </h3>
                                 </div>
-                                
+
                                 <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                                    <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Department:</label>
-                                    <h3 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;"><?= htmlspecialchars($user['department']) ?></h3>
+                                    <label for=""
+                                        style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Department:</label>
+                                    <h3
+                                        style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">
+                                        <?= htmlspecialchars($user['department']) ?>
+                                    </h3>
                                 </div>
-                                
+
                             </div>
 
                         </div>
@@ -283,7 +310,7 @@ $conn->close();
                             <div class="searchContainer">
                                 <input class="searchBar" type="text" placeholder="Search...">
                             </div>
-            
+
                             <div class="tableContainer">
                                 <table>
                                     <thead>
@@ -296,7 +323,7 @@ $conn->close();
                                             <th>Status</th>
                                         </tr>
                                     </thead>
-                
+
                                     <tbody>
                                         <tr>
                                             <td>1</td>
@@ -322,69 +349,91 @@ $conn->close();
                 <div class="infoContainer">
                     <div class="pictureContainer1" style="background-color: none;">
 
-                    <div class="pictureContainer">
-                        <img src="<?= '../assets/img/' . htmlspecialchars($user['image']) ?>" alt="Profile Picture" style="width: 100%; border-radius: 50%; object-fit: cover;">
+                        <div class="pictureContainer">
+                            <img src="<?= '../assets/img/' . htmlspecialchars($user['image']) ?>" alt="Profile Picture"
+                                style="width: 100%; border-radius: 50%; object-fit: cover;">
+                        </div>
+
+                        <form action="" method="POST" enctype="multipart/form-data">
+                            <input type="file" name="profile_image" accept="image/*" required>
+                            <button type="submit" class="addButton">Change Profile Image</button>
+                        </form>
+
+
                     </div>
 
-                    <form action="" method="POST" enctype="multipart/form-data">
-                        <input type="file" name="profile_image" accept="image/*" required>
-                        <button type="submit" class="addButton">Change Profile Image</button>
-                    </form>
-
-
-                    </div>
-    
                     <div class="subLoginContainer">
 
-                    <form action="" method="POST" enctype="multipart/form-data">
+                        <form action="" method="POST" enctype="multipart/form-data">
 
-                        <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                            <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">First Name:</label>
-                            <input class="inputEmail" name="first_name" value="<?= htmlspecialchars($user['first_name']) ?>" ="text">
-                        </div>
+                            <div class="inputContainer" style="flex-direction: column; height: 4rem;">
+                                <label for=""
+                                    style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">First
+                                    Name:</label>
+                                <input class="inputEmail" name="first_name"
+                                    value="<?= htmlspecialchars($user['first_name']) ?>"="text">
+                            </div>
 
-                        <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                            <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Last Name:</label>
-                            <input class="inputEmail" name="last_name" value="<?= htmlspecialchars($user['last_name']) ?>" type="text">
-                        </div>
+                            <div class="inputContainer" style="flex-direction: column; height: 4rem;">
+                                <label for=""
+                                    style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Last
+                                    Name:</label>
+                                <input class="inputEmail" name="last_name"
+                                    value="<?= htmlspecialchars($user['last_name']) ?>" type="text">
+                            </div>
 
-                        <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                            <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Middle Name:</label>
-                            <input class="inputEmail" name="middle_name" value="<?= htmlspecialchars($user['middle_name']) ?>" type="text">
-                        </div>
-                        
-                        <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                            <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Email:</label>
-                            <input class="inputEmail" name="email" value="<?= htmlspecialchars($user['email']) ?>" type="text">
-                        </div>
-                        
-                        <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                            <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Contact No.:</label>
-                            <input class="inputEmail" name="contact_no" value="<?= htmlspecialchars($user['contact_no']) ?>" type="text">
-                        </div>
-                        
-                        <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                            <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Address:</label>
-                            <input class="inputEmail" name="address" value="<?= htmlspecialchars($user['address']) ?>" type="text">
-                        </div>
-                        
-                        <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                            <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Position:</label>
-                            <input class="inputEmail" name="rank" value="<?= htmlspecialchars($user['rank']) ?>" type="text">
-                        </div>
+                            <div class="inputContainer" style="flex-direction: column; height: 4rem;">
+                                <label for=""
+                                    style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Middle
+                                    Name:</label>
+                                <input class="inputEmail" name="middle_name"
+                                    value="<?= htmlspecialchars($user['middle_name']) ?>" type="text">
+                            </div>
 
-                                                
-                        <div class="inputContainer" style="flex-direction: column; height: 4rem;">
-                            <label for="" style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Department:</label>
-                            <input class="inputEmail" name="department" value="<?= htmlspecialchars($user['department']) ?>" type="text">
-                        </div>
-                           
-                        <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
-                            <button type="submit" class="addButton" style="width: 6rem;">Save</button>
-                            <button onclick="profile()" class="addButton1" style="width: 6rem;">Cancel</button>
-                        </div>
-                        
-                    </form>
+                            <div class="inputContainer" style="flex-direction: column; height: 4rem;">
+                                <label for=""
+                                    style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Email:</label>
+                                <input class="inputEmail" name="email" value="<?= htmlspecialchars($user['email']) ?>"
+                                    type="text">
+                            </div>
+
+                            <div class="inputContainer" style="flex-direction: column; height: 4rem;">
+                                <label for=""
+                                    style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Contact
+                                    No.:</label>
+                                <input class="inputEmail" name="contact_no"
+                                    value="<?= htmlspecialchars($user['contact_no']) ?>" type="text">
+                            </div>
+
+                            <div class="inputContainer" style="flex-direction: column; height: 4rem;">
+                                <label for=""
+                                    style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Address:</label>
+                                <input class="inputEmail" name="address"
+                                    value="<?= htmlspecialchars($user['address']) ?>" type="text">
+                            </div>
+
+                            <div class="inputContainer" style="flex-direction: column; height: 4rem;">
+                                <label for=""
+                                    style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Position:</label>
+                                <input class="inputEmail" name="rank" value="<?= htmlspecialchars($user['rank']) ?>"
+                                    type="text">
+                            </div>
+
+
+                            <div class="inputContainer" style="flex-direction: column; height: 4rem;">
+                                <label for=""
+                                    style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Department:</label>
+                                <input class="inputEmail" name="department"
+                                    value="<?= htmlspecialchars($user['department']) ?>" type="text">
+                            </div>
+
+                            <div class="inputContainer"
+                                style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
+                                <button type="submit" class="addButton" style="width: 6rem;">Save</button>
+                                <button onclick="profile()" class="addButton1" style="width: 6rem;">Cancel</button>
+                            </div>
+
+                        </form>
 
                     </div>
                 </div>
@@ -396,4 +445,5 @@ $conn->close();
     <script src="../assets/js/uploadImage.js"></script>
     <script src="../assets/js/profile.js"></script>
 </body>
+
 </html>

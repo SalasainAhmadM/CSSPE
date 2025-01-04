@@ -3,7 +3,7 @@ session_start();
 require_once '../conn/conn.php';
 require_once '../conn/auth.php';
 
-validateSessionRole('instructor');
+validateSessionRole(['instructor', 'information_admin', 'inventory_admin']);
 
 // Update the is_read column to 1 for all notifications when the page is opened
 $updateQuery = "UPDATE notifications SET is_read = 1 WHERE is_read = 0";
@@ -193,7 +193,8 @@ if (isset($_GET['delete_id'])) {
 
                             <div class="subNotificaitonContainer">
                                 <div class="messageContainer" style="margin-bottom:1rem;">
-                                    <h3><?php echo htmlspecialchars($row['title']); ?><h3>
+                                    <h3><?php echo htmlspecialchars($row['title']); ?>
+                                        <h3>
                                 </div>
 
                                 <div class="messageContainer">

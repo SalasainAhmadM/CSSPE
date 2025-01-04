@@ -3,12 +3,12 @@ session_start();
 require_once '../conn/conn.php';
 require_once '../conn/auth.php';
 
-validateSessionRole('instructor');
+validateSessionRole(['instructor', 'information_admin', 'inventory_admin']);
 
 $limit = 12;
 
 // Get the current page or default to 1
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 
 // Calculate the starting point for the query
 $offset = ($page - 1) * $limit;
@@ -195,12 +195,13 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                             </div>
 
                             <div class="infoContainer2">
-                                <p>Uploaded at: <?php echo htmlspecialchars(date('Y-m-d', strtotime($row['uploaded_at']))); ?></p>
+                                <p>Uploaded at:
+                                    <?php echo htmlspecialchars(date('Y-m-d', strtotime($row['uploaded_at']))); ?>
+                                </p>
                             </div>
 
                             <div class="buttonContainer">
-                                <button class="addButton" style="width: 6rem;"
-                                    onclick="editProgram(
+                                <button class="addButton" style="width: 6rem;" onclick="editProgram(
                         '<?php echo $row['title']; ?>', 
                         '<?php echo $row['description']; ?>',
                         '<?php echo $row['file_path']; ?>',
@@ -219,7 +220,8 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                     <?php endif; ?>
 
                     <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                        <a href="?page=<?php echo $i; ?>" class="<?php echo ($i === $page) ? 'active' : ''; ?>"><?php echo $i; ?></a>
+                        <a href="?page=<?php echo $i; ?>"
+                            class="<?php echo ($i === $page) ? 'active' : ''; ?>"><?php echo $i; ?></a>
                     <?php endfor; ?>
 
                     <?php if ($page < $totalPages): ?>
@@ -240,7 +242,8 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
 
             <div class="inputContainer" style="flex-direction: column; min-height: 20rem;">
                 <div class="imageContainer">
-                    <img id="memorandumImage" class="image2" src="../assets/img/freepik-untitled-project-20241018143133NtJY.png" alt="">
+                    <img id="memorandumImage" class="image2"
+                        src="../assets/img/freepik-untitled-project-20241018143133NtJY.png" alt="">
                 </div>
             </div>
 
@@ -250,11 +253,13 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                 </div>
 
                 <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                    <label style="text-align: center; font-size: 1.5rem;">Description: <p id="memorandumDescription"></p></label>
+                    <label style="text-align: center; font-size: 1.5rem;">Description: <p id="memorandumDescription">
+                        </p></label>
                 </div>
 
                 <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                    <label style="text-align: center; font-size: 1.5rem;">Date Uploaded: <p id="memorandumUploadedAt"></p></label>
+                    <label style="text-align: center; font-size: 1.5rem;">Date Uploaded: <p id="memorandumUploadedAt">
+                        </p></label>
                 </div>
 
                 <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
