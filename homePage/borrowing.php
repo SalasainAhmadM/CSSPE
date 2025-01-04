@@ -4,6 +4,7 @@ require_once '../conn/conn.php';
 require_once '../conn/auth.php';
 
 validateSessionRole(['instructor', 'information_admin', 'inventory_admin']);
+$inventoryAdminId = $_SESSION['user_id'];
 
 $query_notifications = "SELECT COUNT(*) AS notification_count FROM notifications WHERE is_read = 0";
 $result_notifications = mysqli_query($conn, $query_notifications);
@@ -12,6 +13,23 @@ $notificationCount = 0;
 if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_notifications)) {
     $notificationCount = $row_notifications['notification_count'];
 }
+
+$query = "SELECT first_name, middle_name, last_name, image FROM users WHERE id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $inventoryAdminId);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $fullName = trim($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']);
+    $image = $row['image'];
+} else {
+    $fullName = "User Not Found";
+}
+
+$itemsQuery = "SELECT * FROM items";
+$itemsResult = $conn->query($itemsQuery);
 ?>
 
 <!DOCTYPE html>
@@ -28,6 +46,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
 
 <body>
     <div class="body">
+
         <div class="sidebar">
             <div class="sidebarContent">
                 <div class="arrowContainer" style="margin-left: 80rem;" id="toggleButton">
@@ -132,12 +151,35 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
             </div>
         </div>
 
+        <style>
+            .inventoryGrid {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                padding: 50px;
+                justify-content: space-between;
+                text-align: center;
+            }
+
+            .inventoryContainer {
+                flex: 0 0 calc(16.6% - 20px);
+                box-sizing: border-box;
+                background-color: #f9f9f9;
+                border: 1px solid #ddd;
+                padding: 10px;
+                text-align: center;
+            }
+
+            .inventoryContainer img {
+                object-fit: cover;
+            }
+        </style>
         <div class="mainContainer" style="margin-left: 250px;">
             <div class="container">
                 <div class="headerContainer">
                     <div class="subHeaderContainer">
                         <div class="logoContainer">
-                            <img class="logo" src="../assets/img/CSSPE.png" alt="">
+                            <img class="logo" src="/dionSe/assets/img/CSSPE.png" alt="">
                         </div>
 
                         <div class="collegeNameContainer">
@@ -151,61 +193,42 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                 </div>
 
                 <div class="searchContainer">
-                    <input class="searchBar2" type="text" placeholder="Search..." oninput="searchCard2()">
-                    <select name="" class="addButton size">
-                        <option value="">Sort By Availability</option>
-                        <option value="availabilityHighToLow">Highest to Lowest</option>
-                        <option value="availabilityLowToHigh">Lowest to Highest</option>
-                    </select>
+                    <input id="searchBar" class="searchBar" type="text" placeholder="Search...">
                 </div>
 
-                <div class="inventoryContainer">
-
-                    <div class="subInventoryContainer">
-                        <div class="imageContainer" style="border-bottom: solid gray 1px;">
-                            <img class="image" src="../assets/img/CSSPE.png" alt="">
-                        </div>
-
-                        <div class="infoContainer">
-                            <p>Item Name</p>
-                        </div>
-
-                        <div class="infoContainer1">
-                            <p>Description</p>
-                        </div>
-
-                        <div class="infoContainer1">
-                            <p>Available: 6</p>
-                        </div>
-
-                        <div class="buttonContainer">
-                            <button onclick="editProgram()" class="addButton">Borrow</button>
-                        </div>
-                    </div>
-
-                    <div class="subInventoryContainer">
-                        <div class="imageContainer" style="border-bottom: solid gray 1px;">
-                            <img class="image" src="../assets/img/CSSPE.png" alt="">
-                        </div>
-
-                        <div class="infoContainer">
-                            <p>Nzro</p>
-                        </div>
-
-                        <div class="infoContainer1">
-                            <p>Description</p>
-                        </div>
-
-                        <div class="infoContainer1">
-                            <p>Available: 10</p>
-                        </div>
-
-                        <div class="buttonContainer">
-                            <button onclick="editProgram()" class="addButton">Borrow</button>
-                        </div>
-                    </div>
-
+                <!-- Main inventory grid -->
+                <div id="inventoryGrid" class="inventoryGrid">
+                    <?php if ($itemsResult->num_rows > 0): ?>
+                        <?php while ($item = $itemsResult->fetch_assoc()): ?>
+                            <div class="inventoryContainer" data-title="<?= htmlspecialchars($item['name']) ?>">
+                                <div class="subInventoryContainer">
+                                    <div class="imageContainer" style="border-bottom: solid gray 1px;">
+                                        <img style="height: 50px;" class="image"
+                                            src="../../assets/uploads/<?= htmlspecialchars($item['image'] ?: '../../assets/img/CSSPE.png') ?>"
+                                            alt="Item Image">
+                                    </div>
+                                    <div class="infoContainer">
+                                        <p><?= htmlspecialchars($item['name']) ?></p>
+                                    </div>
+                                    <div class="infoContainer1">
+                                        <p><?= htmlspecialchars($item['description']) ?></p>
+                                    </div>
+                                    <div class="infoContainer1">
+                                        <p>Available: <?= htmlspecialchars($item['quantity']) ?></p>
+                                    </div>
+                                    <div class="buttonContainer">
+                                        <button onclick="borrowItem(<?= htmlspecialchars($item['id']) ?>)"
+                                            class="addButton">Borrow</button>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endwhile; ?>
+                    <?php else: ?>
+                        <p>No items available</p>
+                    <?php endif; ?>
                 </div>
+
+
 
             </div>
         </div>
@@ -275,10 +298,28 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
         </div>
     </div>
 
-    <script src="../assets/js/search_Card.js"></script>
-    <script src="../assets/js/sidebar.js"></script>
-    <script src="../assets/js/program.js"></script>
+    <script>
+        const searchBar = document.getElementById('searchBar');
+        const inventoryGrid = document.getElementById('inventoryGrid');
 
+        searchBar.addEventListener('input', function () {
+            const searchTerm = searchBar.value.toLowerCase();
+            const inventoryContainers = inventoryGrid.getElementsByClassName('inventoryContainer');
+
+            for (const container of inventoryContainers) {
+                const title = container.getAttribute('data-title').toLowerCase();
+                container.style.display = title.includes(searchTerm) ? '' : 'none';
+            }
+        });
+
+
+        function borrowItem(itemId) {
+            alert('Borrow item with ID: ' + itemId);
+            // Implement AJAX request to handle borrowing logic here
+        }
+    </script>
+    <script src="/dionSe/assets/js/sidebar.js"></script>
+    <script src="/dionSe/assets/js/program.js"></script>
 </body>
 
 </html>
