@@ -3,7 +3,7 @@ session_start();
 require_once '../conn/conn.php';
 require_once '../conn/auth.php';
 
-validateSessionRole('instructor');
+validateSessionRole(['instructor', 'information_admin', 'inventory_admin']);
 
 // User ID from session
 $userid = $_SESSION['user_id'];
@@ -173,8 +173,10 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                                 </div>
 
                                 <div class="dateContainer" style="padding:10px 2px;">
-                                    <h6 style="margin-left: 0.5rem;">Location: <?php echo htmlspecialchars($row['location']); ?></h6>
-                                    <h6 style="margin-left: 0.5rem;">Date: <?php echo addslashes(date('Y-m-d', strtotime($row['date_uploaded_at']))); ?></h6>
+                                    <h6 style="margin-left: 0.5rem;">Location:
+                                        <?php echo htmlspecialchars($row['location']); ?></h6>
+                                    <h6 style="margin-left: 0.5rem;">Date:
+                                        <?php echo addslashes(date('Y-m-d', strtotime($row['date_uploaded_at']))); ?></h6>
                                 </div>
                             </div>
                         </div>
