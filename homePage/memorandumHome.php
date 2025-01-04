@@ -3,7 +3,7 @@ session_start();
 require_once '../conn/conn.php';
 require_once '../conn/auth.php';
 
-validateSessionRole('instructor');
+validateSessionRole(['instructor', 'information_admin', 'inventory_admin']);
 
 $limit = 12;
 
@@ -17,13 +17,11 @@ $offset = ($page - 1) * $limit;
 $query = "SELECT * FROM memorandums LIMIT $limit OFFSET $offset";
 $result = mysqli_query($conn, $query);
 
-// Count total records
 $totalQuery = "SELECT COUNT(*) AS total FROM memorandums";
 $totalResult = mysqli_query($conn, $totalQuery);
 $totalRow = mysqli_fetch_assoc($totalResult);
 $totalItems = $totalRow['total'];
 
-// Calculate total pages
 $totalPages = ceil($totalItems / $limit);
 
 $query_notifications = "SELECT COUNT(*) AS notification_count FROM notifications WHERE is_read = 0";

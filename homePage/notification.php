@@ -3,7 +3,7 @@ session_start();
 require_once '../conn/conn.php';
 require_once '../conn/auth.php';
 
-validateSessionRole('instructor');
+validateSessionRole(['instructor', 'information_admin', 'inventory_admin']);
 
 // Update the is_read column to 1 for all notifications when the page is opened
 $updateQuery = "UPDATE notifications SET is_read = 1 WHERE is_read = 0";
