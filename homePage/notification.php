@@ -69,7 +69,7 @@ if (isset($_GET['delete_id'])) {
                     </div>
 
                     <div class="userPictureContainer1">
-                        <p>Khriz marr l. falcatan</p>
+                        <p><?php echo ($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?></p>
                     </div>
                 </div>
 
