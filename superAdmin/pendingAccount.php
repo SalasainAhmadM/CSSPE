@@ -1,9 +1,9 @@
 <?php
 session_start();
 require_once '../conn/conn.php';
-require_once '../conn/auth.php'; 
+require_once '../conn/auth.php';
 
-// validateSessionRole('super_admin');
+validateSessionRole('super_admin');
 
 // Fetch data from the pending_users table
 $query = "SELECT id, first_name, last_name, middle_name, email, address, contact_no, rank, password, created_at, role, department FROM pending_users";
@@ -27,7 +27,7 @@ if (isset($_GET['approve_id'])) {
     $select_query = "SELECT * FROM pending_users WHERE id = $user_id";
     $result_select = mysqli_query($conn, $select_query);
     $pending_user = mysqli_fetch_assoc($result_select);
-    
+
     $insert_query = "INSERT INTO users (first_name, last_name, middle_name, email, address, contact_no, rank, password, role, department) 
                      VALUES ('" . mysqli_real_escape_string($conn, $pending_user['first_name']) . "', 
                              '" . mysqli_real_escape_string($conn, $pending_user['last_name']) . "', 
@@ -38,9 +38,8 @@ if (isset($_GET['approve_id'])) {
                              '" . mysqli_real_escape_string($conn, $pending_user['rank']) . "', 
                              '" . mysqli_real_escape_string($conn, $pending_user['password']) . "', 
                              '" . mysqli_real_escape_string($conn, $pending_user['role']) . "',
-                             '" . mysqli_real_escape_string($conn, $pending_user['department']) . "')"
-                             ;
-                             
+                             '" . mysqli_real_escape_string($conn, $pending_user['department']) . "')";
+
     if (mysqli_query($conn, $insert_query)) {
         $delete_query = "DELETE FROM pending_users WHERE id = $user_id";
         if (mysqli_query($conn, $delete_query)) {
@@ -72,7 +71,7 @@ if (isset($_GET['approve_id'])) {
 
 <body>
     <div class="body">
-    <div class="sidebar">
+        <div class="sidebar">
             <div class="sidebarContent">
                 <div class="arrowContainer" style="margin-left: 80rem;" id="toggleButton">
                     <div class="subArrowContainer">
@@ -89,14 +88,15 @@ if (isset($_GET['approve_id'])) {
                     </div>
 
                     <div class="userPictureContainer1">
-                        <p>Khriz marr l. falcatan</p>
+                        <?php echo ($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?><br>
+                        <?php echo $_SESSION['user_role'] ?>
                     </div>
                 </div>
 
                 <div class="navContainer">
                     <div class="subNavContainer">
 
-                        <a href="../superAdmin/homePage/announcement.php">
+                        <a href="../homePage/">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Home</p>
@@ -104,7 +104,7 @@ if (isset($_GET['approve_id'])) {
                             </div>
                         </a>
 
-                        <a href="../superAdmin/account.php">
+                        <a href="../superAdmin/">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Accounts</p>
@@ -128,7 +128,7 @@ if (isset($_GET['approve_id'])) {
                             </div>
                         </a>
 
-                        <a href="../superAdmin/informationAdmin/program.php">
+                        <a href="../informationAdmin/">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Information Admin Panel</p>
@@ -136,7 +136,7 @@ if (isset($_GET['approve_id'])) {
                             </div>
                         </a>
 
-                        <a href="../superAdmin/inventoryAdmin/dashboard.php">
+                        <a href="../inventoryAdmin/">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Inventory Admin Panel</p>
@@ -199,7 +199,7 @@ if (isset($_GET['approve_id'])) {
                         </thead>
 
                         <tbody>
-                            <?php while($row = mysqli_fetch_assoc($result)): ?>
+                            <?php while ($row = mysqli_fetch_assoc($result)): ?>
                                 <tr>
                                     <td><?php echo htmlspecialchars($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']); ?></td>
                                     <td><?php echo htmlspecialchars($row['email']); ?></td>
