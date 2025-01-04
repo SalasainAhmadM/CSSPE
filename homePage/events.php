@@ -1,7 +1,7 @@
 <?php
 session_start();
-require_once '../conn/conn.php'; 
-require_once '../conn/auth.php'; 
+require_once '../conn/conn.php';
+require_once '../conn/auth.php';
 
 validateSessionRole(['instructor', 'information_admin', 'inventory_admin']);
 
@@ -19,6 +19,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,10 +28,11 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
     <link rel="stylesheet" href="../assets/css/events.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
 </head>
+
 <body>
     <div class="body">
         <div class="sidebar">
-            <div  class="sidebarContent">
+            <div class="sidebarContent">
                 <div class="arrowContainer" style="margin-left: 80rem;" id="toggleButton">
                     <div class="subArrowContainer">
                         <img class="hideIcon" src="../assets/img/arrow.png" alt="">
@@ -39,17 +41,17 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
             </div>
             <div class="userContainer">
                 <div class="subUserContainer">
-                    <div class="userPictureContainer" >
+                    <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
                             <img class="subUserPictureContainer" src="../assets/img/CSSPE.png" alt="">
                         </div>
                     </div>
-    
+
                     <div class="userPictureContainer1">
                         <p>Khriz marr l. falcatan</p>
                     </div>
                 </div>
-        
+
                 <div class="navContainer">
                     <div class="subNavContainer">
                         <a href="../homePage/profile.php">
@@ -59,7 +61,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                                 </div>
                             </div>
                         </a>
-        
+
                         <a href="../homePage/">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -67,7 +69,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                                 </div>
                             </div>
                         </a>
-        
+
                         <a href="../homePage/borrowing.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -75,7 +77,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                                 </div>
                             </div>
                         </a>
-        
+
                         <a href="../homePage/memorandumHome.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -83,7 +85,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                                 </div>
                             </div>
                         </a>
-    
+
                         <a href="../homePage/events.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -91,7 +93,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                                 </div>
                             </div>
                         </a>
-    
+
                         <a href="../homePage/members.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -99,7 +101,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                                 </div>
                             </div>
                         </a>
-    
+
                         <a href="../homePage/organization.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -107,7 +109,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                                 </div>
                             </div>
                         </a>
-    
+
                         <a href="../homePage/notification.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -122,7 +124,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                         </a>
                     </div>
                 </div>
-        
+
                 <div class="subUserContainer">
                     <a href="../logout.php">
                         <div style="margin-left: 1.5rem;" class="userPictureContainer1">
@@ -132,7 +134,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                 </div>
             </div>
         </div>
-    
+
         <div class="mainContainer" style="margin-left: 250px;">
             <div class="container">
                 <div class="headerContainer">
@@ -140,7 +142,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                         <div class="logoContainer">
                             <img class="logo" src="/dionSe/assets/img/CSSPE.png" alt="">
                         </div>
-        
+
                         <div class="collegeNameContainer">
                             <p>CSSPE Inventory & Information System</p>
                         </div>
@@ -158,7 +160,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                     </select>
                 </div>
 
-                
+
                 <div class="tableContainer" style="height:475px">
                     <table>
                         <thead>
@@ -169,13 +171,13 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                             </tr>
                         </thead>
                         <?php while ($row = mysqli_fetch_assoc($result)): ?>
-                        <tbody>
-                            <tr>
-                                <td><?php echo htmlspecialchars($row['title']); ?></td>
-                                <td><?php echo htmlspecialchars($row['description']); ?></td>
-                                <td><?php echo htmlspecialchars($row['date_uploaded_at']); ?></td>
-                            </tr>
-                        </tbody>
+                            <tbody>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($row['title']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['description']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['date_uploaded_at']); ?></td>
+                                </tr>
+                            </tbody>
                         <?php endwhile; ?>
                     </table>
                 </div>
@@ -187,4 +189,5 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
     <script src="../assets/js/sidebar.js"></script>
     <script src="../assets/js/program.js"></script>
 </body>
+
 </html>

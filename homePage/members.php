@@ -200,9 +200,11 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                         <?php while ($row = mysqli_fetch_assoc($result)): ?>
                             <tbody>
                                 <tr>
-                                    <td><?php echo htmlspecialchars($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']); ?>
+                                    </td>
                                     <td>
-                                        <img class="" src="<?= '../assets/img/' . htmlspecialchars($row['image']) ?>" style="width:100px" alt="">
+                                        <img class="" src="<?= '../assets/img/' . htmlspecialchars($row['image']) ?>"
+                                            style="width:100px" alt="">
                                     </td>
                                     <td><?php echo htmlspecialchars($row['email']); ?></td>
                                     <td><?php echo htmlspecialchars($row['address']); ?></td>

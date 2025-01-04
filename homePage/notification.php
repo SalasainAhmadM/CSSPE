@@ -193,7 +193,8 @@ if (isset($_GET['delete_id'])) {
 
                             <div class="subNotificaitonContainer">
                                 <div class="messageContainer" style="margin-bottom:1rem;">
-                                    <h3><?php echo htmlspecialchars($row['title']); ?><h3>
+                                    <h3><?php echo htmlspecialchars($row['title']); ?>
+                                        <h3>
                                 </div>
 
                                 <div class="messageContainer">
