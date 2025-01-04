@@ -184,9 +184,9 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                 <div class="inventoryContainer1" id="inventoryContainer">
                     <?php while ($row = mysqli_fetch_assoc($result)): ?>
                         <div class="subInventoryContainer1">
-                            <div class="imageContainer1" style="border-bottom: solid gray 1px;">
+                            <!-- <div class="imageContainer1" style="border-bottom: solid gray 1px;">
                                 <img class="image2" src="../assets/img/CSSPE.png" alt="">
-                            </div>
+                            </div> -->
 
                             <div class="infoContainer1">
                                 <p><?php echo htmlspecialchars($row['title']); ?></p>

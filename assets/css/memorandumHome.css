@@ -15,7 +15,7 @@
 .pagination {
     display: flex;
     justify-content: center;
-    margin: 20px 0;
+    margin: 5px 0;
 }
 
 .pagination a {
@@ -301,7 +301,7 @@
 }
 
 .inventoryContainer1 {
-    margin-top: 3rem;
+    margin-top: 2rem;
     width: 100%;
     display: flex;
     justify-content: center;
@@ -309,7 +309,7 @@
     gap: 1rem;
     overflow-y: auto; 
     overflow-x: auto;
-    max-height: 45%; 
+    /* max-height: 45%;  */
 }
 
 
@@ -469,6 +469,7 @@
     }
 
     .subInventoryContainer1{
-        width: 25rem;
+        width: 20rem;
+        margin-bottom: 5px;
     }
 }

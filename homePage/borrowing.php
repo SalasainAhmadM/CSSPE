@@ -318,8 +318,8 @@ $itemsResult = $conn->query($itemsQuery);
             // Implement AJAX request to handle borrowing logic here
         }
     </script>
-    <script src="/dionSe/assets/js/sidebar.js"></script>
-    <script src="/dionSe/assets/js/program.js"></script>
+    <script src="../assets/js/sidebar.js"></script>
+    <script src="../assets/js/program.js"></script>
 </body>
 
 </html>
