@@ -7,7 +7,7 @@ validateSessionRole('inventory_admin');
 $inventoryAdminId = $_SESSION['user_id'];
 
 // Fetch user details
-$query = "SELECT first_name, middle_name, last_name, email, address, contact_no, department, role, rank FROM users WHERE id = ?";
+$query = "SELECT first_name, middle_name, last_name, email, address, contact_no, image, department, role, rank FROM users WHERE id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $inventoryAdminId);
 $stmt->execute();
@@ -19,6 +19,7 @@ if ($result->num_rows > 0) {
     $firstName = $row['first_name'];
     $middleName = $row['middle_name'];
     $lastName = $row['last_name'];
+    $image = $row['image'];
     $email = $row['email'];
     $address = $row['address'];
     $contactNo = $row['contact_no'];
@@ -60,7 +61,9 @@ if ($result->num_rows > 0) {
                 <div class="subUserContainer">
                     <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
-                            <img class="subUserPictureContainer" src="/dionSe/assets/img/CSSPE.png" alt="">
+                            <img class="subUserPictureContainer"
+                                src="../../assets/img/<?= !empty($image) ? htmlspecialchars($image) : '/dionSe/assets/img/CSSPE.png' ?>"
+                                alt="">
                         </div>
                     </div>
 
@@ -177,12 +180,14 @@ if ($result->num_rows > 0) {
                     <div class="subProfileContainer">
                         <div class="infoContainer">
                             <div class="pictureContainer1">
-                                <div class="pictureContainer" style="cursor: pointer;" onclick="triggerImageUpload()">
-                                    <img id="profileImage" class="picture" src="/dionSe/assets/img/CSSPE.png"
+                                <div class="pictureContainer" style="cursor: pointer;"
+                                    onclick="document.getElementById('imageInput').click()">
+                                    <img id="profileImage" class="picture"
+                                        src="../../assets/img/<?= !empty($image) ? htmlspecialchars($image) : '/dionSe/assets/img/CSSPE.png' ?>"
                                         alt="Profile Picture">
-                                    <input type="file" id="imageInput" accept="image/*" style="display: none;"
-                                        onchange="previewImage(event)">
                                 </div>
+                                <input type="file" id="imageInput" style="display: none;" accept="image/*"
+                                    onchange="updateImagePreview(this)">
 
                                 <div style="margin-top: 1rem;">
                                     <button onclick="confirmEditProfile()" class="addButton">Edit Profile</button>
@@ -190,7 +195,7 @@ if ($result->num_rows > 0) {
                             </div>
 
                             <div class="subLoginContainer">
-                                <form id="editProfileForm">
+                                <form id="editProfileForm" enctype="multipart/form-data">
                                     <div class="inputContainer"
                                         style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; height: 4rem;">
                                         <div style="flex: 10 0 30%; padding-left: 30px;">
@@ -310,7 +315,7 @@ if ($result->num_rows > 0) {
         <div class="editContainer3 size1">
             <div class="subProfileContainer size6">
                 <div class="infoContainer">
-                    <div class="pictureContainer1" style="background-color: none;">
+                    <!-- <div class="pictureContainer1" style="background-color: none;">
                         <div class="pictureContainer" style="cursor: pointer;" onclick="triggerImageUpload()">
                             <img id="profileImage" class="picture" src="/dionSe/assets/img/CSSPE.png"
                                 alt="Profile Picture">
@@ -321,7 +326,7 @@ if ($result->num_rows > 0) {
                             <button onclick="triggerImageUpload()" class="addButton" id="imageUpload"
                                 style="width: 100%;">Change Profile</button>
                         </div>
-                    </div>
+                    </div> -->
 
                     <div class="subLoginContainer">
                         <div class="inputContainer" style="flex-direction: column; height: 4rem;">
@@ -379,27 +384,16 @@ if ($result->num_rows > 0) {
     </div>
 
     <script>
-        function triggerImageUpload() {
-            const imageInput = document.getElementById('imageInput');
-            if (imageInput) {
-                imageInput.click();
+        function updateImagePreview(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('profileImage').src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
             }
         }
 
-        // Display a preview of the selected image
-        function previewImage(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const profileImage = document.getElementById('profileImage');
-                    if (profileImage) {
-                        profileImage.src = e.target.result;
-                    }
-                };
-                reader.readAsDataURL(file);
-            }
-        }
         function confirmEditProfile() {
             Swal.fire({
                 title: 'Edit Profile',
@@ -426,18 +420,19 @@ if ($result->num_rows > 0) {
                         .then((data) => {
                             if (data.success) {
                                 Swal.fire('Success', data.message, 'success').then(() => {
-                                    location.reload(); // Reload page to reflect changes
+                                    location.reload();
                                 });
                             } else {
                                 Swal.fire('Error', data.message, 'error');
                             }
                         })
-                        .catch((error) => {
+                        .catch(() => {
                             Swal.fire('Error', 'An unexpected error occurred. Please try again.', 'error');
                         });
                 }
             });
         }
+
     </script>
     <!-- SweetAlert2 CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">

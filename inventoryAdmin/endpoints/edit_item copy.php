@@ -52,9 +52,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     if ($stmt->execute()) {
-        // Update similar items
-        updateSimilarItems($name, $id);
-
         echo json_encode(['status' => 'success', 'message' => 'Item updated successfully!']);
     } else {
         echo json_encode(['status' => 'error', 'message' => 'Failed to update item.']);
@@ -62,28 +59,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $stmt->close();
     $conn->close();
-}
-
-function updateSimilarItems($newName, $currentItemId)
-{
-    global $conn;
-
-    // Find items with similar names
-    $query = "SELECT id FROM items WHERE name LIKE ? AND id != ?";
-    $stmt = $conn->prepare($query);
-    $likePattern = "%" . $newName . "%";
-    $stmt->bind_param("si", $likePattern, $currentItemId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    while ($row = $result->fetch_assoc()) {
-        $updateQuery = "UPDATE items SET name = ? WHERE id = ?";
-        $updateStmt = $conn->prepare($updateQuery);
-        $updateStmt->bind_param("si", $newName, $row['id']);
-        $updateStmt->execute();
-        $updateStmt->close();
-    }
-
-    $stmt->close();
 }
 ?>

@@ -105,7 +105,8 @@ CREATE TABLE `items` (
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL,
   `users_id` int(11) NOT NULL,
-  `image` varchar(255) DEFAULT NULL
+  `image` varchar(255) DEFAULT NULL,
+  `type` ENUM('origin', 'brand') NOT NULL DEFAULT 'origin'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -139,7 +140,8 @@ CREATE TABLE `item_transactions` (
   `item_id` int(11) NOT NULL,
   `users_id` int(11) NOT NULL,
   `schedule_from` time NOT NULL,
-  `schedule_to` time NOT NULL
+  `schedule_to` time NOT NULL,
+   `status` ENUM('Pending', 'Approved') NOT NULL DEFAULT 'Pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------

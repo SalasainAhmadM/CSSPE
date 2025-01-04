@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $filePath = $uploadDir . $fileName;
 
         if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $filePath)) {
-            $imagePath = 'assets/img/' . $fileName;
+            $imagePath = $fileName;
         } else {
             echo json_encode(['success' => false, 'message' => 'Failed to upload image.']);
             exit;

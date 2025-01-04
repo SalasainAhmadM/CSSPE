@@ -6,7 +6,7 @@ require_once '../../conn/auth.php';
 validateSessionRole('inventory_admin');
 $inventoryAdminId = $_SESSION['user_id'];
 
-$query = "SELECT first_name, middle_name, last_name FROM users WHERE id = ?";
+$query = "SELECT first_name, middle_name, last_name, image FROM users WHERE id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $inventoryAdminId);
 $stmt->execute();
@@ -15,6 +15,7 @@ $result = $stmt->get_result();
 if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
     $fullName = trim($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']);
+    $image = $row['image'];
 } else {
     $fullName = "User Not Found";
 }
@@ -48,7 +49,9 @@ $itemsResult = $conn->query($itemsQuery);
                 <div class="subUserContainer">
                     <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
-                            <img class="subUserPictureContainer" src="/dionSe/assets/img/CSSPE.png" alt="">
+                            <img class="subUserPictureContainer"
+                                src="../../assets/img/<?= !empty($image) ? htmlspecialchars($image) : '/dionSe/assets/img/CSSPE.png' ?>"
+                                alt="">
                         </div>
                     </div>
 
@@ -149,6 +152,7 @@ $itemsResult = $conn->query($itemsQuery);
                 gap: 10px;
                 padding: 50px;
                 justify-content: space-between;
+                text-align: center;
             }
 
             .inventoryContainer {
@@ -183,17 +187,17 @@ $itemsResult = $conn->query($itemsQuery);
                 </div>
 
                 <div class="searchContainer">
-                    <input class="searchBar" type="text" placeholder="Search...">
+                    <input id="searchBar" class="searchBar" type="text" placeholder="Search...">
                 </div>
 
                 <!-- Main inventory grid -->
-                <div class="inventoryGrid">
+                <div id="inventoryGrid" class="inventoryGrid">
                     <?php if ($itemsResult->num_rows > 0): ?>
                         <?php while ($item = $itemsResult->fetch_assoc()): ?>
-                            <div class="inventoryContainer">
+                            <div class="inventoryContainer" data-title="<?= htmlspecialchars($item['name']) ?>">
                                 <div class="subInventoryContainer">
                                     <div class="imageContainer" style="border-bottom: solid gray 1px;">
-                                        <img style=" height: 50px;" class="image"
+                                        <img style="height: 50px;" class="image"
                                             src="../../assets/uploads/<?= htmlspecialchars($item['image'] ?: '../../assets/img/CSSPE.png') ?>"
                                             alt="Item Image">
                                     </div>
@@ -218,12 +222,8 @@ $itemsResult = $conn->query($itemsQuery);
                     <?php endif; ?>
                 </div>
 
-                <script>
-                    function borrowItem(itemId) {
-                        alert('Borrow item with ID: ' + itemId);
-                        // Implement AJAX request to handle borrowing logic here
-                    }
-                </script>
+
+
             </div>
         </div>
     </div>
@@ -292,6 +292,26 @@ $itemsResult = $conn->query($itemsQuery);
         </div>
     </div>
 
+    <script>
+        const searchBar = document.getElementById('searchBar');
+        const inventoryGrid = document.getElementById('inventoryGrid');
+
+        searchBar.addEventListener('input', function () {
+            const searchTerm = searchBar.value.toLowerCase();
+            const inventoryContainers = inventoryGrid.getElementsByClassName('inventoryContainer');
+
+            for (const container of inventoryContainers) {
+                const title = container.getAttribute('data-title').toLowerCase();
+                container.style.display = title.includes(searchTerm) ? '' : 'none';
+            }
+        });
+
+
+        function borrowItem(itemId) {
+            alert('Borrow item with ID: ' + itemId);
+            // Implement AJAX request to handle borrowing logic here
+        }
+    </script>
     <script src="/dionSe/assets/js/sidebar.js"></script>
     <script src="/dionSe/assets/js/program.js"></script>
 </body>

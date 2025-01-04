@@ -6,7 +6,7 @@ require_once '../../conn/auth.php';
 validateSessionRole('inventory_admin');
 $inventoryAdminId = $_SESSION['user_id'];
 
-$query = "SELECT first_name, middle_name, last_name FROM users WHERE id = ?";
+$query = "SELECT first_name, middle_name, last_name, image FROM users WHERE id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $inventoryAdminId);
 $stmt->execute();
@@ -15,6 +15,7 @@ $result = $stmt->get_result();
 if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
     $fullName = trim($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']);
+    $image = $row['image'];
 } else {
     $fullName = "User Not Found";
 }
@@ -48,7 +49,9 @@ $memoResult = $conn->query($memoQuery);
                 <div class="subUserContainer">
                     <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
-                            <img class="subUserPictureContainer" src="/dionSe/assets/img/CSSPE.png" alt="">
+                            <img class="subUserPictureContainer"
+                                src="../../assets/img/<?= !empty($image) ? htmlspecialchars($image) : '/dionSe/assets/img/CSSPE.png' ?>"
+                                alt="">
                         </div>
                     </div>
 
@@ -182,32 +185,56 @@ $memoResult = $conn->query($memoQuery);
                     <p class="text">Memorandums</p>
                 </div>
 
+                <?php
+
+                date_default_timezone_set('Asia/Manila');
+
+                $filter = isset($_GET['filter']) ? $_GET['filter'] : '';
+                $currentDate = date('Y-m-d');
+                $currentWeekStart = date('Y-m-d', strtotime('monday this week'));
+                $currentWeekEnd = date('Y-m-d', strtotime('sunday this week'));
+                $currentMonth = date('Y-m');
+
+                $query = "SELECT * FROM memorandums";
+
+                if ($filter === 'day') {
+                    $query .= " WHERE DATE(uploaded_at) = '$currentDate'";
+                } elseif ($filter === 'week') {
+                    $query .= " WHERE DATE(uploaded_at) BETWEEN '$currentWeekStart' AND '$currentWeekEnd'";
+                } elseif ($filter === 'month') {
+                    $query .= " WHERE DATE_FORMAT(uploaded_at, '%Y-%m') = '$currentMonth'";
+                }
+
+                $memoResult = $conn->query($query);
+                ?>
+
                 <div class="searchContainer">
-                    <input class="searchBar" type="text" placeholder="Search...">
-                    <select name="" class="addButton size" id="">
+                    <input id="searchBar" class="searchBar" type="text" placeholder="Search by title...">
+                    <select name="filter" class="addButton size" id="filterSelect" onchange="applyFilter()">
                         <option value="">Filter</option>
-                        <option value="">All</option>
-                        <option value="">This day</option>
-                        <option value="">This week</option>
-                        <option value="">This month</option>
+                        <option value="all">All</option>
+                        <option value="day">This day</option>
+                        <option value="week">This week</option>
+                        <option value="month">This month</option>
                     </select>
                 </div>
 
+
                 <!-- Main inventory grid -->
-                <div class="inventoryGrid">
+                <div id="inventoryGrid" class="inventoryGrid">
                     <?php if ($memoResult->num_rows > 0): ?>
                         <?php while ($memo = $memoResult->fetch_assoc()): ?>
-                            <div class="inventoryContainer">
+                            <div class="inventoryContainer" data-title="<?= htmlspecialchars($memo['title']) ?>">
                                 <h3><?= htmlspecialchars($memo['title']) ?></h3>
                                 <p><?= htmlspecialchars($memo['description'] ?? 'No Description Available') ?></p>
                                 <p><strong>Uploaded At:</strong> <?= htmlspecialchars($memo['uploaded_at']) ?></p>
                                 <div class="buttonContainer">
                                     <button class="addButton" onclick="viewMemo(
-                        '<?= addslashes($memo['title']) ?>',
-                        '<?= addslashes($memo['description'] ?? 'No Description Available') ?>',
-                        '<?= addslashes($memo['uploaded_at']) ?>',
-                        '<?= addslashes($memo['file_path']) ?>'
-                    )">View</button>
+                '<?= addslashes($memo['title']) ?>',
+                '<?= addslashes($memo['description'] ?? 'No Description Available') ?>',
+                '<?= addslashes($memo['uploaded_at']) ?>',
+                '<?= addslashes($memo['file_path']) ?>'
+            )">View</button>
                                 </div>
                             </div>
                         <?php endwhile; ?>
@@ -215,6 +242,7 @@ $memoResult = $conn->query($memoQuery);
                         <p>No memorandums available</p>
                     <?php endif; ?>
                 </div>
+
             </div>
         </div>
     </div>
@@ -262,6 +290,19 @@ $memoResult = $conn->query($memoQuery);
         </div>
     </div>
     <script>
+        const searchBar = document.getElementById('searchBar');
+        const inventoryGrid = document.getElementById('inventoryGrid');
+
+        searchBar.addEventListener('input', function () {
+            const searchTerm = searchBar.value.toLowerCase();
+            const memoContainers = inventoryGrid.getElementsByClassName('inventoryContainer');
+
+            for (const container of memoContainers) {
+                const title = container.getAttribute('data-title').toLowerCase();
+                container.style.display = title.includes(searchTerm) ? '' : 'none';
+            }
+        });
+
         function viewMemo(title, description, uploadedAt, filePath) {
             // Find modal elements
             const editContainer = document.querySelector('.editContainer');
@@ -298,6 +339,21 @@ $memoResult = $conn->query($memoQuery);
         function editProgram() {
             const editContainer = document.querySelector('.editContainer');
             editContainer.style.display = 'none';
+        }
+
+        function applyFilter() {
+            const filterValue = document.getElementById('filterSelect').value;
+            const urlParams = new URLSearchParams(window.location.search);
+
+            // Update filter parameter in URL
+            if (filterValue === 'all' || filterValue === '') {
+                urlParams.delete('filter'); // Remove filter if "All" is selected
+            } else {
+                urlParams.set('filter', filterValue);
+            }
+
+            // Reload page with the selected filter
+            window.location.search = urlParams.toString();
         }
 
     </script>

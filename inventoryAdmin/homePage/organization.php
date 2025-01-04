@@ -6,7 +6,7 @@ require_once '../../conn/auth.php';
 validateSessionRole('inventory_admin');
 $inventoryAdminId = $_SESSION['user_id'];
 
-$query = "SELECT first_name, middle_name, last_name FROM users WHERE id = ?";
+$query = "SELECT first_name, middle_name, image, last_name FROM users WHERE id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $inventoryAdminId);
 $stmt->execute();
@@ -15,6 +15,7 @@ $result = $stmt->get_result();
 if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
     $fullName = trim($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']);
+    $image = $row['image'];
 } else {
     $fullName = "User Not Found";
 }
@@ -45,7 +46,9 @@ if ($result->num_rows > 0) {
                 <div class="subUserContainer">
                     <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
-                            <img class="subUserPictureContainer" src="/dionSe/assets/img/CSSPE.png" alt="">
+                            <img class="subUserPictureContainer"
+                                src="../../assets/img/<?= !empty($image) ? htmlspecialchars($image) : '/dionSe/assets/img/CSSPE.png' ?>"
+                                alt="">
                         </div>
                     </div>
 
