@@ -185,9 +185,10 @@ $teacherResult = $conn->query($teacherQuery);
         </div>
     </div>
 
-    <div class="addContainer" style="display: none; background-color: none;">
+    <div class="addContainer" style="display: none; background-color: none; ">
         <div class="addContainer">
-            <div class="subAddContainer">
+            <div class="subAddContainer"
+                style="background-color: white; padding: 20px; border-radius: 10px;transform: scale(0.65);">
                 <div class="titleContainer">
                     <p>Borrow Item</p>
                 </div>
@@ -276,9 +277,10 @@ $teacherResult = $conn->query($teacherQuery);
         </div>
     </div>
 
-    <div class="editContainer" style="display: none; background-color: none;">
-        <div class="addContainer">
-            <div class="subAddContainer">
+    <div class="editContainer" style="display: none; background-color: none; ">
+        <div class="editContainer">
+            <div class="subAddContainer"
+                style="background-color: white; padding: 20px; border-radius: 10px;transform: scale(0.65);">
                 <div class="titleContainer">
                     <p>Edit Borrowed Item</p>
                 </div>

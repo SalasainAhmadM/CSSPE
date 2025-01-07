@@ -173,7 +173,8 @@ if ($result->num_rows > 0) {
 
     <div class="addContainer" style="display: none; background-color: none;">
         <div class="addContainer">
-            <div class="subAddContainer">
+            <div class="subAddContainer"
+                style="background-color: white; padding: 20px; border-radius: 10px;transform: scale(0.65);">
                 <div class="titleContainer">
                     <p>Return Item</p>
                 </div>

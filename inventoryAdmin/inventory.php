@@ -256,7 +256,8 @@ $itemResult = $itemStmt->get_result();
 
     <div class="editContainer" style="display: none; background-color: none;">
         <div class="editContainer">
-            <div class="subAddContainer">
+            <div class="subAddContainer"
+                style="background-color: white; padding: 20px; border-radius: 10px;transform: scale(0.65);">
                 <div class="titleContainer">
                     <p>Edit Item</p>
                 </div>
