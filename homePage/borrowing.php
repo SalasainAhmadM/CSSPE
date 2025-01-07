@@ -278,7 +278,7 @@ $teacherResult = $conn->query($teacherQuery);
 
     <div class="editContainer"
         style="display: none; background-color: rgba(0, 0, 0, 0.5); position: fixed; top: 0; left: 0; width: 100%; height: 100%; justify-content: center; align-items: center;">
-        <div class="subAddContainer" style="background-color: white; padding: 20px; border-radius: 10px;">
+        <div class="subAddContainer" style="background-color: white; padding: 20px; border-radius: 10px;transform: scale(0.65);">
             <div class="titleContainer">
                 <p>Borrowed Item</p>
             </div>
