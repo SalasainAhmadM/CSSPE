@@ -5,6 +5,22 @@ require_once '../conn/auth.php';
 
 validateSessionRole('information_admin');
 
+$informationAdminId = $_SESSION['user_id'];
+
+$query = "SELECT first_name, middle_name, last_name, image FROM users WHERE id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $informationAdminId);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $fullName = trim($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']);
+    $image = $row['image'];
+} else {
+    $fullName = "User Not Found";
+}
+
 // Fetch data from the pending_users table
 $query = "SELECT id, first_name, last_name, middle_name, email, address, contact_no, rank, password, created_at, role, department, image FROM users";
 $result = mysqli_query($conn, $query);
@@ -14,10 +30,13 @@ if (isset($_GET['delete_id'])) {
     $user_id = $_GET['delete_id'];
     $delete_query = "DELETE FROM users WHERE id = $user_id";
     if (mysqli_query($conn, $delete_query)) {
+        $_SESSION['message'] = "Faculty member deleted successfully!";
+        $_SESSION['message_type'] = "success";
         header('Location: ' . $_SERVER['PHP_SELF']);
         exit();
     } else {
-        echo "Error deleting record: " . mysqli_error($conn);
+        $_SESSION['message'] = "Error deleting faculty member: " . mysqli_error($conn);
+        $_SESSION['message_type'] = "error";
     }
 }
 
@@ -39,7 +58,8 @@ function fetchDepartments()
 if (isset($_POST['add_faculty'])) {
 
     // Function to handle empty values
-    function checkEmpty($value) {
+    function checkEmpty($value)
+    {
         return empty(trim($value)) ? "N/A" : mysqli_real_escape_string($GLOBALS['conn'], $value);
     }
 
@@ -88,11 +108,13 @@ if (isset($_POST['add_faculty'])) {
                      VALUES ('$first_name', '$last_name', '$middle_name', '$email', '$address', '$contact_no', '$department', '$rank', '$hashedPassword', '$image_path')";
 
     if (mysqli_query($conn, $insert_query)) {
-        echo "New user added successfully!";
+        $_SESSION['message'] = "New faculty member added successfully!";
+        $_SESSION['message_type'] = "success";
         header("Location: facultyMember.php");
         exit();
     } else {
-        echo "Error: " . mysqli_error($conn);
+        $_SESSION['message'] = "Error adding faculty member: " . mysqli_error($conn);
+        $_SESSION['message_type'] = "error";
     }
 }
 
@@ -155,11 +177,13 @@ if (isset($_POST['update_faculty'])) {
                      WHERE id = $faculty_id";
 
     if (mysqli_query($conn, $update_query)) {
-        echo "Faculty member updated successfully!";
+        $_SESSION['message'] = "Faculty member updated successfully!";
+        $_SESSION['message_type'] = "success";
         header('Location: ' . $_SERVER['PHP_SELF']);
         exit();
     } else {
-        echo "Error: " . mysqli_error($conn);
+        $_SESSION['message'] = "Error updating faculty member: " . mysqli_error($conn);
+        $_SESSION['message_type'] = "error";
     }
 }
 
@@ -196,13 +220,14 @@ if (isset($_POST['update_faculty'])) {
                 <div class="subUserContainer">
                     <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
-                            <img class="subUserPictureContainer" src="../assets/img/CSSPE.png" alt="">
+                            <img class="subUserPictureContainer"
+                                src="../assets/img/<?= !empty($image) ? htmlspecialchars($image) : 'CSSPE.png' ?>"
+                                alt="">
                         </div>
                     </div>
 
                     <div class="userPictureContainer1">
-                        <?php echo ($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?><br>
-                        <?php echo $_SESSION['user_role'] ?>
+                        <p><?php echo $fullName; ?></p>
                     </div>
                 </div>
 
@@ -321,10 +346,14 @@ if (isset($_POST['update_faculty'])) {
                         <tbody>
                             <?php while ($row = mysqli_fetch_assoc($result)): ?>
                                 <tr>
-                                    <td><?php echo htmlspecialchars($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']); ?></td>
-                                    <td>
-                                        <img class="" src="<?= '../assets/img/' . htmlspecialchars($row['image']) ?>" style="width:100px" alt="">
+                                    <td><?php echo htmlspecialchars($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']); ?>
                                     </td>
+                                    <td>
+                                        <img class=""
+                                            src="<?= '../assets/img/' . (empty($row['image']) ? 'CSSPE.png' : htmlspecialchars($row['image'])) ?>"
+                                            style="width:100px" alt="">
+                                    </td>
+
                                     <td><?php echo htmlspecialchars($row['email']); ?></td>
                                     <td><?php echo htmlspecialchars($row['address']); ?></td>
                                     <td><?php echo htmlspecialchars($row['contact_no']); ?></td>
@@ -373,7 +402,8 @@ if (isset($_POST['update_faculty'])) {
                                 <div class="uploadContainer">
                                     <div class="subUploadContainer">
                                         <div class="displayImage">
-                                            <img class="image1" id="preview" src="" alt="Image Preview" style="max-width: 100%; display: none;">
+                                            <img class="image1" id="preview" src="" alt="Image Preview"
+                                                style="max-width: 100%; display: none;">
                                         </div>
                                     </div>
 
@@ -381,21 +411,24 @@ if (isset($_POST['update_faculty'])) {
                             </div>
 
                             <div class="uploadButton">
-                                <input id="imageUpload" type="file" name="profile_image" accept="image/*" style="display: none;" onchange="previewImage()">
-                                <button type="button" onclick="triggerImageUpload()" class="addButton" style="height: 2rem; width: 5rem;">Upload</button>
+                                <input id="imageUpload" type="file" name="profile_image" accept="image/*"
+                                    style="display: none;" onchange="previewImage()">
+                                <button type="button" onclick="triggerImageUpload()" class="addButton"
+                                    style="height: 2rem; width: 5rem;">Upload</button>
                             </div>
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="first_name" type="text" placeholder="First Name:" >
+                            <input class="inputEmail" name="first_name" type="text" placeholder="First Name:">
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="last_name" type="text" placeholder="Last Name:" >
+                            <input class="inputEmail" name="last_name" type="text" placeholder="Last Name:">
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="middle_name" type="text" placeholder="Middle Name (Optional):">
+                            <input class="inputEmail" name="middle_name" type="text"
+                                placeholder="Middle Name (Optional):">
                         </div>
 
                         <div class="inputContainer">
@@ -403,19 +436,19 @@ if (isset($_POST['update_faculty'])) {
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="email" type="email" placeholder="Email:" >
+                            <input class="inputEmail" name="email" type="email" placeholder="Email:">
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="address" type="text" placeholder="Address:" >
+                            <input class="inputEmail" name="address" type="text" placeholder="Address:">
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="contact_no" type="text" placeholder="Contact No.:" >
+                            <input class="inputEmail" name="contact_no" type="text" placeholder="Contact No.:">
                         </div>
 
                         <div class="inputContainer">
-                            <select class="inputEmail" name="department" >
+                            <select class="inputEmail" name="department">
                                 <option value="">Choose a Department</option>
                                 <?php
                                 $departments = fetchDepartments();
@@ -427,7 +460,7 @@ if (isset($_POST['update_faculty'])) {
                         </div>
 
                         <div class="inputContainer">
-                            <select class="inputEmail" name="rank" >
+                            <select class="inputEmail" name="rank">
                                 <option value="">Choose a Rank</option>
                                 <option value="Instructor">Instructor</option>
                                 <option value="Assistant Professor">Assistant Professor</option>
@@ -471,49 +504,55 @@ if (isset($_POST['update_faculty'])) {
                                 <div class="uploadContainer">
                                     <div class="subUploadContainer">
                                         <div class="displayImage">
-                                            <img class="image1" id="faculty_image" src="" alt="Image Preview" style="max-width: 100%; display: none;">
+                                            <img class="image1" id="faculty_image" src="" alt="Image Preview"
+                                                style="max-width: 100%; display: none;">
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="uploadButton">
-                                <input type="file" name="faculty_image" accept="image/*" >
+                                <input type="file" name="faculty_image" accept="image/*">
                             </div>
                         </div>
-                        
-                        
+
+
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="first_name" id="first_name" type="text" placeholder="First Name:" >
+                            <input class="inputEmail" name="first_name" id="first_name" type="text"
+                                placeholder="First Name:">
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="last_name" id="last_name" type="text" placeholder="Last Name:" >
+                            <input class="inputEmail" name="last_name" id="last_name" type="text"
+                                placeholder="Last Name:">
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="middle_name" id="middle_name" type="text" placeholder="Middle Name (Optional):">
+                            <input class="inputEmail" name="middle_name" id="middle_name" type="text"
+                                placeholder="Middle Name (Optional):">
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="password" id="password" type="password" placeholder="Password:">
+                            <input class="inputEmail" name="password" id="password" type="password"
+                                placeholder="Password:">
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="email" id="email" type="email" placeholder="Email:" >
+                            <input class="inputEmail" name="email" id="email" type="email" placeholder="Email:">
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="address" id="address" type="text" placeholder="Address:" >
+                            <input class="inputEmail" name="address" id="address" type="text" placeholder="Address:">
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="contact_no" id="contact_no" type="text" placeholder="Contact No.:" >
+                            <input class="inputEmail" name="contact_no" id="contact_no" type="text"
+                                placeholder="Contact No.:">
                         </div>
 
                         <div class="inputContainer">
-                            <select class="inputEmail" name="department" id="department" >
+                            <select class="inputEmail" name="department" id="department">
                                 <option value="">Choose a Department</option>
                                 <?php
                                 $departments = fetchDepartments();
@@ -525,7 +564,7 @@ if (isset($_POST['update_faculty'])) {
                         </div>
 
                         <div class="inputContainer">
-                            <select class="inputEmail" name="rank" id="rank" >
+                            <select class="inputEmail" name="rank" id="rank">
                                 <option value="">Choose a Rank</option>
                                 <option value="Instructor">Instructor</option>
                                 <option value="Assistant Professor">Assistant Professor</option>
@@ -535,7 +574,8 @@ if (isset($_POST['update_faculty'])) {
                         </div>
 
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
-                            <button type="submit" name="update_faculty" class="addButton" style="width: 6rem;">Save</button>
+                            <button type="submit" name="update_faculty" class="addButton"
+                                style="width: 6rem;">Save</button>
                             <button onclick="cancelContainer()" class="addButton1" style="width: 6rem;">Cancel</button>
                         </div>
                     </div>
@@ -558,8 +598,8 @@ if (isset($_POST['update_faculty'])) {
         function editProgram(id, image, first_name, middle_name, last_name, email, password, address, contact_no, department, rank) {
             document.getElementById('faculty_id').value = id;
 
-            document.getElementById('faculty_image').src = image; 
-            document.getElementById('faculty_image').style.display = 'block'; 
+            document.getElementById('faculty_image').src = image;
+            document.getElementById('faculty_image').style.display = 'block';
 
             document.getElementById('first_name').value = first_name;
             document.getElementById('last_name').value = last_name;
@@ -577,14 +617,12 @@ if (isset($_POST['update_faculty'])) {
         function cancelContainer() {
             document.querySelector('.editContainer').style.display = 'none';
         }
-    </script>
 
-    <script>
         function previewImage() {
             const file = document.getElementById('imageUpload').files[0];
             const reader = new FileReader();
 
-            reader.onloadend = function() {
+            reader.onloadend = function () {
                 const image = document.getElementById('preview');
                 image.src = reader.result;
                 image.style.display = 'block'; // Display the image after loading
@@ -594,9 +632,7 @@ if (isset($_POST['update_faculty'])) {
                 reader.readAsDataURL(file);
             }
         }
-    </script>
 
-    <script>
         function deleteUser(userId) {
             Swal.fire({
                 title: 'Are you sure?',
@@ -611,6 +647,16 @@ if (isset($_POST['update_faculty'])) {
                 }
             });
         }
+
+        <?php if (isset($_SESSION['message'])): ?>
+            Swal.fire({
+                icon: "<?php echo $_SESSION['message_type']; ?>",
+                title: "<?php echo $_SESSION['message']; ?>",
+                showConfirmButton: false,
+                timer: 3000
+            });
+            <?php unset($_SESSION['message'], $_SESSION['message_type']); ?>
+        <?php endif; ?>
     </script>
 
 </body>

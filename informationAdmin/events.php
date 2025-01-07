@@ -5,6 +5,22 @@ require_once '../conn/auth.php';
 
 validateSessionRole('information_admin');
 
+$informationAdminId = $_SESSION['user_id'];
+
+$query = "SELECT first_name, middle_name, last_name, image FROM users WHERE id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $informationAdminId);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $fullName = trim($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']);
+    $image = $row['image'];
+} else {
+    $fullName = "User Not Found";
+}
+
 $query = "SELECT * FROM events";
 $result = mysqli_query($conn, $query);
 
@@ -12,14 +28,14 @@ if (isset($_POST['add_event'])) {
     $title = mysqli_real_escape_string($conn, $_POST['title']);
     $description = mysqli_real_escape_string($conn, $_POST['description']);
     $date = mysqli_real_escape_string($conn, $_POST['date']);
-
     $date_uploaded_at = date('Y-m-d H:i:s');
 
     $query = "INSERT INTO events (title, description, date_uploaded_at) 
               VALUES ('$title', '$description', '$date_uploaded_at')";
 
     if (mysqli_query($conn, $query)) {
-        echo "Event added successfully!";
+        $_SESSION['message'] = "Event added successfully!";
+        $_SESSION['message_type'] = "success";
         header('Location: ' . $_SERVER['PHP_SELF']);
         exit();
     } else {
@@ -27,24 +43,19 @@ if (isset($_POST['add_event'])) {
     }
 }
 
-
-// Update event logic
 if (isset($_POST['update_event'])) {
     $event_id = $_POST['event_id'];
     $title = mysqli_real_escape_string($conn, $_POST['title']);
     $description = mysqli_real_escape_string($conn, $_POST['description']);
     $date = mysqli_real_escape_string($conn, $_POST['date']);
-
-    // Get the current time in 'H:i:s' format
     $current_time = date('H:i:s');
-
-    // Combine the date from $date with the current time
     $date_uploaded_at = $date . ' ' . $current_time;
 
     $query = "UPDATE events SET title = '$title', description = '$description', date_uploaded_at = '$date_uploaded_at' WHERE id = $event_id";
 
     if (mysqli_query($conn, $query)) {
-        echo "Event updated successfully!";
+        $_SESSION['message'] = "Event updated successfully!";
+        $_SESSION['message_type'] = "success";
         header('Location: ' . $_SERVER['PHP_SELF']);
         exit();
     } else {
@@ -52,13 +63,13 @@ if (isset($_POST['update_event'])) {
     }
 }
 
-
-
-// delete request
 if (isset($_GET['delete_id'])) {
     $event_id = $_GET['delete_id'];
     $delete_query = "DELETE FROM events WHERE id = $event_id";
+
     if (mysqli_query($conn, $delete_query)) {
+        $_SESSION['message'] = "Event deleted successfully!";
+        $_SESSION['message_type'] = "success";
         header('Location: ' . $_SERVER['PHP_SELF']);
         exit();
     } else {
@@ -66,6 +77,7 @@ if (isset($_GET['delete_id'])) {
     }
 }
 ?>
+
 
 
 <!DOCTYPE html>
@@ -97,13 +109,14 @@ if (isset($_GET['delete_id'])) {
                 <div class="subUserContainer">
                     <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
-                            <img class="subUserPictureContainer" src="../assets/img/CSSPE.png" alt="">
+                            <img class="subUserPictureContainer"
+                                src="../assets/img/<?= !empty($image) ? htmlspecialchars($image) : 'CSSPE.png' ?>"
+                                alt="">
                         </div>
                     </div>
 
                     <div class="userPictureContainer1">
-                        <?php echo ($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?><br>
-                        <?php echo $_SESSION['user_role'] ?>
+                        <p><?php echo $fullName; ?></p>
                     </div>
                 </div>
 
@@ -222,7 +235,8 @@ if (isset($_GET['delete_id'])) {
                                     <td><?php echo htmlspecialchars($row['description']); ?></td>
                                     <td><?php echo htmlspecialchars($row['date_uploaded_at']); ?></td>
                                     <td class="button">
-                                        <a href="#" onclick="editProgram(<?php echo $row['id'] ?>,
+                                        <a href="#"
+                                            onclick="editProgram(<?php echo $row['id'] ?>,
                                         '<?php echo addslashes($row['title']); ?>',
                                         '<?php echo addslashes($row['description']); ?>',
                                         '<?php echo addslashes(date('Y-m-d', strtotime($row['date_uploaded_at']))); ?>')">
@@ -260,7 +274,8 @@ if (isset($_GET['delete_id'])) {
                         </div>
 
                         <div class="inputContainer" style="height: 10rem;">
-                            <textarea class="inputEmail" name="description" id="description" placeholder="Description"></textarea>
+                            <textarea class="inputEmail" name="description" id="description"
+                                placeholder="Description"></textarea>
                         </div>
 
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
@@ -302,13 +317,15 @@ if (isset($_GET['delete_id'])) {
                         <div class="inputContainer" style="flex-direction: column; height: 5rem; min-height: 12rem;">
                             <label for=""
                                 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Content:</label>
-                            <textarea style="min-height: 10rem;" id="event_description" class="inputEmail" name="description" id=""
-                                placeholder="Content"></textarea>
+                            <textarea style="min-height: 10rem;" id="event_description" class="inputEmail"
+                                name="description" id="" placeholder="Content"></textarea>
                         </div>
 
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
-                            <button type="submit" name="update_event" class="addButton" style="width: 6rem;">Save</button>
-                            <button type="button" onclick="cancelContainer()" class="addButton1" style="width: 6rem;">Cancel</button>
+                            <button type="submit" name="update_event" class="addButton"
+                                style="width: 6rem;">Save</button>
+                            <button type="button" onclick="cancelContainer()" class="addButton1"
+                                style="width: 6rem;">Cancel</button>
                         </div>
                     </div>
                 </div>
@@ -327,6 +344,7 @@ if (isset($_GET['delete_id'])) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+        // Function to open the edit form with pre-filled values
         function editProgram(id, title, description, date) {
             document.getElementById('event_id').value = id;
             document.getElementById('event_title').value = title;
@@ -336,12 +354,12 @@ if (isset($_GET['delete_id'])) {
             document.querySelector('.editContainer').style.display = 'block';
         }
 
+        // Function to cancel and close the edit form
         function cancelContainer() {
             document.querySelector('.editContainer').style.display = 'none';
         }
-    </script>
 
-    <script>
+        // SweetAlert confirmation for delete operation
         function deleteEvent(userId) {
             Swal.fire({
                 title: 'Are you sure?',
@@ -356,7 +374,18 @@ if (isset($_GET['delete_id'])) {
                 }
             });
         }
+
+        <?php if (isset($_SESSION['message'])): ?>
+            Swal.fire({
+                icon: "<?php echo $_SESSION['message_type']; ?>",
+                title: "<?php echo $_SESSION['message']; ?>",
+                showConfirmButton: false,
+                timer: 3000
+            });
+            <?php unset($_SESSION['message'], $_SESSION['message_type']); ?>
+        <?php endif; ?>
     </script>
+
 </body>
 
 </html>

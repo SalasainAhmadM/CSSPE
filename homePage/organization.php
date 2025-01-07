@@ -4,6 +4,20 @@ require_once '../conn/conn.php';
 require_once '../conn/auth.php';
 
 validateSessionRole(['instructor', 'information_admin', 'inventory_admin']);
+$userid = $_SESSION['user_id'];
+$query = "SELECT first_name, middle_name, last_name, image FROM users WHERE id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $userid);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $fullName = trim($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']);
+    $image = $row['image'];
+} else {
+    $fullName = "User Not Found";
+}
 
 $query = "SELECT * FROM organizations";
 $result = mysqli_query($conn, $query);
@@ -44,17 +58,45 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                 <div class="subUserContainer">
                     <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
-                            <img class="subUserPictureContainer" src="../assets/img/CSSPE.png" alt="">
+                            <img class="subUserPictureContainer"
+                                src="../assets/img/<?= !empty($image) ? htmlspecialchars($image) : 'CSSPE.png' ?>"
+                                alt="">
                         </div>
                     </div>
 
                     <div class="userPictureContainer1">
-                        <p><?php echo ($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?></p>
+                        <p><?php echo $fullName; ?></p>
                     </div>
                 </div>
 
                 <div class="navContainer">
                     <div class="subNavContainer">
+                        <?php if ($_SESSION['user_role'] === 'inventory_admin'): ?>
+                            <a href="../inventoryAdmin/index.php">
+                                <div class="buttonContainer1">
+                                    <div class="nameOfIconContainer">
+                                        <p>Back to Inventory Admin Panel</p>
+                                    </div>
+                                </div>
+                            </a>
+                        <?php elseif ($_SESSION['user_role'] === 'information_admin'): ?>
+                            <a href="../informationAdmin/index.php">
+                                <div class="buttonContainer1">
+                                    <div class="nameOfIconContainer">
+                                        <p>Back to Information Admin Panel</p>
+                                    </div>
+                                </div>
+                            </a>
+                        <?php elseif ($_SESSION['user_role'] === 'super_admin'): ?>
+                            <a href="../superAdmin/index.php">
+                                <div class="buttonContainer1">
+                                    <div class="nameOfIconContainer">
+                                        <p>Back to Super Admin Panel</p>
+                                    </div>
+                                </div>
+                            </a>
+                        <?php endif; ?>
+
                         <a href="../homePage/profile.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -114,6 +156,13 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                         <a href="../homePage/notification.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
+                                    <p>Notifications</p>
+                                </div>
+                            </div>
+                        </a>
+                        <!-- <a href="../homePage/notification.php">
+                            <div class="buttonContainer1">
+                                <div class="nameOfIconContainer">
                                     <p>
                                         Notifications
                                         <span style="background-color:#1a1a1a; padding:5px; border-radius:4px;">
@@ -122,7 +171,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                                     </p>
                                 </div>
                             </div>
-                        </a>
+                        </a> -->
                     </div>
                 </div>
 

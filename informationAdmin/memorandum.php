@@ -5,6 +5,22 @@ require_once '../conn/auth.php';
 
 validateSessionRole('information_admin');
 
+$informationAdminId = $_SESSION['user_id'];
+
+$query = "SELECT first_name, middle_name, last_name, image FROM users WHERE id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $informationAdminId);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $fullName = trim($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']);
+    $image = $row['image'];
+} else {
+    $fullName = "User Not Found";
+}
+
 $query = "SELECT * FROM memorandums";
 $result = mysqli_query($conn, $query);
 
@@ -125,16 +141,20 @@ if (isset($_POST['update_memorandum'])) {
 
 
 
-// delete request
 if (isset($_GET['delete_id'])) {
     $user_id = $_GET['delete_id'];
     $delete_query = "DELETE FROM memorandums WHERE id = $user_id";
+
     if (mysqli_query($conn, $delete_query)) {
-        header('Location: ' . $_SERVER['PHP_SELF']);
-        exit();
+
+        $_SESSION['success'] = 'Record deleted successfully!';
     } else {
-        echo "Error deleting record: " . mysqli_error($conn);
+
+        $_SESSION['error'] = 'Error deleting record: ' . mysqli_error($conn);
     }
+
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit();
 }
 
 ?>
@@ -169,13 +189,14 @@ if (isset($_GET['delete_id'])) {
                 <div class="subUserContainer">
                     <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
-                            <img class="subUserPictureContainer" src="../assets/img/CSSPE.png" alt="">
+                            <img class="subUserPictureContainer"
+                                src="../assets/img/<?= !empty($image) ? htmlspecialchars($image) : 'CSSPE.png' ?>"
+                                alt="">
                         </div>
                     </div>
 
                     <div class="userPictureContainer1">
-                        <?php echo ($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?><br>
-                        <?php echo $_SESSION['user_role'] ?>
+                        <p><?php echo $fullName; ?></p>
                     </div>
                 </div>
 
@@ -421,9 +442,6 @@ if (isset($_GET['delete_id'])) {
         function cancelContainer() {
             document.querySelector('.editContainer').style.display = 'none';
         }
-    </script>
-
-    <script>
         function deleteMemorandum(userId) {
             Swal.fire({
                 title: 'Are you sure?',
@@ -438,27 +456,21 @@ if (isset($_GET['delete_id'])) {
                 }
             });
         }
-    </script>
 
-    <script>
-        // Check if success message is set
         <?php if (isset($_SESSION['success'])): ?>
             Swal.fire({
                 icon: 'success',
-                title: 'Success!',
-                text: '<?= $_SESSION['success']; ?>',
+                title: '<?= $_SESSION['success']; ?>',
                 showConfirmButton: false,
-                timer: 2000
+                timer: 3000
             });
             <?php unset($_SESSION['success']); ?>
         <?php endif; ?>
 
-        // Check if error message is set
         <?php if (isset($_SESSION['error'])): ?>
             Swal.fire({
                 icon: 'error',
-                title: 'Error!',
-                text: '<?= $_SESSION['error']; ?>',
+                title: '<?= $_SESSION['error']; ?>',
                 showConfirmButton: true
             });
             <?php unset($_SESSION['error']); ?>

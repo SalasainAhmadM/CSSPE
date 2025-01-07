@@ -4,7 +4,7 @@ require_once '../conn/conn.php';
 require_once '../conn/auth.php';
 
 validateSessionRole(['instructor', 'information_admin', 'inventory_admin']);
-$inventoryAdminId = $_SESSION['user_id'];
+$userid = $_SESSION['user_id'];
 
 $query_notifications = "SELECT COUNT(*) AS notification_count FROM notifications WHERE is_read = 0";
 $result_notifications = mysqli_query($conn, $query_notifications);
@@ -16,7 +16,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
 
 $query = "SELECT first_name, middle_name, last_name, image FROM users WHERE id = ?";
 $stmt = $conn->prepare($query);
-$stmt->bind_param("i", $inventoryAdminId);
+$stmt->bind_param("i", $userid);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -30,6 +30,10 @@ if ($result->num_rows > 0) {
 
 $itemsQuery = "SELECT * FROM items";
 $itemsResult = $conn->query($itemsQuery);
+
+// Fetch users with role 'Instructor'
+$teacherQuery = "SELECT id, CONCAT(first_name, ' ', COALESCE(middle_name, ''), ' ', last_name) AS full_name FROM users WHERE role = 'Instructor'";
+$teacherResult = $conn->query($teacherQuery);
 ?>
 
 <!DOCTYPE html>
@@ -59,17 +63,45 @@ $itemsResult = $conn->query($itemsQuery);
                 <div class="subUserContainer">
                     <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
-                            <img class="subUserPictureContainer" src="../assets/img/CSSPE.png" alt="">
+                            <img class="subUserPictureContainer"
+                                src="../assets/img/<?= !empty($image) ? htmlspecialchars($image) : 'CSSPE.png' ?>"
+                                alt="">
                         </div>
                     </div>
 
                     <div class="userPictureContainer1">
-                        <p><?php echo ($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?></p>
+                        <p><?php echo $fullName; ?></p>
                     </div>
                 </div>
 
                 <div class="navContainer">
                     <div class="subNavContainer">
+                        <?php if ($_SESSION['user_role'] === 'inventory_admin'): ?>
+                            <a href="../inventoryAdmin/index.php">
+                                <div class="buttonContainer1">
+                                    <div class="nameOfIconContainer">
+                                        <p>Back to Inventory Admin Panel</p>
+                                    </div>
+                                </div>
+                            </a>
+                        <?php elseif ($_SESSION['user_role'] === 'information_admin'): ?>
+                            <a href="../informationAdmin/index.php">
+                                <div class="buttonContainer1">
+                                    <div class="nameOfIconContainer">
+                                        <p>Back to Information Admin Panel</p>
+                                    </div>
+                                </div>
+                            </a>
+                        <?php elseif ($_SESSION['user_role'] === 'super_admin'): ?>
+                            <a href="../superAdmin/index.php">
+                                <div class="buttonContainer1">
+                                    <div class="nameOfIconContainer">
+                                        <p>Back to Super Admin Panel</p>
+                                    </div>
+                                </div>
+                            </a>
+                        <?php endif; ?>
+
                         <a href="../homePage/profile.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -129,6 +161,13 @@ $itemsResult = $conn->query($itemsQuery);
                         <a href="../homePage/notification.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
+                                    <p>Notifications</p>
+                                </div>
+                            </div>
+                        </a>
+                        <!-- <a href="../homePage/notification.php">
+                            <div class="buttonContainer1">
+                                <div class="nameOfIconContainer">
                                     <p>
                                         Notifications
                                         <span style="background-color:#1a1a1a; padding:5px; border-radius:4px;">
@@ -137,7 +176,7 @@ $itemsResult = $conn->query($itemsQuery);
                                     </p>
                                 </div>
                             </div>
-                        </a>
+                        </a> -->
                     </div>
                 </div>
 
@@ -196,7 +235,6 @@ $itemsResult = $conn->query($itemsQuery);
                     <input id="searchBar" class="searchBar" type="text" placeholder="Search...">
                 </div>
 
-                <!-- Main inventory grid -->
                 <div id="inventoryGrid" class="inventoryGrid">
                     <?php if ($itemsResult->num_rows > 0): ?>
                         <?php while ($item = $itemsResult->fetch_assoc()): ?>
@@ -204,11 +242,14 @@ $itemsResult = $conn->query($itemsQuery);
                                 <div class="subInventoryContainer">
                                     <div class="imageContainer" style="border-bottom: solid gray 1px;">
                                         <img style="height: 50px;" class="image"
-                                            src="../../assets/uploads/<?= htmlspecialchars($item['image'] ?: '../../assets/img/CSSPE.png') ?>"
+                                            src="../assets/uploads/<?= htmlspecialchars($item['image'] ?: '../../assets/img/CSSPE.png') ?>"
                                             alt="Item Image">
                                     </div>
                                     <div class="infoContainer">
                                         <p><?= htmlspecialchars($item['name']) ?></p>
+                                    </div>
+                                    <div class="infoContainer1">
+                                        <p><?= htmlspecialchars($item['brand']) ?></p>
                                     </div>
                                     <div class="infoContainer1">
                                         <p><?= htmlspecialchars($item['description']) ?></p>
@@ -217,7 +258,8 @@ $itemsResult = $conn->query($itemsQuery);
                                         <p>Available: <?= htmlspecialchars($item['quantity']) ?></p>
                                     </div>
                                     <div class="buttonContainer">
-                                        <button onclick="borrowItem(<?= htmlspecialchars($item['id']) ?>)"
+                                        <button
+                                            onclick="borrowItem(<?= htmlspecialchars($item['id']) ?>, '<?= htmlspecialchars($item['name']) ?>', '<?= htmlspecialchars($item['brand']) ?>')"
                                             class="addButton">Borrow</button>
                                     </div>
                                 </div>
@@ -234,71 +276,182 @@ $itemsResult = $conn->query($itemsQuery);
         </div>
     </div>
 
-    <div class="editContainer" style="display: none; background-color: none;">
-        <div class="editContainer">
-            <div class="subAddContainer">
-                <div class="titleContainer">
-                    <p>Borrowed Item</p>
+    <div class="editContainer"
+        style="display: none; background-color: rgba(0, 0, 0, 0.5); position: fixed; top: 0; left: 0; width: 100%; height: 100%; justify-content: center; align-items: center;">
+        <div class="subAddContainer" style="background-color: white; padding: 20px; border-radius: 10px;">
+            <div class="titleContainer">
+                <p>Borrowed Item</p>
+            </div>
+
+            <div class="subLoginContainer">
+                <!-- hidden id -->
+                <div class="inputContainer" style="display: none;">
+                    <input id="itemId" type="hidden">
                 </div>
 
-                <div class="subLoginContainer">
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Item
-                            Name:</label>
-                        <input class="inputEmail" type="text">
-                    </div>
+                <!-- Item Name -->
+                <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                    <label>Item Name:</label>
+                    <input id="itemName" class="inputEmail" type="text" readonly>
+                </div>
 
-                    <div class="inputContainer">
-                        <select name="" id="" class="inputEmail">
-                            <option value="">Choose a brand</option>
-                        </select>
-                    </div>
+                <!-- Brand  -->
+                <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                    <label>Brand:</label>
+                    <input id="itemBrand" class="inputEmail" type="text" readonly>
+                </div>
 
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Quantity:</label>
-                        <input class="inputEmail" type="Number" placeholder="Quantity:">
-                    </div>
+                <!-- Teacher Selection -->
+                <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                    <label>Choose Teacher:</label>
+                    <select id="teacherSelect" class="inputEmail">
+                        <option value="">Choose a teacher</option>
+                        <?php while ($row = $teacherResult->fetch_assoc()): ?>
+                            <option value="<?= $row['id'] ?>"><?= htmlspecialchars($row['full_name']) ?></option>
+                        <?php endwhile; ?>
+                    </select>
+                </div>
 
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Borrow
-                            Date:</label>
-                        <input class="inputEmail" type="date" placeholder="Date:">
-                    </div>
+                <!-- Quantity -->
+                <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                    <label>Quantity:</label>
+                    <input id="quantity" class="inputEmail" type="number" placeholder="Quantity:">
+                </div>
 
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Return
-                            Date:</label>
-                        <input class="inputEmail" type="date" placeholder="Date:">
-                    </div>
+                <!-- Borrow Date -->
+                <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                    <label>Borrow Date:</label>
+                    <input id="borrowDate" class="inputEmail" type="date">
+                </div>
 
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Class
-                            schedule time from:</label>
-                        <input class="inputEmail" type="time" placeholder="From:">
-                    </div>
+                <!-- Return Date -->
+                <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                    <label>Return Date:</label>
+                    <input id="returnDate" class="inputEmail" type="date">
+                </div>
 
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Class
-                            schedule time to:</label>
-                        <input class="inputEmail" type="time" placeholder="To">
-                    </div>
+                <!-- Class Date -->
+                <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                    <label>Class Date:</label>
+                    <input id="classDate" class="inputEmail" type="date">
+                </div>
 
-                    <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
-                        <button class="addButton" style="width: 6rem;">Borrow</button>
-                        <button onclick="editProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
-                    </div>
+                <!-- Schedule Time -->
+                <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                    <label>Class schedule time from:</label>
+                    <input id="timeFrom" class="inputEmail" type="time">
+                </div>
+
+                <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                    <label>Class schedule time to:</label>
+                    <input id="timeTo" class="inputEmail" type="time">
+                </div>
+
+                <!-- Buttons -->
+                <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
+                    <button class="confirmButton" style="width: 6rem;">Borrow</button>
+                    <button class="addButton1" style="width: 6rem;">Cancel</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
+        function borrowItem(itemId, itemName, itemBrand) {
+            const modal = document.querySelector('.editContainer');
+            modal.style.display = 'flex';
+
+            // Populate the readonly fields with the item name and brand
+            document.getElementById('itemName').value = itemName;
+            document.getElementById('itemBrand').value = itemBrand;
+
+            // Store the itemId for form submission
+            document.getElementById('itemId').value = itemId;
+        }
+
+        function closeModal() {
+            const modal = document.querySelector('.editContainer');
+            modal.style.display = 'none';
+        }
+
+        document.querySelector('.addButton1').addEventListener('click', closeModal);
+
+        document.querySelector('.confirmButton').addEventListener('click', function () {
+            // Get form values
+            const itemId = document.getElementById('itemId').value;
+            const teacherId = document.getElementById('teacherSelect').value;
+            const quantity = document.getElementById('quantity').value;
+            const borrowDate = document.getElementById('borrowDate').value;
+            const returnDate = document.getElementById('returnDate').value;
+            const classDate = document.getElementById('classDate').value;
+            const scheduleFrom = document.getElementById('timeFrom').value;
+            const scheduleTo = document.getElementById('timeTo').value;
+
+            if (!teacherId || !quantity || !borrowDate || !returnDate || !classDate || !scheduleFrom || !scheduleTo) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Missing Information',
+                    text: 'Please fill in all required fields.'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Confirm Borrow',
+                text: 'Are you sure you want to borrow this item?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Borrow'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Submit the form using fetch
+                    const formData = new FormData();
+                    formData.append('item_id', itemId);
+                    formData.append('teacher', teacherId);
+                    formData.append('quantity', quantity);
+                    formData.append('borrow_date', borrowDate);
+                    formData.append('return_date', returnDate);
+                    formData.append('class_date', classDate);
+                    formData.append('schedule_from', scheduleFrom);
+                    formData.append('schedule_to', scheduleTo);
+
+                    fetch('borrow_item.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: data.message,
+                                    showConfirmButton: false,
+                                    timer: 3000
+                                });
+                                closeModal();
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: data.message
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire(
+                                'Error!',
+                                'An error occurred while processing your request.',
+                                'error'
+                            );
+                        });
+                }
+            });
+        });
+
         const searchBar = document.getElementById('searchBar');
         const inventoryGrid = document.getElementById('inventoryGrid');
 
@@ -311,12 +464,6 @@ $itemsResult = $conn->query($itemsQuery);
                 container.style.display = title.includes(searchTerm) ? '' : 'none';
             }
         });
-
-
-        function borrowItem(itemId) {
-            alert('Borrow item with ID: ' + itemId);
-            // Implement AJAX request to handle borrowing logic here
-        }
     </script>
     <script src="../assets/js/sidebar.js"></script>
     <script src="../assets/js/program.js"></script>

@@ -5,10 +5,26 @@ require_once '../conn/auth.php';
 
 validateSessionRole('information_admin');
 
+$informationAdminId = $_SESSION['user_id'];
+
+$query = "SELECT first_name, middle_name, last_name, image FROM users WHERE id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $informationAdminId);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $fullName = trim($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']);
+    $image = $row['image'];
+} else {
+    $fullName = "User Not Found";
+}
+
 $query = "SELECT * FROM departments";
 $result = mysqli_query($conn, $query);
 
-// Check if the form was submitted
+// Add Department
 if (isset($_POST['add_department'])) {
     $department_name = mysqli_real_escape_string($conn, $_POST['department_name']);
     $department_description = mysqli_real_escape_string($conn, $_POST['department_description']);
@@ -25,7 +41,9 @@ if (isset($_POST['add_department'])) {
         if (in_array(strtolower($image_ext), ['jpg', 'jpeg', 'png', 'gif']) && $image_size < 5000000) {
             move_uploaded_file($image_tmp, $image_path);
         } else {
-            echo "Invalid image format or size!";
+            $_SESSION['message'] = "Invalid image format or size!";
+            $_SESSION['message_type'] = "error";
+            header('Location: ' . $_SERVER['PHP_SELF']);
             exit();
         }
     } else {
@@ -36,16 +54,19 @@ if (isset($_POST['add_department'])) {
               VALUES ('$department_name', '$department_description', '$image_path')";
 
     if (mysqli_query($conn, $query)) {
-        echo "Department added successfully!";
+        $_SESSION['message'] = "Department added successfully!";
+        $_SESSION['message_type'] = "success";
         header('Location: ' . $_SERVER['PHP_SELF']);
         exit();
     } else {
-        echo "Error: " . mysqli_error($conn);
+        $_SESSION['message'] = "Error: " . mysqli_error($conn);
+        $_SESSION['message_type'] = "error";
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit();
     }
 }
 
-
-// Update department logic
+// Update Department
 if (isset($_POST['update_department'])) {
     $department_id = $_POST['department_id'];
     $department_name = mysqli_real_escape_string($conn, $_POST['department_name']);
@@ -63,43 +84,53 @@ if (isset($_POST['update_department'])) {
         if (in_array(strtolower($image_ext), ['jpg', 'jpeg', 'png', 'gif']) && $image_size < 5000000) {
             move_uploaded_file($image_tmp, $image_path);
         } else {
-            echo "Invalid image format or size!";
+            $_SESSION['message'] = "Invalid image format or size!";
+            $_SESSION['message_type'] = "error";
+            header('Location: ' . $_SERVER['PHP_SELF']);
             exit();
         }
     } else {
-        // If no new image is uploaded, retain the current image
         $query_image = "SELECT image FROM departments WHERE id = $department_id";
         $result_image = mysqli_query($conn, $query_image);
         $row = mysqli_fetch_assoc($result_image);
         $image_path = $row['image'];
     }
 
-    // Update department information
     $update_query = "UPDATE departments 
                      SET department_name = '$department_name', description = '$department_description', image = '$image_path' 
                      WHERE id = $department_id";
 
     if (mysqli_query($conn, $update_query)) {
-        echo "Department updated successfully!";
+        $_SESSION['message'] = "Department updated successfully!";
+        $_SESSION['message_type'] = "success";
         header('Location: ' . $_SERVER['PHP_SELF']);
         exit();
     } else {
-        echo "Error: " . mysqli_error($conn);
+        $_SESSION['message'] = "Error: " . mysqli_error($conn);
+        $_SESSION['message_type'] = "error";
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit();
     }
 }
 
-
-// delete request
+// Delete Department
 if (isset($_GET['delete_id'])) {
     $department_id = $_GET['delete_id'];
     $delete_query = "DELETE FROM departments WHERE id = $department_id";
+
     if (mysqli_query($conn, $delete_query)) {
+        $_SESSION['message'] = "Department deleted successfully!";
+        $_SESSION['message_type'] = "success";
         header('Location: ' . $_SERVER['PHP_SELF']);
         exit();
     } else {
-        echo "Error deleting record: " . mysqli_error($conn);
+        $_SESSION['message'] = "Error deleting record: " . mysqli_error($conn);
+        $_SESSION['message_type'] = "error";
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit();
     }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -131,13 +162,14 @@ if (isset($_GET['delete_id'])) {
                 <div class="subUserContainer">
                     <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
-                            <img class="subUserPictureContainer" src="../assets/img/CSSPE.png" alt="">
+                            <img class="subUserPictureContainer"
+                                src="../assets/img/<?= !empty($image) ? htmlspecialchars($image) : 'CSSPE.png' ?>"
+                                alt="">
                         </div>
                     </div>
 
                     <div class="userPictureContainer1">
-                        <?php echo ($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?><br>
-                        <?php echo $_SESSION['user_role'] ?>
+                        <p><?php echo $fullName; ?></p>
                     </div>
                 </div>
 
@@ -298,7 +330,8 @@ if (isset($_GET['delete_id'])) {
                                 <div class="uploadContainer">
                                     <div class="subUploadContainer">
                                         <div class="displayImage">
-                                            <img class="image1" id="department_image" src="" alt="Image Preview" style="max-width: 100%; display: none;">
+                                            <img class="image1" id="department_image" src="" alt="Image Preview"
+                                                style="max-width: 100%; display: none;">
                                         </div>
                                     </div>
                                 </div>
@@ -312,17 +345,20 @@ if (isset($_GET['delete_id'])) {
                         <div class="inputContainer" style="flex-direction: column; height: 5rem;">
                             <label for=""
                                 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Departments:</label>
-                            <input class="inputEmail" type="text" id="department_name" name="department_name" placeholder="Departments:" required>
+                            <input class="inputEmail" type="text" id="department_name" name="department_name"
+                                placeholder="Departments:" required>
                         </div>
 
                         <div class="inputContainer" style="flex-direction: column; height: 5rem; min-height: 12rem;">
                             <label for=""
                                 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Description:</label>
-                            <textarea style="min-height: 10rem;" class="inputEmail" name="department_description" id="department_description" placeholder="Description" required></textarea>
+                            <textarea style="min-height: 10rem;" class="inputEmail" name="department_description"
+                                id="department_description" placeholder="Description" required></textarea>
                         </div>
 
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
-                            <button type="submit" name="update_department" type="button" class="addButton" style="width: 6rem;" id="saveButton" name="update_department">Save</button>
+                            <button type="submit" name="update_department" type="button" class="addButton"
+                                style="width: 6rem;" id="saveButton" name="update_department">Save</button>
                             <button onclick="cancelContainer()" class="addButton1" style="width: 6rem;">Cancel</button>
                         </div>
 
@@ -348,7 +384,8 @@ if (isset($_GET['delete_id'])) {
                                 <div class="uploadContainer">
                                     <div class="subUploadContainer">
                                         <div class="displayImage">
-                                            <img class="image1" id="preview" src="" alt="Image Preview" style="max-width: 100%; display: none;">
+                                            <img class="image1" id="preview" src="" alt="Image Preview"
+                                                style="max-width: 100%; display: none;">
                                         </div>
                                     </div>
 
@@ -356,21 +393,26 @@ if (isset($_GET['delete_id'])) {
                             </div>
 
                             <div class="uploadButton">
-                                <input id="imageUpload" type="file" name="department_image" accept="image/*" style="display: none;" onchange="previewImage()">
-                                <button type="button" onclick="triggerImageUpload()" class="addButton" style="height: 2rem; width: 5rem;">Upload</button>
+                                <input id="imageUpload" type="file" name="department_image" accept="image/*"
+                                    style="display: none;" onchange="previewImage()">
+                                <button type="button" onclick="triggerImageUpload()" class="addButton"
+                                    style="height: 2rem; width: 5rem;">Upload</button>
                             </div>
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" type="text" name="department_name" placeholder="Department Name" required>
+                            <input class="inputEmail" type="text" name="department_name" placeholder="Department Name"
+                                required>
                         </div>
 
                         <div class="inputContainer" style="height: 10rem;">
-                            <textarea class="inputEmail" name="department_description" placeholder="Description" required></textarea>
+                            <textarea class="inputEmail" name="department_description" placeholder="Description"
+                                required></textarea>
                         </div>
 
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
-                            <button type="submit" name="add_department" class="addButton" style="width: 6rem;">Add</button>
+                            <button type="submit" name="add_department" class="addButton"
+                                style="width: 6rem;">Add</button>
                             <button onclick="addProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
                         </div>
                     </div>
@@ -412,7 +454,7 @@ if (isset($_GET['delete_id'])) {
             const file = document.getElementById('imageUpload').files[0];
             const reader = new FileReader();
 
-            reader.onloadend = function() {
+            reader.onloadend = function () {
                 const image = document.getElementById('preview');
                 image.src = reader.result;
                 image.style.display = 'block'; // Display the image after loading
@@ -439,6 +481,16 @@ if (isset($_GET['delete_id'])) {
                 }
             });
         }
+
+        <?php if (isset($_SESSION['message'])): ?>
+            Swal.fire({
+                icon: "<?php echo $_SESSION['message_type']; ?>",
+                title: "<?php echo $_SESSION['message']; ?>",
+                showConfirmButton: false,
+                timer: 3000
+            });
+            <?php unset($_SESSION['message'], $_SESSION['message_type']); ?>
+        <?php endif; ?>
     </script>
 
 

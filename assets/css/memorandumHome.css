@@ -33,9 +33,9 @@
 }
 
 .pagination a.active {
-    background-color: #007bff;
+    background-color: rgb(109, 18, 10);
     color: white;
-    border-color: #007bff;
+    border-color: rgb(109, 18, 10);
 }
 
 

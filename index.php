@@ -59,10 +59,37 @@ function registerUser($firstName, $lastName, $middleName, $email, $address, $con
     }
 }
 
-
 function loginUser($email, $password)
 {
     global $conn;
+
+    // Check overdue items and create notifications
+    $overdueQuery = "
+        SELECT 
+            it.transaction_id, 
+            it.quantity_borrowed, 
+            it.return_date, 
+            i.name AS item_name 
+        FROM 
+            item_transactions it
+        INNER JOIN 
+            items i ON it.item_id = i.id
+        WHERE 
+            it.return_date < CURDATE() 
+            AND it.status != 'Returned'
+    ";
+    $overdueResult = $conn->query($overdueQuery);
+
+    if ($overdueResult && $overdueResult->num_rows > 0) {
+        while ($overdue = $overdueResult->fetch_assoc()) {
+            $description = "Item {$overdue['item_name']} with quantity {$overdue['quantity_borrowed']} is overdue.";
+            $notifQuery = "INSERT INTO notif_items (description) VALUES (?)";
+            $notifStmt = $conn->prepare($notifQuery);
+            $notifStmt->bind_param("s", $description);
+            $notifStmt->execute();
+        }
+    }
+
 
     $query = "SELECT * FROM users WHERE email = ?";
     $stmt = $conn->prepare($query);
@@ -111,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $address = $_POST['address'];
         $contactNo = $_POST['contact_no'];
         $rank = $_POST['rank'];
-        $department = $_POST['department']; 
+        $department = $_POST['department'];
         $password = $_POST['password'];
         $confirmPassword = $_POST['confirm_password'];
 
@@ -332,18 +359,18 @@ function fetchDepartments()
                         </div>
 
                         <div class="inputContainer" style="gap: 0.5rem;">
-                        <select class="inputEmail" name="department" required>
-                            <option value="">Choose a Department</option>
-                            <?php
-                            // Fetch and display departments
-                            $departments = fetchDepartments();
-                            foreach ($departments as $department) {
-                                echo "<option value='" . $department['department_name'] . "'>" . $department['department_name'] . "</option>";
-                            }
-                            ?>
-                        </select>
+                            <select class="inputEmail" name="department" required>
+                                <option value="">Choose a Department</option>
+                                <?php
+                                // Fetch and display departments
+                                $departments = fetchDepartments();
+                                foreach ($departments as $department) {
+                                    echo "<option value='" . $department['department_name'] . "'>" . $department['department_name'] . "</option>";
+                                }
+                                ?>
+                            </select>
                         </div>
-                        
+
                         <div class="inputContainer" style="gap: 0.5rem;">
                             <select class="inputEmail" name="rank" required>
                                 <option value="">Choose a rank</option>
@@ -373,7 +400,7 @@ function fetchDepartments()
             </div>
         </div>
     </div>
-    
+
     </div>
 
     <script src="./assets/js/login.js"></script>

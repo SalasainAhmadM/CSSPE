@@ -4,9 +4,23 @@ require_once '../conn/conn.php';
 require_once '../conn/auth.php';
 
 validateSessionRole(['instructor', 'information_admin', 'inventory_admin']);
+$userid = $_SESSION['user_id'];
+$query = "SELECT first_name, middle_name, last_name, image FROM users WHERE id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $userid);
+$stmt->execute();
+$result = $stmt->get_result();
 
-$query = "SELECT * FROM users";
-$result = mysqli_query($conn, $query);
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $fullName = trim($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']);
+    $image = $row['image'];
+} else {
+    $fullName = "User Not Found";
+}
+
+$instructorsQuery = "SELECT first_name, middle_name, last_name, email, address, contact_no, rank, image, department FROM users WHERE role = 'Instructor'";
+$instructorsResult = $conn->query($instructorsQuery);
 
 function fetchDepartments()
 {
@@ -57,17 +71,45 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                 <div class="subUserContainer">
                     <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
-                            <img class="subUserPictureContainer" src="../assets/img/CSSPE.png" alt="">
+                            <img class="subUserPictureContainer"
+                                src="../assets/img/<?= !empty($image) ? htmlspecialchars($image) : 'CSSPE.png' ?>"
+                                alt="">
                         </div>
                     </div>
 
                     <div class="userPictureContainer1">
-                        <p><?php echo ($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?></p>
+                        <p><?php echo $fullName; ?></p>
                     </div>
                 </div>
 
                 <div class="navContainer">
                     <div class="subNavContainer">
+                        <?php if ($_SESSION['user_role'] === 'inventory_admin'): ?>
+                            <a href="../inventoryAdmin/index.php">
+                                <div class="buttonContainer1">
+                                    <div class="nameOfIconContainer">
+                                        <p>Back to Inventory Admin Panel</p>
+                                    </div>
+                                </div>
+                            </a>
+                        <?php elseif ($_SESSION['user_role'] === 'information_admin'): ?>
+                            <a href="../informationAdmin/index.php">
+                                <div class="buttonContainer1">
+                                    <div class="nameOfIconContainer">
+                                        <p>Back to Information Admin Panel</p>
+                                    </div>
+                                </div>
+                            </a>
+                        <?php elseif ($_SESSION['user_role'] === 'super_admin'): ?>
+                            <a href="../superAdmin/index.php">
+                                <div class="buttonContainer1">
+                                    <div class="nameOfIconContainer">
+                                        <p>Back to Super Admin Panel</p>
+                                    </div>
+                                </div>
+                            </a>
+                        <?php endif; ?>
+
                         <a href="../homePage/profile.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -124,7 +166,14 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                             </div>
                         </a>
 
-                        <a href="../homePage/notification.php?update=1">
+                        <a href="../homePage/notification.php">
+                            <div class="buttonContainer1">
+                                <div class="nameOfIconContainer">
+                                    <p>Notifications</p>
+                                </div>
+                            </div>
+                        </a>
+                        <!-- <a href="../homePage/notification.php?update=1">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>
@@ -135,7 +184,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                                     </p>
                                 </div>
                             </div>
-                        </a>
+                        </a> -->
                     </div>
                 </div>
 
@@ -169,16 +218,13 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
 
 
                 <div class="searchContainer">
-                    <input class="searchBar" id="search" type="text" placeholder="Search...">
-                    <select name="" class="addButton size" id="" onchange="filterByDepartment()">
-                        <option value="">Choose a Department</option>
-                        <?php
-                        // Fetch and display departments
-                        $departments = fetchDepartments();
-                        foreach ($departments as $department) {
-                            echo "<option value='" . $department['department_name'] . "'>" . $department['department_name'] . "</option>";
-                        }
-                        ?>
+                    <input class="searchBar" id="searchBar" type="text" placeholder="Search by name...">
+                    <select name="" class="addButton size" id="rankFilter">
+                        <option value="">Choose a Rank</option>
+                        <option value="Instructor">Instructor</option>
+                        <option value="Assistant Professor">Assistant Professor</option>
+                        <option value="Associate Professor">Associate Professor</option>
+                        <option value="Professor">Professor</option>
                     </select>
                 </div>
 
@@ -196,24 +242,30 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                                 <th>Position</th>
                             </tr>
                         </thead>
-
-                        <?php while ($row = mysqli_fetch_assoc($result)): ?>
-                            <tbody>
+                        <tbody id="instructorTableBody">
+                            <?php if ($instructorsResult->num_rows > 0): ?>
+                                <?php while ($instructor = $instructorsResult->fetch_assoc()): ?>
+                                    <tr>
+                                        <td><?= htmlspecialchars($instructor['first_name'] . ' ' . ($instructor['middle_name'] ? $instructor['middle_name'] . ' ' : '') . $instructor['last_name']) ?>
+                                        </td>
+                                        <td>
+                                            <img class="image"
+                                                src="../assets/img/<?= htmlspecialchars($instructor['image'] ?: 'CSSPE.png') ?>"
+                                                alt="Instructor Image" style="width: 50px; height: 50px; object-fit: cover;">
+                                        </td>
+                                        <td><?= htmlspecialchars($instructor['email']) ?></td>
+                                        <td><?= htmlspecialchars($instructor['address']) ?></td>
+                                        <td><?= htmlspecialchars($instructor['contact_no']) ?></td>
+                                        <td><?= htmlspecialchars($instructor['department']) ?></td>
+                                        <td><?= htmlspecialchars($instructor['rank']) ?></td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            <?php else: ?>
                                 <tr>
-                                    <td><?php echo htmlspecialchars($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']); ?>
-                                    </td>
-                                    <td>
-                                        <img class="" src="<?= '../assets/img/' . htmlspecialchars($row['image']) ?>"
-                                            style="width:100px" alt="">
-                                    </td>
-                                    <td><?php echo htmlspecialchars($row['email']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['address']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['contact_no']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['department']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['rank']); ?></td>
+                                    <td colspan="7">No instructors found</td>
                                 </tr>
-                            </tbody>
-                        <?php endwhile; ?>
+                            <?php endif; ?>
+                        </tbody>
                     </table>
                 </div>
 
@@ -222,19 +274,34 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
     </div>
 
     <script>
-        function filterByDepartment() {
-            const selectedDepartment = document.querySelector('.addButton').value.toLowerCase();
-            const rows = document.querySelectorAll('.tableContainer tbody tr');
+        // Get references to the search bar, rank filter, and table body
+        const searchBar = document.getElementById('searchBar');
+        const rankFilter = document.getElementById('rankFilter');
+        const tableBody = document.getElementById('instructorTableBody');
 
-            rows.forEach(row => {
-                const department = row.querySelector('td:nth-child(6)').textContent.toLowerCase();
-                if (!selectedDepartment || department === selectedDepartment) {
-                    row.style.display = ''; // Show row
-                } else {
-                    row.style.display = 'none'; // Hide row
-                }
-            });
+        // Add an input event listener to the search bar
+        searchBar.addEventListener('input', filterTable);
+
+        // Add a change event listener to the rank filter
+        rankFilter.addEventListener('change', filterTable);
+
+        function filterTable() {
+            const searchTerm = searchBar.value.toLowerCase();
+            const selectedRank = rankFilter.value;
+            const rows = tableBody.getElementsByTagName('tr');
+
+            for (const row of rows) {
+                const nameCell = row.cells[0]?.textContent.toLowerCase();
+                const rankCell = row.cells[6]?.textContent;
+
+                // Check if the row matches both filters
+                const matchesSearch = !searchTerm || nameCell.includes(searchTerm);
+                const matchesRank = !selectedRank || rankCell === selectedRank;
+
+                row.style.display = matchesSearch && matchesRank ? '' : 'none';
+            }
         }
+
     </script>
 
     <script src="../assets/js/search.js"></script>

@@ -121,7 +121,7 @@
     width: 25rem;
 }
 
-.addButton{
+.addButton , .confirmButton{
     width: 92%;
     height: 3rem;
     border: none;
@@ -135,13 +135,13 @@
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.699);
 }
 
-.addButton:hover{
+.addButton:hover  , .confirmButton:hover{
     background-color: transparent;
     border: solid rgb(109, 18, 10) 1px;
     color: rgb(109, 18, 10);
 }
 
-.addButton:active{
+.addButton:active  , .confirmButton:active{
     transform: scale(0.9);
     background-color: rgb(109, 18, 10);
     color: white;

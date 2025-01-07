@@ -5,6 +5,22 @@ require_once '../conn/auth.php';
 
 validateSessionRole('information_admin');
 
+$informationAdminId = $_SESSION['user_id'];
+
+$query = "SELECT first_name, middle_name, last_name, image FROM users WHERE id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $informationAdminId);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $fullName = trim($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']);
+    $image = $row['image'];
+} else {
+    $fullName = "User Not Found";
+}
+
 $query = "SELECT * FROM organizations";
 $result = mysqli_query($conn, $query);
 
@@ -36,10 +52,13 @@ if (isset($_POST['add_organization'])) {
               VALUES ('$organization_name', '$department_description', '$image_path')";
 
     if (mysqli_query($conn, $query)) {
+        $_SESSION['message'] = "Organization added successfully!";
+        $_SESSION['message_type'] = "success";
         header('Location: ' . $_SERVER['PHP_SELF']);
         exit();
     } else {
-        echo "Error: " . mysqli_error($conn);
+        $_SESSION['message'] = "Error adding organization!";
+        $_SESSION['message_type'] = "error";
     }
 }
 
@@ -76,10 +95,13 @@ if (isset($_POST['update_organization'])) {
               WHERE id = '$organization_id'";
 
     if (mysqli_query($conn, $query)) {
+        $_SESSION['message'] = "Organization updated successfully!";
+        $_SESSION['message_type'] = "success";
         header('Location: ' . $_SERVER['PHP_SELF']);
         exit();
     } else {
-        echo "Error: " . mysqli_error($conn);
+        $_SESSION['message'] = "Error updating organization!";
+        $_SESSION['message_type'] = "error";
     }
 }
 
@@ -88,10 +110,13 @@ if (isset($_GET['delete_id'])) {
     $organizations_id = $_GET['delete_id'];
     $delete_query = "DELETE FROM organizations WHERE id = $organizations_id";
     if (mysqli_query($conn, $delete_query)) {
+        $_SESSION['message'] = "Organization deleted successfully!";
+        $_SESSION['message_type'] = "success";
         header('Location: ' . $_SERVER['PHP_SELF']);
         exit();
     } else {
-        echo "Error deleting record: " . mysqli_error($conn);
+        $_SESSION['message'] = "Error deleting organization!";
+        $_SESSION['message_type'] = "error";
     }
 }
 
@@ -123,13 +148,14 @@ if (isset($_GET['delete_id'])) {
                 <div class="subUserContainer">
                     <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
-                            <img class="subUserPictureContainer" src="../assets/img/CSSPE.png" alt="">
+                            <img class="subUserPictureContainer"
+                                src="../assets/img/<?= !empty($image) ? htmlspecialchars($image) : 'CSSPE.png' ?>"
+                                alt="">
                         </div>
                     </div>
 
                     <div class="userPictureContainer1">
-                        <?php echo ($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?><br>
-                        <?php echo $_SESSION['user_role'] ?>               
+                        <p><?php echo $fullName; ?></p>
                     </div>
                 </div>
 
@@ -333,7 +359,8 @@ if (isset($_GET['delete_id'])) {
                                 <div class="uploadContainer">
                                     <div class="subUploadContainer">
                                         <div class="displayImage">
-                                            <img class="image1" id="preview" src="" alt="Image Preview" style="max-width: 100%; display: none;">
+                                            <img class="image1" id="preview" src="" alt="Image Preview"
+                                                style="max-width: 100%; display: none;">
                                         </div>
                                     </div>
 
@@ -341,21 +368,26 @@ if (isset($_GET['delete_id'])) {
                             </div>
 
                             <div class="uploadButton">
-                                <input id="imageUpload" type="file" name="organization_image" accept="image/*" style="display: none;" onchange="previewImage()">
-                                <button type="button" onclick="triggerImageUpload()" class="addButton" style="height: 2rem; width: 5rem;">Upload</button>
+                                <input id="imageUpload" type="file" name="organization_image" accept="image/*"
+                                    style="display: none;" onchange="previewImage()">
+                                <button type="button" onclick="triggerImageUpload()" class="addButton"
+                                    style="height: 2rem; width: 5rem;">Upload</button>
                             </div>
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" type="text" name="organization_name" placeholder="Organization Name" required>
+                            <input class="inputEmail" type="text" name="organization_name"
+                                placeholder="Organization Name" required>
                         </div>
 
                         <div class="inputContainer" style="height: 10rem;">
-                            <textarea class="inputEmail" name="organization_description" placeholder="Description" required></textarea>
+                            <textarea class="inputEmail" name="organization_description" placeholder="Description"
+                                required></textarea>
                         </div>
 
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
-                            <button type="submit" name="add_organization" class="addButton" style="width: 6rem;">Add</button>
+                            <button type="submit" name="add_organization" class="addButton"
+                                style="width: 6rem;">Add</button>
                             <button onclick="addProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
                         </div>
                     </div>
@@ -386,7 +418,8 @@ if (isset($_GET['delete_id'])) {
                                 <div class="uploadContainer">
                                     <div class="subUploadContainer">
                                         <div class="displayImage">
-                                            <img class="image1" id="organization_image" src="" alt="Image Preview" style="max-width: 100%; display: none;">
+                                            <img class="image1" id="organization_image" src="" alt="Image Preview"
+                                                style="max-width: 100%; display: none;">
                                         </div>
                                     </div>
                                 </div>
@@ -398,15 +431,18 @@ if (isset($_GET['delete_id'])) {
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" type="text" name="organization_name" id="organization_name" placeholder="Organization Name">
+                            <input class="inputEmail" type="text" name="organization_name" id="organization_name"
+                                placeholder="Organization Name">
                         </div>
 
                         <div class="inputContainer" style="height: 10rem;">
-                            <textarea class="inputEmail" name="organization_description" id="organization_description" placeholder="Description"></textarea>
+                            <textarea class="inputEmail" name="organization_description" id="organization_description"
+                                placeholder="Description"></textarea>
                         </div>
 
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
-                            <button type="submit" name="update_organization" class="addButton" style="width: 6rem;">Add</button>
+                            <button type="submit" name="update_organization" class="addButton"
+                                style="width: 6rem;">Add</button>
                             <button onclick="addProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
                         </div>
                     </div>
@@ -450,7 +486,7 @@ if (isset($_GET['delete_id'])) {
             const file = document.getElementById('imageUpload').files[0];
             const reader = new FileReader();
 
-            reader.onloadend = function() {
+            reader.onloadend = function () {
                 const image = document.getElementById('preview');
                 image.src = reader.result;
                 image.style.display = 'block'; // Display the image after loading
@@ -460,10 +496,7 @@ if (isset($_GET['delete_id'])) {
                 reader.readAsDataURL(file);
             }
         }
-    </script>
 
-
-    <script>
         function deleteProgram(userId) {
             Swal.fire({
                 title: 'Are you sure?',
@@ -478,6 +511,16 @@ if (isset($_GET['delete_id'])) {
                 }
             });
         }
+
+        <?php if (isset($_SESSION['message'])): ?>
+            Swal.fire({
+                icon: "<?php echo $_SESSION['message_type']; ?>",
+                title: "<?php echo $_SESSION['message']; ?>",
+                showConfirmButton: false,
+                timer: 3000
+            });
+            <?php unset($_SESSION['message'], $_SESSION['message_type']); ?>
+        <?php endif; ?>
     </script>
 
 </body>

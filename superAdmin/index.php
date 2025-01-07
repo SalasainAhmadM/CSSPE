@@ -4,21 +4,40 @@ require_once '../conn/conn.php';
 require_once '../conn/auth.php';
 
 validateSessionRole('super_admin');
+$userid = $_SESSION['user_id'];
+$query = "SELECT first_name, middle_name, last_name, image FROM users WHERE id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $userid);
+$stmt->execute();
+$result = $stmt->get_result();
 
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $fullName = trim($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']);
+    $image = $row['image'];
+} else {
+    $fullName = "User Not Found";
+}
 // Fetch data from the pending_users table
 $query = "SELECT id, first_name, last_name, middle_name, email, address, contact_no, rank, password, created_at, role, department, image FROM users";
 $result = mysqli_query($conn, $query);
 
-// delete request
+// Delete request
 if (isset($_GET['delete_id'])) {
-    $user_id = $_GET['delete_id'];
+    $user_id = intval($_GET['delete_id']);
     $delete_query = "DELETE FROM users WHERE id = $user_id";
+
     if (mysqli_query($conn, $delete_query)) {
-        header('Location: ' . $_SERVER['PHP_SELF']);
-        exit();
+
+        $_SESSION['message'] = "User deleted successfully!";
+        $_SESSION['message_type'] = "success";
     } else {
-        echo "Error deleting record: " . mysqli_error($conn);
+
+        $_SESSION['message'] = "Error deleting record: " . mysqli_error($conn);
+        $_SESSION['message_type'] = "error";
     }
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit();
 }
 
 function fetchDepartments()
@@ -99,8 +118,6 @@ if (isset($_POST['add_faculty'])) {
 
 
 
-
-
 if (isset($_POST['update_faculty'])) {
     $faculty_id = $_POST['faculty_id'];
 
@@ -120,7 +137,7 @@ if (isset($_POST['update_faculty'])) {
         $hashedPassword = $_POST['current_password'];
     }
 
-    // Handle image upload for update
+    // Handle image upload
     if (isset($_FILES['faculty_image']) && $_FILES['faculty_image']['error'] == 0) {
         $image = $_FILES['faculty_image'];
         $image_name = basename($image['name']);
@@ -133,18 +150,15 @@ if (isset($_POST['update_faculty'])) {
             $new_image_name = uniqid() . '.' . $image_ext;
             $image_path = '../assets/img/' . $new_image_name;
 
-            // Move uploaded image to the directory
             if (move_uploaded_file($image_tmp_name, $image_path)) {
                 $image_path = $new_image_name;
             } else {
-                echo "Error uploading the image.";
-                $image_path = 'CSSPE.png'; // default image
+                $image_path = 'CSSPE.png'; // Default image
             }
         } else {
             $image_path = 'CSSPE.png';
         }
     } else {
-        // If no new image is uploaded, retain the current image
         $query_image = "SELECT image FROM users WHERE id = $faculty_id";
         $result_image = mysqli_query($conn, $query_image);
         $row = mysqli_fetch_assoc($result_image);
@@ -152,19 +166,23 @@ if (isset($_POST['update_faculty'])) {
     }
 
     $update_query = "UPDATE users 
-                     SET first_name = '$first_name', last_name = '$last_name', middle_name = '$middle_name', email = '$email', address = '$address', contact_no = '$contact_no', department = '$department', rank = '$rank', password = '$hashedPassword', image = '$image_path' 
+                     SET first_name = '$first_name', last_name = '$last_name', middle_name = '$middle_name', 
+                         email = '$email', address = '$address', contact_no = '$contact_no', 
+                         department = '$department', rank = '$rank', 
+                         password = '$hashedPassword', image = '$image_path' 
                      WHERE id = $faculty_id";
 
     if (mysqli_query($conn, $update_query)) {
-        echo "Faculty member updated successfully!";
-        header('Location: ' . $_SERVER['PHP_SELF']);
-        exit();
+        $_SESSION['message'] = "Faculty member updated successfully!";
+        $_SESSION['message_type'] = "success";
     } else {
-        echo "Error: " . mysqli_error($conn);
+        $_SESSION['message'] = "Error: " . mysqli_error($conn);
+        $_SESSION['message_type'] = "error";
     }
+
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit();
 }
-
-
 
 ?>
 
@@ -197,13 +215,14 @@ if (isset($_POST['update_faculty'])) {
                 <div class="subUserContainer">
                     <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
-                            <img class="subUserPictureContainer" src="../assets/img/CSSPE.png" alt="">
+                            <img class="subUserPictureContainer"
+                                src="../assets/img/<?= !empty($image) ? htmlspecialchars($image) : 'CSSPE.png' ?>"
+                                alt="">
                         </div>
                     </div>
 
                     <div class="userPictureContainer1">
-                        <?php echo ($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?><br>
-                        <?php echo $_SESSION['user_role'] ?>
+                        <p><?php echo $fullName; ?></p>
                     </div>
                 </div>
 
@@ -319,10 +338,14 @@ if (isset($_POST['update_faculty'])) {
                         <tbody>
                             <?php while ($row = mysqli_fetch_assoc($result)): ?>
                                 <tr>
-                                    <td><?php echo htmlspecialchars($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']); ?></td>
-                                    <td>
-                                        <img class="" src="<?= '../assets/img/' . htmlspecialchars($row['image']) ?>" style="width:100px" alt="">
+                                    <td><?php echo htmlspecialchars($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']); ?>
                                     </td>
+                                    <td>
+                                        <img class=""
+                                            src="<?= '../assets/img/' . (!empty($row['image']) ? htmlspecialchars($row['image']) : 'CSSPE.png') ?>"
+                                            style="width:100px" alt="Image">
+                                    </td>
+
                                     <td><?php echo htmlspecialchars($row['email']); ?></td>
                                     <td><?php echo htmlspecialchars($row['address']); ?></td>
                                     <td><?php echo htmlspecialchars($row['contact_no']); ?></td>
@@ -371,7 +394,7 @@ if (isset($_POST['update_faculty'])) {
 
                     <div class="subLoginContainer">
 
-                        <!-- Hidden input to store event id -->
+                        <!-- Hidden input to store faculty id -->
                         <input type="hidden" name="faculty_id" id="faculty_id">
 
                         <div class="uploadContainer">
@@ -379,33 +402,37 @@ if (isset($_POST['update_faculty'])) {
                                 <div class="uploadContainer">
                                     <div class="subUploadContainer">
                                         <div class="displayImage">
-                                            <img class="image1" id="faculty_image" src="" alt="Image Preview" style="max-width: 100%; display: none;">
+                                            <img class="image1" id="faculty_image" src="../assets/img/CSSPE.png"
+                                                style="max-width: 100%; display: block;">
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="uploadButton">
-                                <input type="file" name="faculty_image" accept="image/*">
+                                <input type="file" name="faculty_image" id="imageUpload" accept="image/*"
+                                    onchange="previewImage()">
                             </div>
                         </div>
 
-
-
                         <div class="inputContainer">
-                            <input class="inputEmail" name="first_name" id="first_name" type="text" placeholder="First Name:">
+                            <input class="inputEmail" name="first_name" id="first_name" type="text"
+                                placeholder="First Name:">
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="last_name" id="last_name" type="text" placeholder="Last Name:">
+                            <input class="inputEmail" name="last_name" id="last_name" type="text"
+                                placeholder="Last Name:">
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="middle_name" id="middle_name" type="text" placeholder="Middle Name (Optional):">
+                            <input class="inputEmail" name="middle_name" id="middle_name" type="text"
+                                placeholder="Middle Name (Optional):">
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="password" id="password" type="password" placeholder="Password:">
+                            <input class="inputEmail" name="password" id="password" type="password"
+                                placeholder="Password:">
                         </div>
 
                         <div class="inputContainer">
@@ -417,7 +444,8 @@ if (isset($_POST['update_faculty'])) {
                         </div>
 
                         <div class="inputContainer">
-                            <input class="inputEmail" name="contact_no" id="contact_no" type="text" placeholder="Contact No.:">
+                            <input class="inputEmail" name="contact_no" id="contact_no" type="text"
+                                placeholder="Contact No.:">
                         </div>
 
                         <div class="inputContainer">
@@ -443,15 +471,16 @@ if (isset($_POST['update_faculty'])) {
                         </div>
 
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
-                            <button type="submit" name="update_faculty" class="addButton" style="width: 6rem;">Save</button>
-                            <button onclick="cancelContainer()" class="addButton1" style="width: 6rem;">Cancel</button>
+                            <button type="submit" name="update_faculty" class="addButton"
+                                style="width: 6rem;">Save</button>
+                            <button onclick="cancelContainer()" type="button" class="addButton1"
+                                style="width: 6rem;">Cancel</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </form>
-
 
 
     <script src="../assets/js/sidebar.js"></script>
@@ -488,9 +517,11 @@ if (isset($_POST['update_faculty'])) {
 
 
         function editProgram(id, image, first_name, middle_name, last_name, email, password, address, contact_no, department, rank) {
+            const defaultImage = '../assets/img/CSSPE.png';
             document.getElementById('faculty_id').value = id;
 
-            document.getElementById('faculty_image').src = image;
+            // Use default image if the provided image is empty
+            document.getElementById('faculty_image').src = image && image.trim() !== '' ? image : defaultImage;
             document.getElementById('faculty_image').style.display = 'block';
 
             document.getElementById('first_name').value = first_name;
@@ -509,26 +540,21 @@ if (isset($_POST['update_faculty'])) {
         function cancelContainer() {
             document.querySelector('.editContainer').style.display = 'none';
         }
-    </script>
 
-    <script>
-        function previewImage() {
-            const file = document.getElementById('imageUpload').files[0];
-            const reader = new FileReader();
 
-            reader.onloadend = function() {
-                const image = document.getElementById('preview');
-                image.src = reader.result;
-                image.style.display = 'block'; // Display the image after loading
-            };
+        document.addEventListener("DOMContentLoaded", function () {
+            <?php if (isset($_SESSION['message']) && isset($_SESSION['message_type'])): ?>
+                Swal.fire({
+                    icon: "<?php echo $_SESSION['message_type']; ?>",
+                    title: "<?php echo $_SESSION['message']; ?>",
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+                <?php unset($_SESSION['message'], $_SESSION['message_type']); ?>
+            <?php endif; ?>
+        });
 
-            if (file) {
-                reader.readAsDataURL(file);
-            }
-        }
-    </script>
-
-    <script>
+        // Function to confirm user deletion
         function deleteUser(userId) {
             Swal.fire({
                 title: 'Are you sure?',
@@ -543,6 +569,16 @@ if (isset($_POST['update_faculty'])) {
                 }
             });
         }
+
+        <?php if (isset($_SESSION['message'])): ?>
+            Swal.fire({
+                icon: "<?php echo $_SESSION['message_type']; ?>",
+                title: "<?php echo $_SESSION['message']; ?>",
+                showConfirmButton: false,
+                timer: 3000
+            });
+            <?php unset($_SESSION['message'], $_SESSION['message_type'], $_SESSION['message_text']); ?>
+        <?php endif; ?>
     </script>
 
 </body>

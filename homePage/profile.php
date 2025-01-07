@@ -17,6 +17,18 @@ $user = $result->fetch_assoc();
 
 $stmt->close();
 
+// Fetch borrowed history
+$sql_borrow_history = "SELECT t.transaction_id, t.quantity_borrowed, t.borrowed_at, t.return_date, t.status, 
+                              i.name AS item_name, i.brand AS item_brand
+                       FROM item_transactions t
+                       JOIN items i ON t.item_id = i.id
+                       WHERE t.users_id = ?
+                       ORDER BY t.borrowed_at DESC";
+$stmt_borrow_history = $conn->prepare($sql_borrow_history);
+$stmt_borrow_history->bind_param("i", $userid);
+$stmt_borrow_history->execute();
+$borrow_history_result = $stmt_borrow_history->get_result();
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $userid = $_SESSION['user_id'];
 
@@ -33,39 +45,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $sql = "UPDATE users SET first_name = ?, last_name = ?, middle_name = ?, email = ?, address = ?, contact_no = ?, rank = ?, department = ? WHERE id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("ssssssssi", $firstName, $lastName, $middleName, $email, $address, $contactNo, $rank, $department, $userid);
-    $stmt->execute();
-    $stmt->close();
 
-    // Check if a file is uploaded
-    if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
-        $fileTmpPath = $_FILES['profile_image']['tmp_name'];
-        $fileName = $_FILES['profile_image']['name'];
-        $fileSize = $_FILES['profile_image']['size'];
-        $fileType = $_FILES['profile_image']['type'];
-        $fileNameCmps = explode(".", $fileName);
-        $fileExtension = strtolower(end($fileNameCmps));
+    if ($stmt->execute()) {
+        $stmt->close();
 
-        // Allowed extensions
-        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
-        if (in_array($fileExtension, $allowedExtensions)) {
-            // Generate a unique name for the file
-            $newFileName = $userid . '_profile.' . $fileExtension;
-            $uploadFileDir = '../assets/img/';
-            $destPath = $uploadFileDir . $newFileName;
+        // Handle profile image upload
+        if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
+            $fileTmpPath = $_FILES['profile_image']['tmp_name'];
+            $fileName = $_FILES['profile_image']['name'];
+            $fileSize = $_FILES['profile_image']['size'];
+            $fileType = $_FILES['profile_image']['type'];
+            $fileNameCmps = explode(".", $fileName);
+            $fileExtension = strtolower(end($fileNameCmps));
 
-            // Move the file to the server directory
-            if (move_uploaded_file($fileTmpPath, $destPath)) {
-                // Update the user's image in the database
-                $sql = "UPDATE users SET image = ? WHERE id = ?";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("si", $newFileName, $userid);
-                $stmt->execute();
-                $stmt->close();
+            // Allowed extensions
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+            if (in_array($fileExtension, $allowedExtensions)) {
+                // Generate a unique name for the file
+                $newFileName = $userid . '_profile.' . $fileExtension;
+                $uploadFileDir = '../assets/img/';
+                $destPath = $uploadFileDir . $newFileName;
+
+                if (move_uploaded_file($fileTmpPath, $destPath)) {
+                    // Update the user's image in the database
+                    $sql = "UPDATE users SET image = ? WHERE id = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("si", $newFileName, $userid);
+                    $stmt->execute();
+                    $stmt->close();
+                }
             }
         }
+
+        $_SESSION['message'] = "Profile updated successfully!";
+        $_SESSION['message_type'] = "success";
+    } else {
+        $_SESSION['message'] = "Failed to update profile!";
+        $_SESSION['message_type'] = "error";
     }
 
-    $_SESSION['success'] = "Profile updated successfully!";
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
 }
@@ -113,17 +131,54 @@ $conn->close();
                 <div class="subUserContainer">
                     <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
-                            <img class="subUserPictureContainer" src="../assets/img/CSSPE.png" alt="">
+                            <?php
+                            $profileImage = !empty($user['image']) ? "../assets/img/" . htmlspecialchars($user['image']) : "../assets/img/CSSPE.png";
+                            ?>
+                            <img class="subUserPictureContainer" src="<?php echo $profileImage; ?>"
+                                alt="Profile Picture">
                         </div>
                     </div>
 
                     <div class="userPictureContainer1">
-                        <p><?php echo ($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?></p>
+                        <p>
+                            <?php
+                            echo htmlspecialchars($user['first_name']) . ' ' .
+                                (!empty($user['middle_name']) ? htmlspecialchars($user['middle_name']) . ' ' : '') .
+                                htmlspecialchars($user['last_name']);
+                            ?>
+                        </p>
                     </div>
                 </div>
 
+
                 <div class="navContainer">
                     <div class="subNavContainer">
+                        <?php if ($_SESSION['user_role'] === 'inventory_admin'): ?>
+                            <a href="../inventoryAdmin/index.php">
+                                <div class="buttonContainer1">
+                                    <div class="nameOfIconContainer">
+                                        <p>Back to Inventory Admin Panel</p>
+                                    </div>
+                                </div>
+                            </a>
+                        <?php elseif ($_SESSION['user_role'] === 'information_admin'): ?>
+                            <a href="../informationAdmin/index.php">
+                                <div class="buttonContainer1">
+                                    <div class="nameOfIconContainer">
+                                        <p>Back to Information Admin Panel</p>
+                                    </div>
+                                </div>
+                            </a>
+                        <?php elseif ($_SESSION['user_role'] === 'super_admin'): ?>
+                            <a href="../superAdmin/index.php">
+                                <div class="buttonContainer1">
+                                    <div class="nameOfIconContainer">
+                                        <p>Back to Super Admin Panel</p>
+                                    </div>
+                                </div>
+                            </a>
+                        <?php endif; ?>
+
                         <a href="../homePage/profile.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -183,6 +238,13 @@ $conn->close();
                         <a href="../homePage/notification.php">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
+                                    <p>Notifications</p>
+                                </div>
+                            </div>
+                        </a>
+                        <!-- <a href="../homePage/notification.php">
+                            <div class="buttonContainer1">
+                                <div class="nameOfIconContainer">
                                     <p>
                                         Notifications
                                         <span style="background-color:#1a1a1a; padding:5px; border-radius:4px;">
@@ -191,7 +253,7 @@ $conn->close();
                                     </p>
                                 </div>
                             </div>
-                        </a>
+                        </a> -->
                     </div>
                 </div>
 
@@ -230,9 +292,10 @@ $conn->close();
                             <div class="pictureContainer1" style="background-color: none;">
 
                                 <div class="pictureContainer">
-                                    <img src="<?= '../assets/img/' . htmlspecialchars($user['image']) ?>"
-                                        alt="Profile Picture" style="width: 100%" border-radius: 50%; object-fit: cover;
-                                        margin-left: 10%;">
+                                    <?php
+                                    $profileImage = !empty($user['image']) ? "../assets/img/" . htmlspecialchars($user['image']) : "../assets/img/CSSPE.png";
+                                    ?>
+                                    <img src="<?php echo $profileImage; ?>" alt="Profile Picture" style="width: 100%">
                                 </div>
 
                                 <div style="margin-top: 1rem;">
@@ -308,34 +371,43 @@ $conn->close();
                             </div>
 
                             <div class="searchContainer">
-                                <input class="searchBar" type="text" placeholder="Search...">
+                                <input id="searchBar" class="searchBar" type="text" placeholder="Search...">
                             </div>
 
                             <div class="tableContainer">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Id</th>
-                                            <th>Item Name</th>
-                                            <th>Brand</th>
-                                            <th>Quantity</th>
-                                            <th>Expected Return Date</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
+                                <?php if ($borrow_history_result->num_rows > 0): ?>
+                                    <table class="borrow-history-table" id="borrowHistoryTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Id</th>
+                                                <th>Item Name</th>
+                                                <th>Brand</th>
+                                                <th>Quantity</th>
+                                                <th>Borrow Date</th>
+                                                <th>Expected Return Date</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
 
-                                    <tbody>
-                                        <tr>
-                                            <td>1</td>
-                                            <td>Hakdog</td>
-                                            <td>Hakdog</td>
-                                            <td>Hakdog</td>
-                                            <td>Hakdog</td>
-                                            <td>Hakdog</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                        <tbody>
+                                            <?php while ($row = $borrow_history_result->fetch_assoc()): ?>
+                                                <tr>
+                                                    <td><?= htmlspecialchars($row['transaction_id']) ?></td>
+                                                    <td><?= htmlspecialchars($row['item_name']) ?></td>
+                                                    <td><?= htmlspecialchars($row['item_brand']) ?></td>
+                                                    <td><?= htmlspecialchars($row['quantity_borrowed']) ?></td>
+                                                    <td><?= htmlspecialchars($row['borrowed_at']) ?></td>
+                                                    <td><?= htmlspecialchars($row['return_date'] ?? 'N/A') ?></td>
+                                                    <td><?= htmlspecialchars($row['status']) ?></td>
+                                                </tr>
+                                            <?php endwhile; ?>
+                                        </tbody>
+                                    </table>
+                                <?php else: ?>
+                                    <p>No borrow history available.</p>
+                                <?php endif; ?>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -343,23 +415,21 @@ $conn->close();
         </div>
     </div>
 
-    <div class="editContainer3 size1" style="display: none; background-color: none; width: 100%;">
+    <div class="editContainer3 size1" id="profileModal" style="display: none; background-color: none; width: 100%;">
         <div class="editContainer3 size1">
             <div class="subProfileContainer size6">
                 <div class="infoContainer">
                     <div class="pictureContainer1" style="background-color: none;">
-
                         <div class="pictureContainer">
-                            <img src="<?= '../assets/img/' . htmlspecialchars($user['image']) ?>" alt="Profile Picture"
-                                style="width: 100%; border-radius: 50%; object-fit: cover;">
+                            <img id="profileImagePreview"
+                                src="<?= '../assets/img/' . (!empty($user['image']) && file_exists('../assets/img/' . $user['image']) ? htmlspecialchars($user['image']) : 'CSSPE.png') ?>"
+                                alt="Profile Picture" style="width: 100%; border-radius: 50%; object-fit: cover;">
                         </div>
 
                         <form action="" method="POST" enctype="multipart/form-data">
-                            <input type="file" name="profile_image" accept="image/*" required>
+                            <input type="file" name="profile_image" id="profileImageInput" accept="image/*" required>
                             <button type="submit" class="addButton">Change Profile Image</button>
                         </form>
-
-
                     </div>
 
                     <div class="subLoginContainer">
@@ -430,7 +500,8 @@ $conn->close();
                             <div class="inputContainer"
                                 style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
                                 <button type="submit" class="addButton" style="width: 6rem;">Save</button>
-                                <button onclick="profile()" class="addButton1" style="width: 6rem;">Cancel</button>
+                                <button type="button" class="addButton1" style="width: 6rem;"
+                                    onclick="closeModal()">Cancel</button>
                             </div>
 
                         </form>
@@ -440,7 +511,47 @@ $conn->close();
             </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.getElementById('profileImageInput').addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('profileImagePreview').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
 
+        document.getElementById('searchBar').addEventListener('input', function () {
+            const filter = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#borrowHistoryTable tbody tr');
+
+            rows.forEach(row => {
+                const itemName = row.cells[1].textContent.toLowerCase();
+                if (itemName.includes(filter)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        <?php if (isset($_SESSION['message'])): ?>
+            Swal.fire({
+                icon: "<?php echo $_SESSION['message_type']; ?>",
+                title: "<?php echo $_SESSION['message']; ?>",
+                showConfirmButton: false,
+                timer: 3000
+            });
+            <?php unset($_SESSION['message'], $_SESSION['message_type'], $_SESSION['message_text']); ?>
+        <?php endif; ?>
+
+        function closeModal() {
+            document.getElementById('profileModal').style.display = 'none';
+        }
+    </script>
     <script src="../assets/js/sidebar.js"></script>
     <script src="../assets/js/uploadImage.js"></script>
     <script src="../assets/js/profile.js"></script>

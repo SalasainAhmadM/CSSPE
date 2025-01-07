@@ -4,7 +4,20 @@ require_once '../conn/conn.php';
 require_once '../conn/auth.php';
 
 validateSessionRole('super_admin');
+$userid = $_SESSION['user_id'];
+$query = "SELECT first_name, middle_name, last_name, image FROM users WHERE id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $userid);
+$stmt->execute();
+$result = $stmt->get_result();
 
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $fullName = trim($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']);
+    $image = $row['image'];
+} else {
+    $fullName = "User Not Found";
+}
 function registerUser($firstName, $lastName, $middleName, $email, $address, $contactNo, $rank, $password, $role)
 {
     global $conn;
@@ -146,13 +159,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="subUserContainer">
                     <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
-                            <img class="subUserPictureContainer" src="../assets/img/CSSPE.png" alt="">
+                            <img class="subUserPictureContainer"
+                                src="../assets/img/<?= !empty($image) ? htmlspecialchars($image) : 'CSSPE.png' ?>"
+                                alt="">
                         </div>
                     </div>
 
                     <div class="userPictureContainer1">
-                        <?php echo ($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?><br>
-                        <?php echo $_SESSION['user_role'] ?>
+                        <p><?php echo $fullName; ?></p>
                     </div>
                 </div>
 
@@ -244,15 +258,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="subLoginContainer">
 
                                 <div class="inputContainer">
-                                    <input class="inputEmail" name="first_name" type="text" placeholder="First Name:" required>
+                                    <input class="inputEmail" name="first_name" type="text" placeholder="First Name:"
+                                        required>
                                 </div>
 
                                 <div class="inputContainer">
-                                    <input class="inputEmail" name="last_name" type="text" placeholder="Last Name:" required>
+                                    <input class="inputEmail" name="last_name" type="text" placeholder="Last Name:"
+                                        required>
                                 </div>
 
                                 <div class="inputContainer">
-                                    <input class="inputEmail" name="middle_name" type="text" placeholder="Middle Name (Optional):" required>
+                                    <input class="inputEmail" name="middle_name" type="text"
+                                        placeholder="Middle Name (Optional):">
                                 </div>
 
                                 <div class="inputContainer">
@@ -260,11 +277,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
 
                                 <div class="inputContainer">
-                                    <input class="inputEmail" name="address" type="text" placeholder="Address:" required>
+                                    <input class="inputEmail" name="address" type="text" placeholder="Address:"
+                                        required>
                                 </div>
 
                                 <div class="inputContainer">
-                                    <input class="inputEmail" name="contact_no" type="text" placeholder="Contact No.:" required>
+                                    <input class="inputEmail" name="contact_no" type="text" placeholder="Contact No.:"
+                                        required>
                                 </div>
 
                                 <div class="inputContainer" style="gap: 0.5rem;">
@@ -282,7 +301,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <option value="">Choose an admin position</option>
                                             <option value="information_admin">Information Admin</option>
                                             <option value="inventory_admin">Inventory Admin</option>
-                                            <option value="super_admin">Super Admin</option>
+                                            <!-- <option value="super_admin">Super Admin</option> -->
                                         </select>
                                     </div>
                                 </div>
@@ -300,14 +319,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
 
                                 <div class="inputContainer">
-                                    <input class="inputEmail" name="password" type="password" placeholder="Password:" required>
+                                    <input class="inputEmail" name="password" type="password" placeholder="Password:"
+                                        required>
                                 </div>
 
                                 <div class="inputContainer">
-                                    <input class="inputEmail" name="confirm_password" type="password" placeholder="Confirm Password:" required>
+                                    <input class="inputEmail" name="confirm_password" type="password"
+                                        placeholder="Confirm Password:" required>
                                 </div>
 
-                                <div class="inputContainer" style="gap: 0.5rem; justify-content: center; padding-right: 0.9rem;">
+                                <div class="inputContainer"
+                                    style="gap: 0.5rem; justify-content: center; padding-right: 0.9rem;">
                                     <button class="addButton" name="register" style="width: 6rem;">Add</button>
                                 </div>
                             </div>
@@ -359,7 +381,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         });
     </script>
 
-    <?php if (!empty($message)) : ?>
+    <?php if (!empty($message)): ?>
         <script>
             Swal.fire({
                 icon: 'error',

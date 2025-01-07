@@ -18,6 +18,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
+    // Fetch current quantity
+    $stmt = $conn->prepare("SELECT quantity, quantity_origin FROM items WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $item = $result->fetch_assoc();
+    $stmt->close();
+
+    if (!$item) {
+        echo json_encode(['status' => 'error', 'message' => 'Item not found!']);
+        exit;
+    }
+
+    $currentQuantity = intval($item['quantity']);
+    $quantityOrigin = intval($item['quantity_origin']);
+
+    // Calculate quantity_origin update
+    $quantityChange = $quantity - $currentQuantity;
+    $newQuantityOrigin = $quantityOrigin + $quantityChange;
+
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
         $targetDir = '../../assets/uploads/';
         $fileName = uniqid() . '-' . basename($_FILES['image']['name']);
@@ -38,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    $query = "UPDATE items SET name = ?, description = ?, brand = ?, quantity = ?";
+    $query = "UPDATE items SET name = ?, description = ?, brand = ?, quantity = ?, quantity_origin = ?";
     if ($image) {
         $query .= ", image = ?";
     }
@@ -46,15 +66,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $stmt = $conn->prepare($query);
     if ($image) {
-        $stmt->bind_param("sssisi", $name, $description, $brand, $quantity, $image, $id);
+        $stmt->bind_param("sssissi", $name, $description, $brand, $quantity, $newQuantityOrigin, $image, $id);
     } else {
-        $stmt->bind_param("sssii", $name, $description, $brand, $quantity, $id);
+        $stmt->bind_param("sssiii", $name, $description, $brand, $quantity, $newQuantityOrigin, $id);
     }
 
     if ($stmt->execute()) {
-        // Update similar items
-        updateSimilarItems($name, $id);
-
         echo json_encode(['status' => 'success', 'message' => 'Item updated successfully!']);
     } else {
         echo json_encode(['status' => 'error', 'message' => 'Failed to update item.']);
@@ -62,28 +79,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $stmt->close();
     $conn->close();
-}
-
-function updateSimilarItems($newName, $currentItemId)
-{
-    global $conn;
-
-    // Find items with similar names
-    $query = "SELECT id FROM items WHERE name LIKE ? AND id != ?";
-    $stmt = $conn->prepare($query);
-    $likePattern = "%" . $newName . "%";
-    $stmt->bind_param("si", $likePattern, $currentItemId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    while ($row = $result->fetch_assoc()) {
-        $updateQuery = "UPDATE items SET name = ? WHERE id = ?";
-        $updateStmt = $conn->prepare($updateQuery);
-        $updateStmt->bind_param("si", $newName, $row['id']);
-        $updateStmt->execute();
-        $updateStmt->close();
-    }
-
-    $stmt->close();
 }
 ?>

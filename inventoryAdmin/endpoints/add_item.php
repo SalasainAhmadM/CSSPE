@@ -38,9 +38,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    $query = "INSERT INTO items (name, description, brand, quantity, users_id, image) VALUES (?, ?, ?, ?, ?, ?)";
+    $query = "INSERT INTO items (name, description, brand, quantity, quantity_origin, users_id, image) VALUES (?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("ssssis", $name, $description, $brand, $quantity, $inventoryAdminId, $image);
+    $stmt->bind_param("sssssis", $name, $description, $brand, $quantity, $quantity, $inventoryAdminId, $image);
 
     if ($stmt->execute()) {
         echo json_encode(['status' => 'success', 'message' => 'Item added successfully!']);

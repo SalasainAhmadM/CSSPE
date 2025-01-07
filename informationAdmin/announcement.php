@@ -5,6 +5,22 @@ require_once '../conn/auth.php';
 
 validateSessionRole('information_admin');
 
+$informationAdminId = $_SESSION['user_id'];
+
+$query = "SELECT first_name, middle_name, last_name, image FROM users WHERE id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $informationAdminId);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $fullName = trim($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']);
+    $image = $row['image'];
+} else {
+    $fullName = "User Not Found";
+}
+
 $query = "SELECT * FROM announcements";
 $result = mysqli_query($conn, $query);
 
@@ -16,28 +32,26 @@ if (isset($_POST['add_announcement'])) {
 
     $date_uploaded_at = date('Y-m-d H:i:s');
 
-    // Insert into announcements table
     $query_announcements = "INSERT INTO announcements (title, description, location, date_uploaded_at) 
                             VALUES ('$title', '$description', '$location', '$date_uploaded_at')";
 
     $query_notifications = "INSERT INTO notifications (title, description, uploaded_at, type) 
                             VALUES ('$title', '$description', '$date_uploaded_at', 'Announcements')";
 
-
     $success_announcements = mysqli_query($conn, $query_announcements);
     $success_notifications = mysqli_query($conn, $query_notifications);
 
     if ($success_announcements && $success_notifications) {
-        echo "Announcement and notification added successfully!";
+        $_SESSION['message'] = "Announcement and notification added successfully!";
+        $_SESSION['message_type'] = "success";
         header('Location: ' . $_SERVER['PHP_SELF']);
         exit();
     } else {
-        echo "Error: " . mysqli_error($conn);
+        $_SESSION['message'] = "Error: " . mysqli_error($conn);
+        $_SESSION['message_type'] = "error";
     }
 }
 
-
-// Update event logic
 if (isset($_POST['update_announcement'])) {
     $announcement_id = $_POST['announcement_id'];
     $title = mysqli_real_escape_string($conn, $_POST['title']);
@@ -45,40 +59,36 @@ if (isset($_POST['update_announcement'])) {
     $location = mysqli_real_escape_string($conn, $_POST['location']);
     $date = mysqli_real_escape_string($conn, $_POST['date']);
 
-    // Get the current time in 'H:i:s' format
     $current_time = date('H:i:s');
-
-    // Combine the date from $date with the current time
     $date_uploaded_at = $date . ' ' . $current_time;
 
-    $query = "UPDATE announcements SET title = '$title', description = '$description', date_uploaded_at = '$date_uploaded_at',  location = ' $location' WHERE id = $announcement_id";
+    $query = "UPDATE announcements SET title = '$title', description = '$description', date_uploaded_at = '$date_uploaded_at',  location = '$location' WHERE id = $announcement_id";
 
     if (mysqli_query($conn, $query)) {
-        echo "Event updated successfully!";
+        $_SESSION['message'] = "Event updated successfully!";
+        $_SESSION['message_type'] = "success";
         header('Location: ' . $_SERVER['PHP_SELF']);
         exit();
     } else {
-        echo "Error: " . mysqli_error($conn);
+        $_SESSION['message'] = "Error: " . mysqli_error($conn);
+        $_SESSION['message_type'] = "error";
     }
 }
 
-
-
-// delete request
 if (isset($_GET['delete_id'])) {
     $announcement_id = $_GET['delete_id'];
     $delete_query = "DELETE FROM announcements WHERE id = $announcement_id";
     if (mysqli_query($conn, $delete_query)) {
+        $_SESSION['message'] = "Announcement deleted successfully!";
+        $_SESSION['message_type'] = "success";
         header('Location: ' . $_SERVER['PHP_SELF']);
         exit();
     } else {
-        echo "Error deleting record: " . mysqli_error($conn);
+        $_SESSION['message'] = "Error deleting record: " . mysqli_error($conn);
+        $_SESSION['message_type'] = "error";
     }
 }
 ?>
-
-
-
 
 
 <!DOCTYPE html>
@@ -110,13 +120,14 @@ if (isset($_GET['delete_id'])) {
                 <div class="subUserContainer">
                     <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
-                            <img class="subUserPictureContainer" src="../assets/img/CSSPE.png" alt="">
+                            <img class="subUserPictureContainer"
+                                src="../assets/img/<?= !empty($image) ? htmlspecialchars($image) : 'CSSPE.png' ?>"
+                                alt="">
                         </div>
                     </div>
 
                     <div class="userPictureContainer1">
-                        <?php echo ($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?><br>
-                        <?php echo $_SESSION['user_role'] ?>
+                        <p><?php echo $fullName; ?></p>
                     </div>
                 </div>
 
@@ -279,11 +290,13 @@ if (isset($_GET['delete_id'])) {
                         </div>
 
                         <div class="inputContainer" style="height: 10rem;">
-                            <textarea class="inputEmail" name="description" id="description" placeholder="Description"></textarea>
+                            <textarea class="inputEmail" name="description" id="description"
+                                placeholder="Description"></textarea>
                         </div>
 
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
-                            <button type="submit" name="add_announcement" class="addButton" style="width: 6rem;">Add</button>
+                            <button type="submit" name="add_announcement" class="addButton"
+                                style="width: 6rem;">Add</button>
                             <button onclick="addProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
                         </div>
                     </div>
@@ -311,30 +324,34 @@ if (isset($_GET['delete_id'])) {
                         <div class="inputContainer" style="flex-direction: column; height: 5rem;">
                             <label for=""
                                 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Title:</label>
-                            <input class="inputEmail" type="text" id="announcement_title" name="title" value="" placeholder="Title:">
+                            <input class="inputEmail" type="text" id="announcement_title" name="title" value=""
+                                placeholder="Title:">
                         </div>
 
                         <div class="inputContainer" style="flex-direction: column; height: 5rem;">
                             <label for=""
                                 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Location:</label>
-                            <input class="inputEmail" type="text" id="announcement_location" name="location" value="" placeholder="Location:">
+                            <input class="inputEmail" type="text" id="announcement_location" name="location" value=""
+                                placeholder="Location:">
                         </div>
 
                         <div class="inputContainer" style="flex-direction: column; height: 5rem;">
                             <label for=""
                                 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Date:</label>
-                            <input class="inputEmail" type="date" id="announcement_date" name="date" value="" placeholder="Date:">
+                            <input class="inputEmail" type="date" id="announcement_date" name="date" value=""
+                                placeholder="Date:">
                         </div>
 
                         <div class="inputContainer" style="flex-direction: column; height: 5rem; min-height: 12rem;">
                             <label for=""
                                 style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Content:</label>
-                            <textarea style="min-height: 10rem;" id="announcement_description" class="inputEmail" value="" name="description" id=""
-                                placeholder="Content"></textarea>
+                            <textarea style="min-height: 10rem;" id="announcement_description" class="inputEmail"
+                                value="" name="description" id="" placeholder="Content"></textarea>
                         </div>
 
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
-                            <button type="submit" name="update_announcement" class="addButton" style="width: 6rem;">Save</button>
+                            <button type="submit" name="update_announcement" class="addButton"
+                                style="width: 6rem;">Save</button>
                             <button onclick="cancelContainer()" class="addButton1" style="width: 6rem;">Cancel</button>
                         </div>
                     </div>
@@ -365,9 +382,7 @@ if (isset($_GET['delete_id'])) {
         function cancelContainer() {
             document.querySelector('.editContainer').style.display = 'none';
         }
-    </script>
 
-    <script>
         function deleteAnnouncement(userId) {
             Swal.fire({
                 title: 'Are you sure?',
@@ -382,6 +397,17 @@ if (isset($_GET['delete_id'])) {
                 }
             });
         }
+
+
+        <?php if (isset($_SESSION['message'])): ?>
+            Swal.fire({
+                icon: "<?php echo $_SESSION['message_type']; ?>",
+                title: "<?php echo $_SESSION['message']; ?>",
+                showConfirmButton: false,
+                timer: 3000
+            });
+            <?php unset($_SESSION['message'], $_SESSION['message_type']); ?>
+        <?php endif; ?>
     </script>
 </body>
 

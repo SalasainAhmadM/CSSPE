@@ -4,7 +4,20 @@ require_once '../conn/conn.php';
 require_once '../conn/auth.php';
 
 validateSessionRole('super_admin');
+$userid = $_SESSION['user_id'];
+$query = "SELECT first_name, middle_name, last_name, image FROM users WHERE id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $userid);
+$stmt->execute();
+$result = $stmt->get_result();
 
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $fullName = trim($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']);
+    $image = $row['image'];
+} else {
+    $fullName = "User Not Found";
+}
 // Fetch data from the pending_users table
 $query = "SELECT id, first_name, last_name, middle_name, email, address, contact_no, rank, password, created_at, role, department FROM pending_users";
 $result = mysqli_query($conn, $query);
@@ -14,10 +27,13 @@ if (isset($_GET['delete_id'])) {
     $user_id = $_GET['delete_id'];
     $delete_query = "DELETE FROM pending_users WHERE id = $user_id";
     if (mysqli_query($conn, $delete_query)) {
+        $_SESSION['message'] = "User deleted successfully!";
+        $_SESSION['message_type'] = "success";
         header('Location: ' . $_SERVER['PHP_SELF']);
         exit();
     } else {
-        echo "Error deleting record: " . mysqli_error($conn);
+        $_SESSION['message'] = "Error deleting user: " . mysqli_error($conn);
+        $_SESSION['message_type'] = "error";
     }
 }
 
@@ -43,13 +59,17 @@ if (isset($_GET['approve_id'])) {
     if (mysqli_query($conn, $insert_query)) {
         $delete_query = "DELETE FROM pending_users WHERE id = $user_id";
         if (mysqli_query($conn, $delete_query)) {
+            $_SESSION['message'] = "User approved successfully!";
+            $_SESSION['message_type'] = "success";
             header('Location: ' . $_SERVER['PHP_SELF']);
             exit();
         } else {
-            echo "Error deleting record after approval: " . mysqli_error($conn);
+            $_SESSION['message'] = "Error deleting record after approval: " . mysqli_error($conn);
+            $_SESSION['message_type'] = "error";
         }
     } else {
-        echo "Error inserting into users table: " . mysqli_error($conn);
+        $_SESSION['message'] = "Error inserting into users table: " . mysqli_error($conn);
+        $_SESSION['message_type'] = "error";
     }
 }
 ?>
@@ -83,13 +103,14 @@ if (isset($_GET['approve_id'])) {
                 <div class="subUserContainer">
                     <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
-                            <img class="subUserPictureContainer" src="../assets/img/CSSPE.png" alt="">
+                            <img class="subUserPictureContainer"
+                                src="../assets/img/<?= !empty($image) ? htmlspecialchars($image) : 'CSSPE.png' ?>"
+                                alt="">
                         </div>
                     </div>
 
                     <div class="userPictureContainer1">
-                        <?php echo ($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?><br>
-                        <?php echo $_SESSION['user_role'] ?>
+                        <p><?php echo $fullName; ?></p>
                     </div>
                 </div>
 
@@ -175,17 +196,17 @@ if (isset($_GET['approve_id'])) {
                 </div>
 
                 <div class="searchContainer">
-                    <input class="searchBar" type="text" placeholder="Search...">
-                    <div class="printButton" style="gap: 1rem; display: flex; width: 90%;">
+                    <input id="searchBar" class="searchBar" type="text" placeholder="Search...">
+                    <!-- <div class="printButton" style="gap: 1rem; display: flex; width: 90%;">
                         <button class="addButton size">Print</button>
                         <select name="" class="addButton size" id="">
                             <option value="">Choose a position</option>
                         </select>
-                    </div>
+                    </div> -->
                 </div>
 
                 <div class="tableContainer" style="height:475px">
-                    <table>
+                    <table id="dataTable">
                         <thead>
                             <tr>
                                 <th>Fullname</th>
@@ -201,7 +222,8 @@ if (isset($_GET['approve_id'])) {
                         <tbody>
                             <?php while ($row = mysqli_fetch_assoc($result)): ?>
                                 <tr>
-                                    <td><?php echo htmlspecialchars($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']); ?>
+                                    </td>
                                     <td><?php echo htmlspecialchars($row['email']); ?></td>
                                     <td><?php echo htmlspecialchars($row['address']); ?></td>
                                     <td><?php echo htmlspecialchars($row['contact_no']); ?></td>
@@ -259,6 +281,30 @@ if (isset($_GET['approve_id'])) {
                 }
             });
         }
+
+        <?php if (isset($_SESSION['message'])): ?>
+            Swal.fire({
+                icon: "<?php echo $_SESSION['message_type']; ?>",
+                title: "<?php echo $_SESSION['message']; ?>",
+                showConfirmButton: false,
+                timer: 3000
+            });
+
+            <?php unset($_SESSION['message'], $_SESSION['message_type']); ?>
+        <?php endif; ?>
+        document.getElementById('searchBar').addEventListener('input', function () {
+            const searchQuery = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#dataTable tbody tr');
+
+            rows.forEach(row => {
+                const fullName = row.cells[0].textContent.toLowerCase();
+                if (fullName.includes(searchQuery)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
     </script>
 
 </body>

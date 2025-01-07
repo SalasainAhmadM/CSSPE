@@ -63,7 +63,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                     <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
                             <img class="subUserPictureContainer"
-                                src="../assets/img/<?= !empty($image) ? htmlspecialchars($image) : 'CSSPE.png' ?>"
+                                src="../assets/img/<?= !empty($image) ? htmlspecialchars($image) : '../assets/img/CSSPE.png' ?>"
                                 alt="">
                         </div>
                     </div>
@@ -88,14 +88,6 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                                 <div class="buttonContainer1">
                                     <div class="nameOfIconContainer">
                                         <p>Back to Information Admin Panel</p>
-                                    </div>
-                                </div>
-                            </a>
-                        <?php elseif ($_SESSION['user_role'] === 'super_admin'): ?>
-                            <a href="../superAdmin/index.php">
-                                <div class="buttonContainer1">
-                                    <div class="nameOfIconContainer">
-                                        <p>Back to Super Admin Panel</p>
                                     </div>
                                 </div>
                             </a>
@@ -159,14 +151,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                             </div>
                         </a>
 
-                        <a href="../homePage/notification.php">
-                            <div class="buttonContainer1">
-                                <div class="nameOfIconContainer">
-                                    <p>Notifications</p>
-                                </div>
-                            </div>
-                        </a>
-                        <!-- <a href="../homePage/notification.php?update=1">
+                        <a href="../homePage/notification.php?update=1">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>
@@ -177,14 +162,14 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                                     </p>
                                 </div>
                             </div>
-                        </a> -->
+                        </a>
 
 
                     </div>
                 </div>
 
                 <div class="subUserContainer">
-                    <a href="../logout.php">
+                    <a href="../logout.php">>
                         <div style="margin-left: 1.5rem;" class="userPictureContainer1">
                             <p>Logout</p>
                         </div>

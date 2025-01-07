@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 04, 2025 at 01:40 PM
+-- Generation Time: Jan 07, 2025 at 07:05 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -40,14 +40,14 @@ CREATE TABLE `announcements` (
 --
 
 INSERT INTO `announcements` (`id`, `title`, `description`, `date_uploaded_at`, `location`) VALUES
-(6, 'Nzro Day', 'nice', '2024-12-14 18:33:42', '     niceasdas'),
-(8, 'Yes', 'hahahahahha', '2024-12-17 18:49:24', 'zamboanga city'),
+(8, 'Yes', 'hahahahahha', '2024-12-17 10:59:25', 'zamboanga city'),
 (9, 'yesssssssssssssss', 'hahhahahha', '2024-12-17 19:21:39', 'zamboanga city'),
 (10, 'yes', 'dd', '2024-12-17 20:01:12', 'zamboanga cityrr'),
 (11, 'asd', 'qwew', '2024-12-17 20:07:33', 'zamboanga cityeqwewe'),
 (12, 'gahahhhha', 'dasdas', '2024-12-17 20:15:49', 'hhaha'),
 (13, 'dasd', 'sada', '2024-12-17 20:18:51', 'zamboanga city'),
-(14, 'NICEEEEEEEEEEEEEEEe', 'eeeeeee', '2024-12-17 20:19:18', 'zamboanga city');
+(14, 'NICEEEEEEEEEEEEEEEe', 'eeeeeee', '2024-12-17 20:19:18', 'zamboanga city'),
+(15, '123', '1qwe', '2025-01-05 10:38:52', '123');
 
 -- --------------------------------------------------------
 
@@ -67,7 +67,7 @@ CREATE TABLE `departments` (
 --
 
 INSERT INTO `departments` (`id`, `department_name`, `description`, `image`) VALUES
-(21, 'College of Architecture', 'yes', '../assets/img/CSSPE.png');
+(21, 'College of Architecture1', 'yes', '../assets/img/CSSPE.png');
 
 -- --------------------------------------------------------
 
@@ -87,8 +87,8 @@ CREATE TABLE `events` (
 --
 
 INSERT INTO `events` (`id`, `title`, `description`, `date_uploaded_at`) VALUES
-(3, 'bice', 'yes', '2024-12-01 18:07:28'),
-(4, 'nice', 'yes', '2024-12-01 18:07:28');
+(6, 'nice', 'yes', '2024-12-01 09:53:48'),
+(7, '123', 'qwe', '2025-01-05 10:33:28');
 
 -- --------------------------------------------------------
 
@@ -103,6 +103,7 @@ CREATE TABLE `items` (
   `brand` varchar(255) NOT NULL,
   `type` enum('origin','brand') NOT NULL DEFAULT 'origin',
   `quantity` varchar(255) NOT NULL,
+  `quantity_origin` varchar(255) NOT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL,
   `users_id` int(11) NOT NULL,
@@ -113,17 +114,18 @@ CREATE TABLE `items` (
 -- Dumping data for table `items`
 --
 
-INSERT INTO `items` (`id`, `name`, `description`, `brand`, `type`, `quantity`, `created_at`, `updated_at`, `users_id`, `image`) VALUES
-(1, 'Earth', 'qwerty', 'Orig', 'origin', '12', '2024-12-28 16:32:52', '0000-00-00 00:00:00', 25, '677176e8106c3-69ce7c36886481c490338f7465e00bd9.png'),
-(2, 'Earth', 'qwerty 2', 'local', 'brand', '12', '2024-12-28 16:33:12', '0000-00-00 00:00:00', 25, NULL),
-(3, 'Earth', 'asdasdasd', '22', 'brand', '123', '2024-12-28 16:33:12', '0000-00-00 00:00:00', 25, NULL),
-(4, 'qwerty', 'asdasdasd', '22', 'origin', '123', '2024-12-28 16:33:12', '0000-00-00 00:00:00', 25, NULL),
-(5, 'asdfg', 'asdasdasd', '22', 'origin', '123', '2024-12-28 16:33:12', '0000-00-00 00:00:00', 25, NULL),
-(6, 'sdfsvsggv', 'asdasdasd', '22', 'origin', '123', '2024-12-28 16:33:12', '0000-00-00 00:00:00', 25, NULL),
-(7, 'qwertyqwerty', 'asdasdasd', '22', 'origin', '123', '2024-12-28 16:33:12', '0000-00-00 00:00:00', 25, NULL),
-(8, 'Item test', 'new', 'orig', 'origin', '12', '2024-12-29 16:55:36', '0000-00-00 00:00:00', 25, NULL),
-(9, '123', 'qwewe', '1211', 'origin', '123', '2024-12-29 17:07:29', '0000-00-00 00:00:00', 25, '67711151698a1-akagi.jpg'),
-(10, 'we', '123123', 'qw', 'origin', '12', '2024-12-29 17:09:34', '0000-00-00 00:00:00', 25, '677111da9bf07-bini.jpg');
+INSERT INTO `items` (`id`, `name`, `description`, `brand`, `type`, `quantity`, `quantity_origin`, `created_at`, `updated_at`, `users_id`, `image`) VALUES
+(2, 'Earth', 'qwerty 2', 'local', 'brand', '21', '27', '2024-12-28 16:33:12', '0000-00-00 00:00:00', 25, NULL),
+(3, 'Earth', 'asdasdasd', '22', 'brand', '10', '120', '2024-12-28 16:33:12', '0000-00-00 00:00:00', 25, NULL),
+(5, 'asdfg', 'asdasdasd', '22', 'origin', '126', '3', '2024-12-28 16:33:12', '0000-00-00 00:00:00', 25, NULL),
+(6, 'sdfsvsggv', 'asdasdasd', '22', 'origin', '100', '123', '2024-12-28 16:33:12', '0000-00-00 00:00:00', 25, NULL),
+(9, '123', 'qwewe', '1211', 'origin', '123', '123', '2024-12-29 17:07:29', '0000-00-00 00:00:00', 25, '67711151698a1-akagi.jpg'),
+(10, 'we', '123123', 'qw', 'origin', '12', '12', '2024-12-29 17:09:34', '0000-00-00 00:00:00', 25, '677111da9bf07-bini.jpg'),
+(11, '121', '121', '12', 'origin', '12', '12', '2025-01-05 18:15:56', '0000-00-00 00:00:00', 25, NULL),
+(12, 'w2e', '22', '2312', 'origin', '22', '22', '2025-01-05 18:19:06', '0000-00-00 00:00:00', 25, NULL),
+(13, '11111111111111', 'csdasdasd', '111111dwdawsda', 'origin', '44', '4444', '2025-01-05 18:23:41', '0000-00-00 00:00:00', 25, '677a5dadae056-download.jpg'),
+(14, 'test', 'real', 'orig', 'origin', '0', '22', '2025-01-06 15:45:13', '0000-00-00 00:00:00', 25, '677b8a093554d-karimagi.jpg'),
+(15, 'testtst', 'jordan', 'qwerty', 'origin', '23', '23', '2025-01-06 15:54:10', '0000-00-00 00:00:00', 25, '677b8c2216f19-download (2).jpg');
 
 -- --------------------------------------------------------
 
@@ -136,22 +138,26 @@ CREATE TABLE `item_transactions` (
   `quantity_borrowed` int(11) NOT NULL,
   `quantity_returned` int(11) DEFAULT NULL,
   `borrowed_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `return_date` date DEFAULT NULL,
   `returned_at` datetime DEFAULT NULL,
   `item_id` int(11) NOT NULL,
   `users_id` int(11) NOT NULL,
   `schedule_from` time NOT NULL,
   `schedule_to` time NOT NULL,
-  `status` enum('Pending','Approved') NOT NULL DEFAULT 'Pending'
+  `class_date` date DEFAULT NULL,
+  `status` enum('Pending','Approved','Returned') NOT NULL DEFAULT 'Pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `item_transactions`
 --
 
-INSERT INTO `item_transactions` (`transaction_id`, `quantity_borrowed`, `quantity_returned`, `borrowed_at`, `returned_at`, `item_id`, `users_id`, `schedule_from`, `schedule_to`, `status`) VALUES
-(1, 2, NULL, '2025-01-04 00:00:00', NULL, 4, 47, '00:00:19', '19:40:00', 'Pending'),
-(2, 3, NULL, '2025-01-31 00:00:00', NULL, 2, 10, '00:00:19', '19:42:00', 'Pending'),
-(3, 4, NULL, '2025-01-17 20:07:04', NULL, 1, 47, '00:00:20', '20:13:00', 'Pending');
+INSERT INTO `item_transactions` (`transaction_id`, `quantity_borrowed`, `quantity_returned`, `borrowed_at`, `return_date`, `returned_at`, `item_id`, `users_id`, `schedule_from`, `schedule_to`, `class_date`, `status`) VALUES
+(2, 0, 3, '2025-01-31 00:00:00', NULL, '2025-01-07 02:35:17', 2, 10, '00:00:19', '19:42:00', NULL, 'Returned'),
+(17, 0, 3, '2025-01-31 00:00:00', NULL, '2025-01-07 02:36:51', 5, 10, '00:00:19', '19:42:00', NULL, 'Returned'),
+(20, 1, 21, '2025-01-08 02:45:35', '2025-01-06', '2025-01-07 12:36:18', 2, 10, '02:46:00', '02:49:00', '2025-01-08', 'Approved'),
+(22, 23, NULL, '2025-01-08 02:48:51', '2025-01-09', NULL, 6, 10, '02:49:00', '05:51:00', '2025-01-11', 'Pending'),
+(24, 110, NULL, '2025-01-07 03:13:09', '2025-01-08', NULL, 3, 10, '03:14:00', '05:13:00', '2025-01-09', 'Pending');
 
 -- --------------------------------------------------------
 
@@ -173,9 +179,7 @@ CREATE TABLE `memorandums` (
 --
 
 INSERT INTO `memorandums` (`id`, `file_path`, `title`, `uploaded_at`, `updated_at`, `description`) VALUES
-(9, '../assets/uploads/6761741983914_Mukaram_CV.pdf', 'qwewew1', '2024-12-17 05:52:41', '2024-12-30 02:01:52', 'qweqw1'),
-(15, '../assets/uploads/6761bb7f03e7d_CANDEN ATTACHMENTS-merged.pdf', 'd', '0000-00-00 00:00:00', '2024-12-30 02:01:57', 'd'),
-(16, '../assets/uploads/6761bbdab8b5e_1576632750_1568344676_Customer Request Form (Front) (1) (2).pdf', 'hahhaha', '2024-12-17 10:58:50', NULL, 'yesssssssssssssssssss'),
+(15, '../assets/uploads/6761bb7f03e7d_CANDEN ATTACHMENTS-merged.pdf', 'd', '0000-00-00 00:00:00', '2025-01-05 18:00:46', 'd'),
 (17, '../assets/uploads/6761c11f6267f_Mukaram_CV.pdf', 'yes', '2024-12-17 11:21:19', NULL, 'yesssssssssssss'),
 (18, '../assets/uploads/6771850e33494_qwer.pdf', 'test', '2024-12-29 10:21:18', NULL, '123'),
 (19, '../assets/uploads/677187f7addda_qwer.pdf', 'test123', '2024-12-29 10:33:43', NULL, '123'),
@@ -183,7 +187,8 @@ INSERT INTO `memorandums` (`id`, `file_path`, `title`, `uploaded_at`, `updated_a
 (21, '../assets/uploads/677187f7addda_qwer.pdf', 'test123', '2024-12-29 10:33:43', NULL, '123'),
 (22, '../assets/uploads/677187f7addda_qwer.pdf', 'test123', '2024-12-29 10:33:43', NULL, '123'),
 (23, '../assets/uploads/677187f7addda_qwer.pdf', 'test123', '2024-12-29 10:33:43', NULL, '123'),
-(24, '../assets/uploads/677187f7addda_qwer.pdf', 'test123', '2025-01-02 10:33:43', NULL, '123');
+(24, '../assets/uploads/677187f7addda_qwer.pdf', 'test123', '2025-01-02 10:33:43', NULL, '123'),
+(25, '../assets/uploads/677a589c4b387_qwer.pdf', '22123', '2025-01-05 03:02:04', NULL, '22123');
 
 -- --------------------------------------------------------
 
@@ -212,8 +217,45 @@ INSERT INTO `notifications` (`id`, `title`, `description`, `uploaded_at`, `type`
 (7, 'gahahhhha', 'dasdas', '2024-12-17 12:15:49', 'Announcements', 1),
 (8, 'dasd', 'sada', '2024-12-17 12:18:51', 'Announcements', 1),
 (9, 'NICEEEEEEEEEEEEEEEe', 'eeeeeee', '2024-12-17 12:19:18', 'Announcements', 1),
-(10, 'test', '123', '2024-12-29 10:21:18', 'Memorandums', 0),
-(11, 'test123', '123', '2024-12-29 10:33:43', 'Memorandums', 0);
+(12, '123', '1qwe', '2025-01-05 02:38:52', 'Announcements', 0),
+(13, '22123', '22123', '2025-01-05 03:02:04', 'Memorandums', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `notif_items`
+--
+
+CREATE TABLE `notif_items` (
+  `id` int(11) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `notif_items`
+--
+
+INSERT INTO `notif_items` (`id`, `description`, `created_at`) VALUES
+(3, '11111111111111 has critical stocks.', '2025-01-07 03:39:26'),
+(4, 'Item Earth with quantity 22 is overdue.', '2025-01-07 03:39:40'),
+(5, 'Item Earth with quantity 22 is overdue.', '2025-01-07 03:58:27'),
+(6, 'Earth has critical stocks.', '2025-01-07 12:06:27'),
+(7, 'Item Earth with quantity 22 is overdue.', '2025-01-07 12:14:23'),
+(8, 'Item Earth with quantity 12 is overdue.', '2025-01-07 12:14:23'),
+(9, 'Item Earth with quantity 22 is overdue.', '2025-01-07 12:14:51'),
+(10, 'Item Earth with quantity 12 is overdue.', '2025-01-07 12:14:51'),
+(11, 'Item Earth with quantity 22 is overdue.', '2025-01-07 12:33:23'),
+(12, 'Item Earth with quantity 12 is overdue.', '2025-01-07 12:33:23'),
+(13, 'Item Earth with quantity 1 is overdue.', '2025-01-07 12:55:54'),
+(14, 'Item Earth with quantity 12 is overdue.', '2025-01-07 12:55:54'),
+(15, 'Item Earth with quantity 1 is overdue.', '2025-01-07 13:54:33'),
+(16, 'Item Earth with quantity 1 is overdue.', '2025-01-07 13:54:43'),
+(17, 'Item Earth with quantity 1 is overdue.', '2025-01-07 13:55:33'),
+(18, 'Item Earth with quantity 1 is overdue.', '2025-01-07 13:55:42'),
+(19, 'Item Earth with quantity 1 is overdue.', '2025-01-07 13:55:53'),
+(20, 'Item Earth with quantity 1 is overdue.', '2025-01-07 13:57:37'),
+(21, 'Item Earth with quantity 1 is overdue.', '2025-01-07 14:01:31');
 
 -- --------------------------------------------------------
 
@@ -233,7 +275,8 @@ CREATE TABLE `organizations` (
 --
 
 INSERT INTO `organizations` (`id`, `organization_name`, `description`, `image`) VALUES
-(14, 'SWORD', 'ONE PIECE', '../assets/img/676ec35d69589.jpg');
+(15, 'QWORD', 'ONE PIECE', '../assets/img/676ec35d69589.jpg'),
+(16, '1213', '12312', '../assets/img/677a59f9b8179.jpg');
 
 -- --------------------------------------------------------
 
@@ -256,6 +299,41 @@ CREATE TABLE `pending_users` (
   `image` varchar(255) DEFAULT NULL,
   `department` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `pending_users`
+--
+
+INSERT INTO `pending_users` (`id`, `first_name`, `last_name`, `middle_name`, `email`, `address`, `contact_no`, `rank`, `password`, `created_at`, `role`, `image`, `department`) VALUES
+(12, 'Samwdw', 'Ricaldeasd', 'sda', 'binimadasdaslsadsoi352@gmail.com', 'Hannah Drive, Rio Hondo, Zamboanga City', '54141412', 'Assistant Professor', '$2y$10$kNQw68yomSgLPANy1htnbucG75OLiFGcpvu8p3rpvwEKG257P4rEO', '2025-01-07 06:01:24', 'instructor', 'CSSPE.png', 'College of Architecture1');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `returned_items`
+--
+
+CREATE TABLE `returned_items` (
+  `return_id` int(11) NOT NULL,
+  `transaction_id` int(11) NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `quantity_returned` varchar(255) NOT NULL,
+  `returned_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `status` enum('Good','Damaged','Lost','Replaced') NOT NULL,
+  `remarks` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `returned_items`
+--
+
+INSERT INTO `returned_items` (`return_id`, `transaction_id`, `item_id`, `quantity_returned`, `returned_at`, `status`, `remarks`) VALUES
+(8, 2, 2, '3', '2025-01-07 02:35:17', 'Good', ''),
+(9, 2, 2, '1', '2025-01-07 02:35:17', 'Lost', ''),
+(10, 17, 5, '2', '2025-01-07 02:36:29', 'Good', ''),
+(11, 17, 5, '4', '2025-01-07 02:36:29', 'Lost', ''),
+(12, 17, 5, '1', '2025-01-07 02:36:51', 'Replaced', ''),
+(13, 20, 2, '21', '2025-01-07 12:36:18', 'Good', '');
 
 -- --------------------------------------------------------
 
@@ -284,13 +362,12 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `first_name`, `last_name`, `middle_name`, `email`, `address`, `contact_no`, `rank`, `password`, `created_at`, `role`, `image`, `department`) VALUES
-(10, 'Nadeer', 'Mukaram', 'R', 'nzro12@gmail.com', 'Hannah Drive, Rio Hondo, Zamboanga City', '54141412', 'Instructor', '$2y$10$uHsRU8jwklQdKXBAULkATed9wj81iLjVQAZfwFfnbGUYs0imEROx.', '2024-12-08 12:19:51', 'instructor', NULL, 'College of Architecture'),
-(20, 'Casca', 'Nad', 'R', 'cascanad@gmail.com', 'Hannah Drive, Rio Hondo, Zamboanga City', '54141412', '', '$2y$10$b.eMiQeyKdy4qUG9rT/TB.w3o0Vmte53YbeA6WpQNnZF5LMTaHlTC', '2024-12-08 14:46:05', 'super_admin', NULL, 'College of Architecture'),
-(25, 'Invent', 'Tory', 'D', 'test1@gmail.com', '12391', '5414141291', 'Instructor', '$2y$10$Ms8QUPjUWubmuwL9yJa7iu4tq7PsRrYIucPYl631hmtJb6LOLzw4G', '2024-12-08 15:22:56', 'inventory_admin', 'akagi.jpg', 'College of Architecture'),
-(47, 'Casca', 'Nadeer', 'R', 'nzro@gmail.com', 'Hannah Drive, Rio Hondo, Zamboanga City', '54141412', 'Professor', '$2y$10$bgIY43.lS5YGOvMl2NajUea8PW8ntj357oYFGcpzbAGCubL9x0Wcm', '2024-12-12 15:41:00', 'instructor', '676ec35d69589.jpg', ''),
-(48, 'Nadeerrrrrr', 'Re', 'Mukaramrrrrrrrrrrrrrrr', 'zoro0wqewqewqe000@gmail.com', 'Hannah Drive, Rio Hondo, Zamboanga City', '12312312', 'Associate Professor', '$2y$10$jWoAT.aYeDvyj4i6VR6VNewlHLd.yEsrN9bCbur.bh5a1BE.vhgzS', '2024-12-13 15:52:27', 'Instructor', '', 'College of Architecture'),
-(49, 'Casca', 'Nadeer', 'R', 'nzro123@gmail.com', 'Hannah Drive, Rio Hondo, Zamboanga City', '54141412', 'Instructor', '$2y$10$5LWJBHQEntvz6IvYzItoPuWySZiRMYOBjbFX1HoBx3vdtoismhJCW', '2024-12-12 15:41:00', 'instructor', '', 'College of Architecture'),
-(56, 'Nzroooo', 'Mkrmoooo', 'R', 'nadeer12345@gmail.com', 'Rio Hondo', '213123', 'Instructor', '$2y$10$5LWJBHQEntvz6IvYzItoPuWySZiRMYOBjbFX1HoBx3vdtoismhJCW', '2024-12-17 18:03:21', 'information_admin', 'CSSPE.png', 'College of Architecture');
+(10, 'User1', 'Test', 'D', 'testuser1@gmail.com', 'Hannah Drive, Rio Hondo, Zamboanga City', '54141412', 'Instructor', '$2y$10$rn4sfd1RZqYAV3dkteDdNOWblB3z6SyBHT8ItMxWC22MSrdtRjNwS', '2024-12-08 12:19:51', 'instructor', '', ''),
+(20, 'Admin', 'Super', 'D', 'superadmin@gmail.com', 'Hannah Drive, Rio Hondo, Zamboanga City', '54141412', 'Associate Professor', '$2y$10$IWuK.Nnty9878oZXm/zoWOIHNzqNFnWjZt58tRYl1wdmzoubWVmuO', '2024-12-08 14:46:05', 'super_admin', '', 'College of Architecture1'),
+(25, 'Invent', 'Tory', 'D', 'inventoryadmin@gmail.com', '12391', '5414141291', 'Instructor', '$2y$10$Ms8QUPjUWubmuwL9yJa7iu4tq7PsRrYIucPYl631hmtJb6LOLzw4G', '2024-12-08 15:22:56', 'inventory_admin', '25_profile.jpg', 'College of Architecture'),
+(56, 'Infor', 'Mation', 'D', 'informationadmin@gmail.com', 'Rio Hondo', '213123', 'Instructor', '$2y$10$5LWJBHQEntvz6IvYzItoPuWySZiRMYOBjbFX1HoBx3vdtoismhJCW', '2024-12-17 18:03:21', 'information_admin', '56_profile.jpg', 'College of Architecture'),
+(67, 'Micheal', 'Jordan', 'D', 'jordan@gmail.com', 'Hanapi Drive', '123', 'Assistant Professor', '$2y$10$IWuK.Nnty9878oZXm/zoWOIHNzqNFnWjZt58tRYl1wdmzoubWVmuO', '2025-01-07 05:44:22', 'instructor', 'CSSPE.png', ''),
+(69, 'Maloi121', 'Cena121', 'D.', 'binimaloi121352@gmail.com', 'Hannah Drive, Rio Hondo, Zamboanga City', '1213', 'Instructor', '$2y$10$MY2nvqjF2DulFQQQWL0X8Odtn9lmJJig33YVGiqm0NyHS7JZYM9/S', '2025-01-07 05:51:50', 'instructor', 'CSSPE.png', '');
 
 --
 -- Indexes for dumped tables
@@ -342,6 +419,12 @@ ALTER TABLE `notifications`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `notif_items`
+--
+ALTER TABLE `notif_items`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `organizations`
 --
 ALTER TABLE `organizations`
@@ -353,6 +436,12 @@ ALTER TABLE `organizations`
 ALTER TABLE `pending_users`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`);
+
+--
+-- Indexes for table `returned_items`
+--
+ALTER TABLE `returned_items`
+  ADD PRIMARY KEY (`return_id`);
 
 --
 -- Indexes for table `users`
@@ -369,61 +458,73 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `announcements`
 --
 ALTER TABLE `announcements`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `departments`
 --
 ALTER TABLE `departments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `events`
 --
 ALTER TABLE `events`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `items`
 --
 ALTER TABLE `items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `item_transactions`
 --
 ALTER TABLE `item_transactions`
-  MODIFY `transaction_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `transaction_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `memorandums`
 --
 ALTER TABLE `memorandums`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+
+--
+-- AUTO_INCREMENT for table `notif_items`
+--
+ALTER TABLE `notif_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `organizations`
 --
 ALTER TABLE `organizations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `pending_users`
 --
 ALTER TABLE `pending_users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT for table `returned_items`
+--
+ALTER TABLE `returned_items`
+  MODIFY `return_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=72;
 
 --
 -- Constraints for dumped tables

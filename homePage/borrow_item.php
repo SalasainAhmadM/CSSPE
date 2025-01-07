@@ -1,5 +1,5 @@
 <?php
-require_once '../../conn/conn.php';
+require_once '../conn/conn.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $item_id = intval($_POST['item_id']);

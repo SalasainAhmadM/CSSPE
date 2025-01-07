@@ -5,7 +5,6 @@ require_once '../conn/auth.php';
 
 validateSessionRole(['instructor', 'information_admin', 'inventory_admin']);
 $userid = $_SESSION['user_id'];
-
 $query = "SELECT first_name, middle_name, last_name, image FROM users WHERE id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $userid);
@@ -20,8 +19,13 @@ if ($result->num_rows > 0) {
     $fullName = "User Not Found";
 }
 
-$query_announcements = "SELECT * FROM announcements";
-$result_announcements = mysqli_query($conn, $query_announcements);
+// Update the is_read column to 1 for all notifications when the page is opened
+$updateQuery = "UPDATE notifications SET is_read = 1 WHERE is_read = 0";
+mysqli_query($conn, $updateQuery);
+
+$query = "SELECT * FROM notifications ORDER BY uploaded_at DESC";
+$result = mysqli_query($conn, $query);
+
 
 $query_notifications = "SELECT COUNT(*) AS notification_count FROM notifications WHERE is_read = 0";
 $result_notifications = mysqli_query($conn, $query_notifications);
@@ -30,10 +34,20 @@ $notificationCount = 0;
 if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_notifications)) {
     $notificationCount = $row_notifications['notification_count'];
 }
+
+// delete request
+if (isset($_GET['delete_id'])) {
+    $notifications_id = $_GET['delete_id'];
+    $delete_query = "DELETE FROM notifications WHERE id = $notifications_id";
+    if (mysqli_query($conn, $delete_query)) {
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit();
+    } else {
+        echo "Error deleting record: " . mysqli_error($conn);
+    }
+}
+
 ?>
-
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -41,11 +55,13 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Announcements</title>
+    <title>Notifications</title>
 
     <link rel="stylesheet" href="../assets/css/organization.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
-    <link rel="stylesheet" href="../assets/css/notification.css">
+    <link rel="stylesheet" href="../assets/css/notificationHome.css">
+
+
 </head>
 
 <body>
@@ -100,8 +116,6 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                                 </div>
                             </a>
                         <?php endif; ?>
-
-
 
                         <a href="../homePage/profile.php">
                             <div class="buttonContainer1">
@@ -159,14 +173,8 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                             </div>
                         </a>
 
+
                         <a href="../homePage/notification.php">
-                            <div class="buttonContainer1">
-                                <div class="nameOfIconContainer">
-                                    <p>Notifications</p>
-                                </div>
-                            </div>
-                        </a>
-                        <!-- <a href="../homePage/notification.php?update=1">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>
@@ -177,9 +185,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                                     </p>
                                 </div>
                             </div>
-                        </a> -->
-
-
+                        </a>
                     </div>
                 </div>
 
@@ -208,36 +214,72 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                 </div>
 
                 <div class="textContainer">
-                    <p class="text">Announcements</p>
+                    <p class="text">Notifications</p>
                 </div>
+
 
                 <div class="dashboardContainer">
 
-                    <?php while ($row = mysqli_fetch_assoc($result_announcements)): ?>
+                    <?php while ($row = mysqli_fetch_assoc($result)): ?>
+
                         <div class="notificationContainer">
+
+                            <div style="text-align: right;">
+                                <a href="#" onclick="deleteNoti(<?php echo $row['id']; ?>)">
+                                    <button class="addButton1" style="width: 6rem;">X</button>
+                                </a>
+                            </div>
+
+                            <div class="type">
+                                <p><?php echo htmlspecialchars($row['type']); ?></p>
+                            </div>
+
                             <div class="subNotificaitonContainer">
-                                <div class="messageContainer" style="padding:5px 5px;">
-                                    <h5><?php echo htmlspecialchars($row['title']); ?></h5>
+                                <div class="messageContainer" style="margin-bottom:1rem;">
+                                    <h3><?php echo htmlspecialchars($row['title']); ?>
+                                        <h3>
+                                </div>
+
+                                <div class="messageContainer">
                                     <p><?php echo htmlspecialchars($row['description']); ?></p>
                                 </div>
 
-                                <div class="dateContainer" style="padding:10px 2px;">
-                                    <h6 style="margin-left: 0.5rem;">Location:
-                                        <?php echo htmlspecialchars($row['location']); ?>
-                                    </h6>
-                                    <h6 style="margin-left: 0.5rem;">Date:
-                                        <?php echo addslashes(date('Y-m-d', strtotime($row['date_uploaded_at']))); ?>
-                                    </h6>
+                                <div class="dateContainer">
+                                    <p><?php echo htmlspecialchars($row['uploaded_at']); ?></p>
                                 </div>
+
                             </div>
+
                         </div>
+
                     <?php endwhile; ?>
 
                 </div>
             </div>
         </div>
     </div>
+
     <script src="../assets/js/sidebar.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 </body>
+
+<script>
+    function deleteNoti(userId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you want to delete this notification?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete!',
+            cancelButtonText: 'No, cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "?delete_id=" + userId;
+            }
+        });
+    }
+</script>
 
 </html>

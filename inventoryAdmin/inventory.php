@@ -35,8 +35,8 @@ $itemResult = $itemStmt->get_result();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 
-    <link rel="stylesheet" href="/dionSe/assets/css/inventory.css">
-    <link rel="stylesheet" href="/dionSe/assets/css/sidebar.css">
+    <link rel="stylesheet" href="../assets/css/inventory.css">
+    <link rel="stylesheet" href="../assets/css/sidebar.css">
 </head>
 
 <body>
@@ -45,7 +45,7 @@ $itemResult = $itemStmt->get_result();
             <div class="sidebarContent">
                 <div class="arrowContainer" style="margin-left: 80rem;" id="toggleButton">
                     <div class="subArrowContainer">
-                        <img class="hideIcon" src="/dionSe/assets/img/arrow.png" alt="">
+                        <img class="hideIcon" src="../assets/img/arrow.png" alt="">
                     </div>
                 </div>
             </div>
@@ -54,7 +54,7 @@ $itemResult = $itemStmt->get_result();
                     <div class="userPictureContainer">
                         <div class="subUserPictureContainer">
                             <img class="subUserPictureContainer"
-                                src="../assets/img/<?= !empty($image) ? htmlspecialchars($image) : '/dionSe/assets/img/CSSPE.png' ?>"
+                                src="../assets/img/<?= !empty($image) ? htmlspecialchars($image) : 'CSSPE.png' ?>"
                                 alt="">
                         </div>
                     </div>
@@ -67,21 +67,13 @@ $itemResult = $itemStmt->get_result();
                 <div class="navContainer">
                     <div class="subNavContainer">
 
-                        <a href="../inventoryAdmin/homePage/announcement.php">
+                        <a href="../homePage/">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
                                     <p>Home</p>
                                 </div>
                             </div>
                         </a>
-
-                        <!-- <a href="../inventoryAdmin/dashboard.php">
-                            <div class="buttonContainer1">
-                                <div class="nameOfIconContainer">
-                                    <p>Dashboard</p>
-                                </div>
-                            </div>
-                        </a> -->
 
                         <a href="../inventoryAdmin/inventory.php">
                             <div class="buttonContainer1">
@@ -132,7 +124,7 @@ $itemResult = $itemStmt->get_result();
                 <div class="headerContainer">
                     <div class="subHeaderContainer">
                         <div class="logoContainer">
-                            <img class="logo" src="/dionSe/assets/img/CSSPE.png" alt="">
+                            <img class="logo" src="../assets/img/CSSPE.png" alt="">
                         </div>
 
                         <div class="collegeNameContainer">
@@ -214,7 +206,9 @@ $itemResult = $itemStmt->get_result();
                         <div class="subUploadContainer">
                             <div class="displayImage">
                                 <img class="image1" id="addPreviewImage" src="../assets/img/CSSPE.png"
-                                    alt="Preview Image" style="max-width: 100%; height: auto; border: 1px solid red;" />
+                                    alt="Preview Image"
+                                    style="max-width: 100%; height: auto; border: 1px solid red; display: none;" />
+
                             </div>
                         </div>
                         <div class="uploadButton">
@@ -271,7 +265,7 @@ $itemResult = $itemStmt->get_result();
                     <div class="uploadContainer">
                         <div class="subUploadContainer">
                             <div class="displayImage">
-                                <img class="image1" id="previewImage" src="../assets/img/CSSPE.png" alt="Preview Image"
+                                <img class="image" id="previewImage" src="../assets/img/CSSPE.png"
                                     style="max-width: 100%; height: auto;">
                             </div>
                         </div>
@@ -305,12 +299,13 @@ $itemResult = $itemStmt->get_result();
                             style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Quantity:</label>
                         <input class="inputEmail" type="number" placeholder="Quantity:">
                     </div>
-
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem; min-height: 12rem;">
+                    <!--  -->
+                    <div class="inputContainer" style="flex-direction: column; height: 5rem;  min-height: 12rem;">
                         <label for=""
                             style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Description:</label>
                         <textarea style="min-height: 10rem;" class="inputEmail" name="" id=""
                             placeholder="Description"></textarea>
+
                     </div>
 
                     <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
@@ -359,10 +354,14 @@ $itemResult = $itemStmt->get_result();
                 const reader = new FileReader();
                 reader.onload = function (e) {
                     preview.src = e.target.result; // Update the image preview
+                    preview.style.display = 'block'; // Make the preview visible
                 };
                 reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                preview.style.display = 'none'; // Hide the preview if no file is selected
             }
         }
+
 
         // Trigger file input click for Add and Edit functionality
         function triggerImageUpload(inputId) {
@@ -387,23 +386,25 @@ $itemResult = $itemStmt->get_result();
 
             fetch('./endpoints/add_item.php', {
                 method: 'POST',
-                body: formData
+                body: formData,
             })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
                         Swal.fire({
                             icon: 'success',
-                            title: 'Success!',
-                            text: data.message
+                            title: data.message,
+                            timer: 3000,
+                            showConfirmButton: false,
+                        }).then(() => {
+                            location.reload(); // Reload the page after success
                         });
-                        document.getElementById('addItemForm').reset();
-                        document.getElementById('addPreviewImage').src = "../assets/img/CSSPE.png"; // Reset preview
                     } else {
                         Swal.fire({
                             icon: 'error',
                             title: 'Error!',
-                            text: data.message
+                            timer: 3000,
+                            showConfirmButton: false,
                         });
                     }
                 })
@@ -411,10 +412,13 @@ $itemResult = $itemStmt->get_result();
                     Swal.fire({
                         icon: 'error',
                         title: 'Error!',
-                        text: 'Something went wrong!'
+                        text: 'Something went wrong!',
+                        timer: 3000,
+                        showConfirmButton: false,
                     });
                 });
         });
+
 
         // Edit Item Function
         function editItem(button) {
@@ -427,15 +431,27 @@ $itemResult = $itemStmt->get_result();
 
             document.querySelector('.editContainer').style.display = 'block';
 
+            // Populate form fields
             document.querySelector('.editContainer input[placeholder="Item Name:"]').value = name;
             document.querySelector('.editContainer input[placeholder="Brand:"]').value = brand;
             document.querySelector('.editContainer input[placeholder="Quantity:"]').value = quantity;
             document.querySelector('.editContainer textarea[placeholder="Description"]').value = description;
 
             const previewImage = document.getElementById('previewImage');
-            previewImage.src = image ? image : "../assets/img/CSSPE.png"; // Reset if no image provided
+
+            // Handle the preview image
+            if (image && image.trim()) {
+                previewImage.src = image;
+                previewImage.style.display = 'block';
+            } else {
+                // Hide the image element when no image is available
+                previewImage.style.display = 'none';
+            }
+
             previewImage.setAttribute('data-id', id);
         }
+
+
 
         // Save Edited Item Function
         function saveItem() {
@@ -475,8 +491,9 @@ $itemResult = $itemStmt->get_result();
                     if (data.status === 'success') {
                         Swal.fire({
                             icon: 'success',
-                            title: 'Item Updated',
-                            text: 'The item has been updated successfully!',
+                            title: 'The item has been updated successfully!',
+                            timer: 3000,
+                            showConfirmButton: false,
                         }).then(() => {
                             location.reload();
                         });
@@ -485,6 +502,8 @@ $itemResult = $itemStmt->get_result();
                             icon: 'error',
                             title: 'Update Failed',
                             text: data.message || 'An error occurred while updating the item.',
+                            timer: 3000,
+                            showConfirmButton: false,
                         });
                     }
                 })
@@ -493,11 +512,13 @@ $itemResult = $itemStmt->get_result();
                         icon: 'error',
                         title: 'Error',
                         text: 'An unexpected error occurred. Please try again later.',
+                        timer: 3000,
+                        showConfirmButton: false,
                     });
                 });
         }
 
-
+        // Delete Item Function
         function deleteItem(itemId) {
             // Use SweetAlert to confirm deletion
             Swal.fire({
@@ -521,20 +542,38 @@ $itemResult = $itemStmt->get_result();
                         .then((response) => response.json())
                         .then((data) => {
                             if (data.status === 'success') {
-                                Swal.fire('Deleted!', data.message, 'success').then(() => {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: data.message,
+                                    timer: 3000,
+                                    showConfirmButton: false,
+                                }).then(() => {
                                     // Reload the page or remove the row from the table
                                     location.reload(); // or remove the row dynamically
                                 });
                             } else {
-                                Swal.fire('Error!', data.message, 'error');
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error!',
+                                    text: data.message,
+                                    timer: 3000,
+                                    showConfirmButton: false,
+                                });
                             }
                         })
-                        .catch((error) => {
-                            Swal.fire('Error!', 'An unexpected error occurred.', 'error');
+                        .catch(() => {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: 'An unexpected error occurred.',
+                                timer: 3000,
+                                showConfirmButton: false,
+                            });
                         });
                 }
             });
         }
+
 
         function printTable() {
             const tableContainer = document.querySelector('.tableContainer');
@@ -604,9 +643,9 @@ $itemResult = $itemStmt->get_result();
     <!-- SweetAlert2 JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
-    <script src="/dionSe/assets/js/sidebar.js"></script>
-    <script src="/dionSe/assets/js/program.js"></script>
-    <!-- <script src="/dionSe/assets/js/uploadImage.js"></script> -->
+    <script src="../assets/js/sidebar.js"></script>
+    <script src="../assets/js/program.js"></script>
+    <!-- <script src="../assets/js/uploadImage.js"></script> -->
 </body>
 
 </html>
