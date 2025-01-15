@@ -283,7 +283,9 @@ if (isset($_GET['delete_id'])) {
                                         <a href="#" onclick="deleteProgram(<?php echo $row['id']; ?>)">
                                             <button class="addButton1" style="width: 6rem;">Delete</button>
                                         </a>
+                                        <button onclick="popup12()" class="addButton" style="width: 10rem;">Manage Project</button>
                                     </td>
+                                    
                                 </tr>
                             <?php endwhile; ?>
                         </tbody>
@@ -299,14 +301,14 @@ if (isset($_GET['delete_id'])) {
                 <div class="container">
 
                     <div class="textContainer">
-                        <p class="text">Tech Club</p>
+                        <p class="text">Manage Project</p>
                     </div>
 
                     <div class="searchContainer">
                         <input class="searchBar" type="text" placeholder="Search...">
                         <div class="printButton" style="gap: 1rem; display: flex; width: 90%;">
                             <button class="addButton size">Print</button>
-                            <button onclick="addProgram()" class="addButton size">Add Organization</button>
+                            <button onclick="addProgram()" class="addButton size">Add Project</button>
                         </div>
                     </div>
 
@@ -315,7 +317,7 @@ if (isset($_GET['delete_id'])) {
                             <thead>
                                 <tr>
                                     <th>Project Name</th>
-                                    <th>Image</th>
+                                    <!-- <th>Image</th> -->
                                     <th>Description</th>
                                     <th>Action</th>
                                 </tr>
@@ -324,9 +326,9 @@ if (isset($_GET['delete_id'])) {
                             <tbody>
                                 <tr>
                                     <td>Hakdog</td>
-                                    <td>
+                                    <!-- <td>
                                         <img class="image" src="../assets/img/CSSPE.png" alt="">
-                                    </td>
+                                    </td> -->
                                     <td>Hakdog</td>
                                     <td class="button">
                                         <button onclick="editProgram()" class="addButton"
@@ -450,6 +452,55 @@ if (isset($_GET['delete_id'])) {
             </div>
         </div>
     </form>
+
+
+    <div class="popup" style="display: none;">
+        <div class="popup">
+            <div class="mainContainer" style="margin-left: 250px;">
+                <div class="container">
+    
+                    <div class="textContainer">
+                        <p class="text">Tech Club</p>
+                    </div>
+    
+                    <div class="searchContainer">
+                        <input class="searchBar" type="text" placeholder="Search...">
+                        <div class="printButton" style="gap: 1rem; display: flex; width: 90%;">
+                            <button class="addButton size">Print</button>
+                            <button onclick="addProgram()" class="addButton size">Add Organization</button>
+                        </div>
+                    </div>
+    
+                    <div class="tableContainer">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Project Name</th>
+                                    <th>Image</th>
+                                    <th>Description</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+        
+                            <tbody>
+                                <tr>
+                                    <td>Hakdog</td>
+                                    <td>
+                                        <img class="image" src="/dionSe/assets/img/CSSPE.png" alt="">
+                                    </td>
+                                    <td>Hakdog</td>
+                                    <td class="button">
+                                        <button onclick="editProgram()" class="addButton" style="width: 5rem;">Edit</button>
+                                        <button class="addButton1" style="width: 5rem;">Delete</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 
