@@ -8,6 +8,16 @@ function addProgram(){
     }
 }
 
+function addProject(){
+    const addProgramButton = document.querySelector('.addProject');
+
+    if(addProgramButton.style.display === 'none'){
+        addProgramButton.style.display = 'block';
+    } else{
+        addProgramButton .style.display = 'none'
+    }
+}
+
 function editProgram(){
     const editProgramButton = document.querySelector('.editContainer');
 

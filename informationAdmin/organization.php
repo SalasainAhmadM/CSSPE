@@ -285,7 +285,7 @@ if (isset($_GET['delete_id'])) {
                                         </a>
                                         <button onclick="popup12()" class="addButton" style="width: 10rem;">Manage Project</button>
                                     </td>
-                                    
+
                                 </tr>
                             <?php endwhile; ?>
                         </tbody>
@@ -308,7 +308,7 @@ if (isset($_GET['delete_id'])) {
                         <input class="searchBar" type="text" placeholder="Search...">
                         <div class="printButton" style="gap: 1rem; display: flex; width: 90%;">
                             <button class="addButton size">Print</button>
-                            <button onclick="addProgram()" class="addButton size">Add Project</button>
+                            <button onclick="addProject()" class="addButton size">Add Project</button>
                         </div>
                     </div>
 
@@ -401,6 +401,60 @@ if (isset($_GET['delete_id'])) {
 
 
 
+    <form method="POST" action="" enctype="multipart/form-data">
+        <div class="addProject" style="display: none; background-color: none;">
+            <div class="addContainer">
+                <div class="subAddContainer">
+                    <div class="titleContainer">
+                        <p>Add Project</p>
+                    </div>
+
+                    <div class="subLoginContainer">
+
+                        <!-- <div class="uploadContainer">
+                            <div class="subUploadContainer">
+                                <div class="uploadContainer">
+                                    <div class="subUploadContainer">
+                                        <div class="displayImage">
+                                            <img class="image1" id="preview" src="" alt="Image Preview"
+                                                style="max-width: 100%; display: none;">
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="uploadButton">
+                                <input id="imageUpload" type="file" name="organization_image" accept="image/*"
+                                    style="display: none;" onchange="previewImage()">
+                                <button type="button" onclick="triggerImageUpload()" class="addButton"
+                                    style="height: 2rem; width: 5rem;">Upload</button>
+                            </div>
+                        </div> -->
+
+                        <div class="inputContainer">
+                            <input class="inputEmail" type="text" name="project_name"
+                                placeholder="Project Name">
+                        </div>
+
+                        <div class="inputContainer" style="height: 10rem;">
+                            <textarea class="inputEmail" name="project_description" placeholder="Description"></textarea>
+                        </div>
+
+                        <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
+                            <button type="submit" name="add_organization" class="addButton"
+                                style="width: 6rem;">Add</button>
+                            <button onclick="addProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+
+
+
     <!-- Edit Container -->
     <form method="POST" action="" enctype="multipart/form-data">
         <div class="editContainer" style="display: none; background-color: none;">
@@ -458,11 +512,11 @@ if (isset($_GET['delete_id'])) {
         <div class="popup">
             <div class="mainContainer" style="margin-left: 250px;">
                 <div class="container">
-    
+
                     <div class="textContainer">
                         <p class="text">Tech Club</p>
                     </div>
-    
+
                     <div class="searchContainer">
                         <input class="searchBar" type="text" placeholder="Search...">
                         <div class="printButton" style="gap: 1rem; display: flex; width: 90%;">
@@ -470,7 +524,7 @@ if (isset($_GET['delete_id'])) {
                             <button onclick="addProgram()" class="addButton size">Add Organization</button>
                         </div>
                     </div>
-    
+
                     <div class="tableContainer">
                         <table>
                             <thead>
@@ -481,7 +535,7 @@ if (isset($_GET['delete_id'])) {
                                     <th>Action</th>
                                 </tr>
                             </thead>
-        
+
                             <tbody>
                                 <tr>
                                     <td>Hakdog</td>
@@ -537,7 +591,7 @@ if (isset($_GET['delete_id'])) {
             const file = document.getElementById('imageUpload').files[0];
             const reader = new FileReader();
 
-            reader.onloadend = function () {
+            reader.onloadend = function() {
                 const image = document.getElementById('preview');
                 image.src = reader.result;
                 image.style.display = 'block'; // Display the image after loading
