@@ -285,7 +285,7 @@ if (isset($_GET['delete_id'])) {
                                         </a>
                                         <button onclick="popup12()" class="addButton" style="width: 10rem;">Manage Project</button>
                                     </td>
-                                    
+
                                 </tr>
                             <?php endwhile; ?>
                         </tbody>
@@ -411,7 +411,7 @@ if (isset($_GET['delete_id'])) {
 
                     <div class="subLoginContainer">
 
-                        <div class="uploadContainer">
+                        <!-- <div class="uploadContainer">
                             <div class="subUploadContainer">
                                 <div class="uploadContainer">
                                     <div class="subUploadContainer">
@@ -430,16 +430,15 @@ if (isset($_GET['delete_id'])) {
                                 <button type="button" onclick="triggerImageUpload()" class="addButton"
                                     style="height: 2rem; width: 5rem;">Upload</button>
                             </div>
-                        </div>
+                        </div> -->
 
                         <div class="inputContainer">
                             <input class="inputEmail" type="text" name="organization_name"
-                                placeholder="Organization Name" >
+                                placeholder="Organization Name">
                         </div>
 
                         <div class="inputContainer" style="height: 10rem;">
-                            <textarea class="inputEmail" name="organization_description" placeholder="Description"
-                                ></textarea>
+                            <textarea class="inputEmail" name="organization_description" placeholder="Description"></textarea>
                         </div>
 
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
@@ -513,11 +512,11 @@ if (isset($_GET['delete_id'])) {
         <div class="popup">
             <div class="mainContainer" style="margin-left: 250px;">
                 <div class="container">
-    
+
                     <div class="textContainer">
                         <p class="text">Tech Club</p>
                     </div>
-    
+
                     <div class="searchContainer">
                         <input class="searchBar" type="text" placeholder="Search...">
                         <div class="printButton" style="gap: 1rem; display: flex; width: 90%;">
@@ -525,7 +524,7 @@ if (isset($_GET['delete_id'])) {
                             <button onclick="addProgram()" class="addButton size">Add Organization</button>
                         </div>
                     </div>
-    
+
                     <div class="tableContainer">
                         <table>
                             <thead>
@@ -536,7 +535,7 @@ if (isset($_GET['delete_id'])) {
                                     <th>Action</th>
                                 </tr>
                             </thead>
-        
+
                             <tbody>
                                 <tr>
                                     <td>Hakdog</td>
@@ -592,7 +591,7 @@ if (isset($_GET['delete_id'])) {
             const file = document.getElementById('imageUpload').files[0];
             const reader = new FileReader();
 
-            reader.onloadend = function () {
+            reader.onloadend = function() {
                 const image = document.getElementById('preview');
                 image.src = reader.result;
                 image.style.display = 'block'; // Display the image after loading
