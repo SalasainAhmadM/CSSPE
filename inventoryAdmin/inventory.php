@@ -20,10 +20,8 @@ if ($result->num_rows > 0) {
     $fullName = "User Not Found";
 }
 
-// Fetch items for the current user
-$itemQuery = "SELECT id, name, description, brand, quantity, image FROM items WHERE users_id = ?";
+$itemQuery = "SELECT id, name, description, brand, quantity, image FROM items";
 $itemStmt = $conn->prepare($itemQuery);
-$itemStmt->bind_param("i", $inventoryAdminId);
 $itemStmt->execute();
 $itemResult = $itemStmt->get_result();
 ?>
