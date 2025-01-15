@@ -433,12 +433,12 @@ if (isset($_GET['delete_id'])) {
                         </div> -->
 
                         <div class="inputContainer">
-                            <input class="inputEmail" type="text" name="project__name"
-                                placeholder="Project_ Name">
+                            <input class="inputEmail" type="text" name="project_name"
+                                placeholder="Project Name">
                         </div>
 
                         <div class="inputContainer" style="height: 10rem;">
-                            <textarea class="inputEmail" name="project__description" placeholder="Description"></textarea>
+                            <textarea class="inputEmail" name="project_description" placeholder="Description"></textarea>
                         </div>
 
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
