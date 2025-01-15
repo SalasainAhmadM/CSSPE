@@ -308,7 +308,7 @@ if (isset($_GET['delete_id'])) {
                         <input class="searchBar" type="text" placeholder="Search...">
                         <div class="printButton" style="gap: 1rem; display: flex; width: 90%;">
                             <button class="addButton size">Print</button>
-                            <button onclick="addProgram()" class="addButton size">Add Project</button>
+                            <button onclick="addProject()" class="addButton size">Add Project</button>
                         </div>
                     </div>
 
@@ -385,6 +385,61 @@ if (isset($_GET['delete_id'])) {
                         <div class="inputContainer" style="height: 10rem;">
                             <textarea class="inputEmail" name="organization_description" placeholder="Description"
                                 required></textarea>
+                        </div>
+
+                        <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
+                            <button type="submit" name="add_organization" class="addButton"
+                                style="width: 6rem;">Add</button>
+                            <button onclick="addProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+
+
+
+    <form method="POST" action="" enctype="multipart/form-data">
+        <div class="addProject" style="display: none; background-color: none;">
+            <div class="addContainer">
+                <div class="subAddContainer">
+                    <div class="titleContainer">
+                        <p>Add Project</p>
+                    </div>
+
+                    <div class="subLoginContainer">
+
+                        <div class="uploadContainer">
+                            <div class="subUploadContainer">
+                                <div class="uploadContainer">
+                                    <div class="subUploadContainer">
+                                        <div class="displayImage">
+                                            <img class="image1" id="preview" src="" alt="Image Preview"
+                                                style="max-width: 100%; display: none;">
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="uploadButton">
+                                <input id="imageUpload" type="file" name="organization_image" accept="image/*"
+                                    style="display: none;" onchange="previewImage()">
+                                <button type="button" onclick="triggerImageUpload()" class="addButton"
+                                    style="height: 2rem; width: 5rem;">Upload</button>
+                            </div>
+                        </div>
+
+                        <div class="inputContainer">
+                            <input class="inputEmail" type="text" name="organization_name"
+                                placeholder="Organization Name" >
+                        </div>
+
+                        <div class="inputContainer" style="height: 10rem;">
+                            <textarea class="inputEmail" name="organization_description" placeholder="Description"
+                                ></textarea>
                         </div>
 
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
