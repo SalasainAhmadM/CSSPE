@@ -284,26 +284,29 @@ if ($result->num_rows > 0) {
                 </div>
 
                 <div class="dashboardContainer">
+
                     <?php foreach ($notifications as $type => $notificationList): ?>
                         <?php if (!empty($notificationList)): ?>
                             <?php foreach ($notificationList as $notification): ?>
-                                <div class="notificationContainer">
-                                    <div class="subNotificaitonContainer">
-                                        <div class="messageContainer" style="padding:5px 5px;">
-                                            <h5><?php echo htmlspecialchars($notification['title']); ?></h5>
-                                            <p><?php echo htmlspecialchars($notification['description']); ?></p>
-                                        </div>
+                                
+                                    <div class="notificationContainer">
+                                        <a class="subNotificaitonContainer">
+                                            <div class="messageContainer" style="padding:5px 5px;">
+                                                <h5><?php echo htmlspecialchars($notification['title']); ?></h5>
+                                                <p><?php echo htmlspecialchars($notification['description']); ?></p>
+                                            </div>
 
-                                        <div class="dateContainer" style="padding:10px 2px;">
-                                            <h6 style="margin-left: 0.5rem;">Type:
-                                                <?php echo htmlspecialchars($type); ?>
-                                            </h6>
-                                            <h6 style="margin-left: 0.5rem;">Date:
-                                                <?php echo htmlspecialchars($notification['formatted_date']); ?>
-                                            </h6>
-                                        </div>
+                                            <div class="dateContainer" style="padding:10px 2px;">
+                                                <h6 style="margin-left: 0.5rem;">Type:
+                                                    <?php echo htmlspecialchars($type); ?>
+                                                </h6>
+                                                <h6 style="margin-left: 0.5rem;">Date:
+                                                    <?php echo htmlspecialchars($notification['formatted_date']); ?>
+                                                </h6>
+                                            </div>
+                                    </a>
                                     </div>
-                                </div>
+
                             <?php endforeach; ?>
                         <?php else: ?>
                             <div class="notificationContainer">
@@ -315,6 +318,7 @@ if ($result->num_rows > 0) {
                             </div>
                         <?php endif; ?>
                     <?php endforeach; ?>
+
                 </div>
             </div>
         </div>

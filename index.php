@@ -210,6 +210,27 @@ function fetchDepartments()
     <link rel="stylesheet" href="./assets/css/login.css">
 
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"> <!-- Include FontAwesome -->
+    
+    <style>
+        .passwordContainer {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .toggle-password-icon {
+            position: absolute;
+            right: 35px;
+            cursor: pointer;
+            color: #aaa;
+            font-size: 18px;
+        }
+        
+        .toggle-password-icon:hover {
+            color: #333;
+        }
+    </style>
 
 </head>
 
@@ -243,8 +264,9 @@ function fetchDepartments()
                                 <input class="inputEmail" type="email" name="email" placeholder="Email:">
                             </div>
 
-                            <div class="inputContainer">
-                                <input class="inputEmail" type="password" name="password" placeholder="Password:">
+                            <div class="inputContainer passwordContainer">
+                                <input id="passwordField" class="inputEmail" type="password" name="password" placeholder="Password:">
+                                <i id="togglePassword" class="fas fa-eye toggle-password-icon"></i>
                             </div>
 
                             <div class="inputContainer">
@@ -380,12 +402,14 @@ function fetchDepartments()
                                 <option value="Professor">Professor</option>
                             </select>
                         </div>
-                        <div class="inputContainer">
-                            <input class="inputEmail" type="password" name="password" placeholder="Password:" required>
+                        <div class="inputContainer passwordContainer">
+                            <input id="registerPassword" class="inputEmail" type="password" name="password" placeholder="Password:">
+                            <i id="toggleRegisterPassword" class="fas fa-eye toggle-password-icon"></i>
                         </div>
-                        <div class="inputContainer">
-                            <input class="inputEmail" type="password" name="confirm_password"
-                                placeholder="Confirm Password:" required>
+                        
+                        <div class="inputContainer passwordContainer">
+                            <input id="confirmPassword" class="inputEmail" type="password" name="confirm_password" placeholder="Confirm Password:">
+                            <i id="toggleConfirmPassword" class="fas fa-eye toggle-password-icon"></i>
                         </div>
                         <div class="inputContainer">
                             <button type="submit" name="register" class="login">Register</button>
@@ -416,6 +440,32 @@ function fetchDepartments()
             });
         </script>
     <?php endif; ?>
+    
+    <script>
+        // Function to toggle password visibility
+        function setupPasswordToggle(toggleId, passwordFieldId) {
+            const toggleIcon = document.getElementById(toggleId);
+            const passwordField = document.getElementById(passwordFieldId);
+    
+            toggleIcon.addEventListener("click", function () {
+                if (passwordField.type === "password") {
+                    passwordField.type = "text";
+                    toggleIcon.classList.remove("fa-eye");
+                    toggleIcon.classList.add("fa-eye-slash");
+                } else {
+                    passwordField.type = "password";
+                    toggleIcon.classList.remove("fa-eye-slash");
+                    toggleIcon.classList.add("fa-eye");
+                }
+            });
+        }
+    
+        // Apply to login and register fields
+        setupPasswordToggle("togglePassword", "passwordField"); // For login
+        setupPasswordToggle("toggleRegisterPassword", "registerPassword"); // For register password
+        setupPasswordToggle("toggleConfirmPassword", "confirmPassword"); // For confirm password
+    </script>
+
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {

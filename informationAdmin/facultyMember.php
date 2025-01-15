@@ -203,6 +203,27 @@ if (isset($_POST['update_faculty'])) {
     <link rel="stylesheet" href="../assets/css/sidebar.css">
 
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        .passwordContainer {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .toggle-password-icon {
+            position: absolute;
+            right: 35px;
+            cursor: pointer;
+            color: #aaa;
+            font-size: 18px;
+        }
+        
+        .toggle-password-icon:hover {
+            color: #333;
+        }
+    </style>
 
 </head>
 
@@ -533,9 +554,9 @@ if (isset($_POST['update_faculty'])) {
                                 placeholder="Middle Name (Optional):">
                         </div>
 
-                        <div class="inputContainer">
-                            <input class="inputEmail" name="password" id="password" type="password"
-                                placeholder="Password:">
+                        <div class="inputContainer passwordContainer">
+                            <input id="password" class="inputEmail" type="password" name="password" placeholder="Password:">
+                            <i id="togglePassword" class="fas fa-eye toggle-password-icon"></i>
                         </div>
 
                         <div class="inputContainer">
@@ -593,6 +614,22 @@ if (isset($_POST['update_faculty'])) {
     <script src="../assets/js/search.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        // JavaScript to toggle password visibility
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordField = document.getElementById('password');
+    
+        togglePassword.addEventListener('click', function () {
+            // Toggle the password field type
+            const type = passwordField.type === 'password' ? 'text' : 'password';
+            passwordField.type = type;
+    
+            // Toggle the icon class
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+    </script>
 
     <script>
         function editProgram(id, image, first_name, middle_name, last_name, email, password, address, contact_no, department, rank) {
