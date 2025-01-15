@@ -278,7 +278,8 @@ $teacherResult = $conn->query($teacherQuery);
 
     <div class="editContainer"
         style="display: none; background-color: rgba(0, 0, 0, 0.5); position: fixed; top: 0; left: 0; width: 100%; height: 100%; justify-content: center; align-items: center;">
-        <div class="subAddContainer" style="background-color: white; padding: 20px; border-radius: 10px;transform: scale(0.65);">
+        <div class="subAddContainer"
+            style="background-color: white; padding: 20px; border-radius: 10px;transform: scale(0.65);">
             <div class="titleContainer">
                 <p>Borrowed Item</p>
             </div>
@@ -301,16 +302,19 @@ $teacherResult = $conn->query($teacherQuery);
                     <input id="itemBrand" class="inputEmail" type="text" readonly>
                 </div>
 
+                <input id="teacherSelect" class="inputEmail" value="<?php echo htmlspecialchars($userid); ?>"
+                    type="hidden">
+
                 <!-- Teacher Selection -->
-                <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                    <label>Choose Teacher:</label>
-                    <select id="teacherSelect" class="inputEmail">
+                <!--  <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                     <label>Choose Teacher:</label>
+                     <select id="teacherSelect" class="inputEmail">
                         <option value="">Choose a teacher</option>
                         <?php while ($row = $teacherResult->fetch_assoc()): ?>
                             <option value="<?= $row['id'] ?>"><?= htmlspecialchars($row['full_name']) ?></option>
                         <?php endwhile; ?>
-                    </select>
-                </div>
+                    </select> 
+                </div>-->
 
                 <!-- Quantity -->
                 <div class="inputContainer" style="flex-direction: column; height: 5rem;">

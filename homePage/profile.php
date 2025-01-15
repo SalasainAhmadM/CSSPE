@@ -49,25 +49,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($stmt->execute()) {
         $stmt->close();
 
+        // Handle password change
+        if (!empty($_POST['password'])) {
+            $password = $_POST['password'];
+            $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+
+            $sql = "UPDATE users SET password = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("si", $hashedPassword, $userid);
+            $stmt->execute();
+            $stmt->close();
+        }
+
         // Handle profile image upload
         if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
             $fileTmpPath = $_FILES['profile_image']['tmp_name'];
             $fileName = $_FILES['profile_image']['name'];
-            $fileSize = $_FILES['profile_image']['size'];
-            $fileType = $_FILES['profile_image']['type'];
             $fileNameCmps = explode(".", $fileName);
             $fileExtension = strtolower(end($fileNameCmps));
 
-            // Allowed extensions
             $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
             if (in_array($fileExtension, $allowedExtensions)) {
-                // Generate a unique name for the file
                 $newFileName = $userid . '_profile.' . $fileExtension;
                 $uploadFileDir = '../assets/img/';
                 $destPath = $uploadFileDir . $newFileName;
 
                 if (move_uploaded_file($fileTmpPath, $destPath)) {
-                    // Update the user's image in the database
                     $sql = "UPDATE users SET image = ? WHERE id = ?";
                     $stmt = $conn->prepare($sql);
                     $stmt->bind_param("si", $newFileName, $userid);
@@ -497,6 +504,15 @@ $conn->close();
                                     value="<?= htmlspecialchars($user['department']) ?>" type="text">
                             </div>
 
+
+
+                            <div class="inputContainer" style="flex-direction: column; height: 4rem;">
+                                <label for=""
+                                    style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Password:</label>
+                                <input class="inputEmail" name="password" id="password" type="password"
+                                    placeholder="New Password (leave blank if unchanged)">
+                                <i id="togglePassword" class="fas fa-eye toggle-password-icon"></i>
+                            </div>
                             <div class="inputContainer"
                                 style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
                                 <button type="submit" class="addButton" style="width: 6rem;">Save</button>

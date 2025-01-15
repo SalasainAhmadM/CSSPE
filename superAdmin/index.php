@@ -18,9 +18,12 @@ if ($result->num_rows > 0) {
 } else {
     $fullName = "User Not Found";
 }
-// Fetch data from the pending_users table
-$query = "SELECT id, first_name, last_name, middle_name, email, address, contact_no, rank, password, created_at, role, department, image FROM users";
+// Fetch data from the users table, excluding the super_admin role
+$query = "SELECT id, first_name, last_name, middle_name, email, address, contact_no, rank, password, created_at, role, department, image 
+          FROM users 
+          WHERE role != 'super_admin'";
 $result = mysqli_query($conn, $query);
+
 
 // Delete request
 if (isset($_GET['delete_id'])) {
@@ -198,16 +201,16 @@ if (isset($_POST['update_faculty'])) {
     <link rel="stylesheet" href="../assets/css/sidebar.css">
 
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"> 
-    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
     <style>
         .passwordContainer {
             position: relative;
             display: flex;
             align-items: center;
         }
-        
-        
+
+
         .toggle-password-icon {
             position: absolute;
             right: 35px;
@@ -215,7 +218,7 @@ if (isset($_POST['update_faculty'])) {
             color: #aaa;
             font-size: 18px;
         }
-        
+
         .toggle-password-icon:hover {
             color: #333;
         }
@@ -381,7 +384,6 @@ if (isset($_POST['update_faculty'])) {
                                         '<?php echo addslashes($row['middle_name']); ?>',
                                         '<?php echo addslashes($row['last_name']); ?>',
                                         '<?php echo addslashes($row['email']); ?>',
-                                        '<?php echo addslashes($row['password']); ?>',
                                         '<?php echo addslashes($row['address']); ?>',
                                         '<?php echo addslashes($row['contact_no']); ?>',
                                         '<?php echo addslashes($row['department']); ?>',
@@ -453,8 +455,9 @@ if (isset($_POST['update_faculty'])) {
                         </div>
 
                         <div class="inputContainer passwordContainer">
-                            <input class="inputEmail" name="password" id="password" type="password" placeholder="Password:">
-                             <i id="togglePassword" class="fas fa-eye toggle-password-icon"></i>
+                            <input class="inputEmail" name="password" id="password" type="password"
+                                placeholder="Password:" required>
+                            <i id="togglePassword" class="fas fa-eye toggle-password-icon"></i>
                         </div>
 
                         <div class="inputContainer">
@@ -512,17 +515,17 @@ if (isset($_POST['update_faculty'])) {
     <script src="../assets/js/search.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+
     <script>
         // JavaScript to toggle password visibility
         const togglePassword = document.getElementById('togglePassword');
         const passwordField = document.getElementById('password');
-    
+
         togglePassword.addEventListener('click', function () {
             // Toggle the password field type
             const type = passwordField.type === 'password' ? 'text' : 'password';
             passwordField.type = type;
-    
+
             // Toggle the icon class
             this.classList.toggle('fa-eye');
             this.classList.toggle('fa-eye-slash');
@@ -554,7 +557,7 @@ if (isset($_POST['update_faculty'])) {
         }
 
 
-        function editProgram(id, image, first_name, middle_name, last_name, email, password, address, contact_no, department, rank) {
+        function editProgram(id, image, first_name, middle_name, last_name, email, address, contact_no, department, rank) {
             const defaultImage = '../assets/img/CSSPE.png';
             document.getElementById('faculty_id').value = id;
 
@@ -565,7 +568,6 @@ if (isset($_POST['update_faculty'])) {
             document.getElementById('first_name').value = first_name;
             document.getElementById('last_name').value = last_name;
             document.getElementById('middle_name').value = middle_name;
-            document.getElementById('password').value = password;
             document.getElementById('email').value = email;
             document.getElementById('address').value = address;
             document.getElementById('contact_no').value = contact_no;

@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         // Check available quantity
-        $query = "SELECT quantity, quantity_origin, name, brand FROM items WHERE id = ?";
+        $query = "SELECT quantity, quantity_origin, name FROM items WHERE id = ?";
         $stmt = $conn->prepare($query);
         $stmt->bind_param('i', $item_id);
         $stmt->execute();
@@ -34,20 +34,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($quantity > $item['quantity']) {
             throw new Exception('Insufficient quantity available.');
         }
-
-        // Get the full name of the teacher
-        $query = "SELECT CONCAT(first_name, ' ', last_name) AS full_name FROM users WHERE id = ?";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param('i', $teacher_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        if ($result->num_rows === 0) {
-            throw new Exception('User not found.');
-        }
-
-        $user = $result->fetch_assoc();
-        $full_name = $user['full_name'];
 
         // Insert into `item_transactions`
         $borrowed_at = $borrow_date . ' ' . (new DateTime('now', new DateTimeZone('Asia/Manila')))->format('H:i:s');
@@ -79,15 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$stmt->execute()) {
                 throw new Exception('Failed to create notification.');
             }
-        }
-
-        // Insert a notification for the borrowed item
-        $borrowNotif = "{$item['name']} ({$item['brand']}) with quantity of {$quantity} was borrowed by {$full_name}.";
-        $query = "INSERT INTO notif_items (description) VALUES (?)";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param('s', $borrowNotif);
-        if (!$stmt->execute()) {
-            throw new Exception('Failed to create borrowed item notification.');
         }
 
         $conn->commit();
