@@ -27,7 +27,7 @@ if ($result->num_rows > 0) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/borrowing.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
 </head>
@@ -158,6 +158,7 @@ if ($result->num_rows > 0) {
                                 <th>Fullname</th>
                                 <th>Contact Number</th>
                                 <th>Email</th>
+                                <th>Note</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -295,7 +296,7 @@ if ($result->num_rows > 0) {
                                         timer: 3000
                                     });
                                     closeReturnModal();
-                                    fetchTransactions(); // Refresh the transactions table
+                                    fetchTransactions();
                                 } else {
                                     Swal.fire({
                                         icon: 'error',
@@ -363,15 +364,18 @@ if ($result->num_rows > 0) {
                             <td>${transaction.item_name}</td>
                             <td>${transaction.item_brand}</td>
                             <td>${transaction.quantity_borrowed}</td>
-                             <td>${transaction.class_date} - ${formatTime24To12(transaction.schedule_from)} - ${formatTime24To12(transaction.schedule_to)}</td>
+                            <td>${transaction.class_date} - ${formatTime24To12(transaction.schedule_from)} - ${formatTime24To12(transaction.schedule_to)}</td>
                             <td>${transaction.borrowed_at ? formatDateTimeWithNewline(transaction.borrowed_at) : 'N/A'}</td>
                             <td>${transaction.return_date}</td>
                             <td>${transaction.first_name} ${transaction.last_name}</td>
                             <td>${transaction.contact_no}</td>
                             <td>${transaction.email}</td>
+                            <td>
+                                ${transaction.status_remark}
+                                <button class="addButton" style="height: 2rem;" onclick="editStatusRemark(${transaction.transaction_id}, '${transaction.status_remark}')"><i class="fa-solid fa-pen-to-square"></i></button>
+                            </td>
                             <td class="button">
                                <button class="addButton" style="width: 7rem;" onclick="openReturnModal(${transaction.transaction_id})">Return</button>
-
                             </td>
                         `;
                                 tbody.appendChild(row);
@@ -386,6 +390,52 @@ if ($result->num_rows > 0) {
             };
             xhr.send();
         }
+
+        function editStatusRemark(transactionId, currentRemark) {
+            Swal.fire({
+                title: 'Edit Status Remark',
+                input: 'text',
+                inputValue: currentRemark,
+                showCancelButton: true,
+                confirmButtonText: 'Update',
+                cancelButtonText: 'Cancel',
+                preConfirm: (newRemark) => {
+                    return new Promise((resolve) => {
+                        // Send the update request
+                        const xhr = new XMLHttpRequest();
+                        xhr.open('POST', './endpoints/update_status_remark.php', true);
+                        xhr.setRequestHeader('Content-Type', 'application/json');
+                        xhr.onreadystatechange = function () {
+                            if (xhr.readyState === 4) {
+                                if (xhr.status === 200) {
+                                    const response = JSON.parse(xhr.responseText);
+                                    if (response.status === 'success') {
+                                        resolve(response.message);
+                                    } else {
+                                        Swal.showValidationMessage(response.message);
+                                    }
+                                } else {
+                                    Swal.showValidationMessage('An error occurred. Please try again.');
+                                }
+                            }
+                        };
+                        xhr.send(JSON.stringify({ transaction_id: transactionId, status_remark: newRemark }));
+                    });
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Status remark updated successfully!',
+                        showConfirmButton: false,
+                        timer: 3000
+                    }).then(() => {
+                        fetchTransactions(); // Refresh the table
+                    });
+                }
+            });
+        }
+
 
         function openReturnModal(transactionId) {
             const xhr = new XMLHttpRequest();

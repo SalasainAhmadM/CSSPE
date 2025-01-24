@@ -410,57 +410,77 @@ $teacherResult = $conn->query($teacherQuery);
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, approve it!',
+                confirmButtonText: 'Yes, add a note!',
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    const xhr = new XMLHttpRequest();
-                    xhr.open('POST', './endpoints/update_transaction_status.php', true);
-                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-                    xhr.onreadystatechange = function () {
-                        if (xhr.readyState === 4) {
-                            if (xhr.status === 200) {
-                                try {
-                                    const response = JSON.parse(xhr.responseText);
-                                    if (response.status === 'success') {
-                                        Swal.fire({
-                                            icon: 'success',
-                                            title: response.message,
-                                            showConfirmButton: false,
-                                            timer: 3000
-                                        });
-                                        fetchTransactions(); // Refresh the transaction list
+                    Swal.fire({
+                        title: 'Add a Note',
+                        input: 'textarea',
+                        inputLabel: 'Status Remark',
+                        inputPlaceholder: 'Enter any remarks for this approval...',
+                        inputAttributes: {
+                            maxlength: 255
+                        },
+                        showCancelButton: true,
+                        confirmButtonText: 'Submit',
+                        cancelButtonText: 'Cancel',
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33'
+                    }).then((noteResult) => {
+                        if (noteResult.isConfirmed) {
+                            const statusRemark = noteResult.value;
+
+                            const xhr = new XMLHttpRequest();
+                            xhr.open('POST', './endpoints/update_transaction_status.php', true);
+                            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                            xhr.onreadystatechange = function () {
+                                if (xhr.readyState === 4) {
+                                    if (xhr.status === 200) {
+                                        try {
+                                            const response = JSON.parse(xhr.responseText);
+                                            if (response.status === 'success') {
+                                                Swal.fire({
+                                                    icon: 'success',
+                                                    title: response.message,
+                                                    showConfirmButton: false,
+                                                    timer: 3000
+                                                });
+                                                fetchTransactions(); // Refresh the transaction list
+                                            } else {
+                                                Swal.fire({
+                                                    icon: 'error',
+                                                    title: response.message,
+                                                    showConfirmButton: false,
+                                                    timer: 3000
+                                                });
+                                            }
+                                        } catch (e) {
+                                            console.error('Error parsing response:', e);
+                                            Swal.fire({
+                                                icon: 'error',
+                                                title: 'An unexpected error occurred.',
+                                                showConfirmButton: false,
+                                                timer: 3000
+                                            });
+                                        }
                                     } else {
                                         Swal.fire({
                                             icon: 'error',
-                                            title: response.message,
+                                            title: 'Failed to communicate with the server.',
                                             showConfirmButton: false,
                                             timer: 3000
                                         });
                                     }
-                                } catch (e) {
-                                    console.error('Error parsing response:', e);
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'An unexpected error occurred.',
-                                        showConfirmButton: false,
-                                        timer: 3000
-                                    });
                                 }
-                            } else {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Failed to communicate with the server.',
-                                    showConfirmButton: false,
-                                    timer: 3000
-                                });
-                            }
+                            };
+                            xhr.send(`transaction_id=${transactionId}&status=Approved&status_remark=${encodeURIComponent(statusRemark)}`);
                         }
-                    };
-                    xhr.send(`transaction_id=${transactionId}&status=Approved`);
+                    });
                 }
             });
         }
+
 
 
         function declineTransaction(transactionId, itemId, quantityBorrowed) {

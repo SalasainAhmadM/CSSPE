@@ -145,7 +145,8 @@ CREATE TABLE `item_transactions` (
   `schedule_from` time NOT NULL,
   `schedule_to` time NOT NULL,
   `class_date` date DEFAULT NULL,
-  `status` enum('Pending','Approved','Returned') NOT NULL DEFAULT 'Pending'
+  `status` enum('Pending','Approved','Returned') NOT NULL DEFAULT 'Pending',
+  `status_remark` varchar 255 NOT NULL DEFAULT 'Pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --

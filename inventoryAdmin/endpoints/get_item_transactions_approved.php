@@ -19,7 +19,8 @@ try {
             u.first_name, 
             u.last_name, 
             u.contact_no, 
-            u.email, 
+            u.email,
+            it.status_remark, 
             it.status 
         FROM item_transactions it
         JOIN items i ON it.item_id = i.id
