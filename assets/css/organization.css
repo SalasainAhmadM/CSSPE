@@ -54,7 +54,7 @@
     width: 100%;
 }
 
-.textContainer{
+.textContainer , .textContainer2{
     height: 4rem;
     display: flex;
     align-items: center;
@@ -135,7 +135,7 @@
     box-shadow: none;
 }
 
-.tableContainer{
+.tableContainer , .tableContainer2{
     margin-top: 2rem;
     width: 90%;
     overflow: auto;
@@ -144,19 +144,19 @@
     overflow: auto;
 }
 
-.tableContainer::-webkit-scrollbar{
+.tableContainer::-webkit-scrollbar , .tableContainer2::-webkit-scrollbar{
     overflow: auto;
     width: 10px;
     height: 10px;
     cursor: pointer;
 }
 
-.tableContainer::-webkit-scrollbar-thumb {
+.tableContainer::-webkit-scrollbar-thumb ,.tableContainer2::-webkit-scrollbar-thumb {
     background-color: rgb(109, 18, 10);
     border-radius: 0.5rem;
   }
   
-.tableContainer::-webkit-scrollbar-track {
+.tableContainer::-webkit-scrollbar-track  , .tableContainer2::-webkit-scrollbar-track {
     background-color: rgb(175, 158, 156);
 }
 

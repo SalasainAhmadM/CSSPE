@@ -596,6 +596,7 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     <table>
                         <thead>
                             <tr>
+                                <th>ID</th>
                                 <th>Item Name</th>
                                 <th>Brand</th>
                                 <th>Quantity</th>
@@ -610,6 +611,7 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                             <?php else: ?>
                                 <?php foreach ($availableItems as $item): ?>
                                     <tr>
+                                        <td><?= $item['id']; ?></td>
                                         <td><?= $item['name']; ?></td>
                                         <td><?= $item['brand']; ?></td>
                                         <td><?= $item['quantity']; ?></td>

@@ -275,20 +275,22 @@ if (isset($_GET['delete_id'])) {
                                     <td><?php echo htmlspecialchars($row['description']); ?></td>
                                     <td class="button">
                                         <a href="#" onclick="editProgram(<?php echo $row['id']; ?>, 
-                                            '<?php echo addslashes($row['organization_name']); ?>',
-                                            '<?php echo addslashes($row['image']); ?>',
-                                            '<?php echo addslashes($row['description']); ?>')">
+                    '<?php echo addslashes($row['organization_name']); ?>',
+                    '<?php echo addslashes($row['image']); ?>',
+                    '<?php echo addslashes($row['description']); ?>')">
                                             <button class="addButton1" style="width: 6rem;">Edit</button>
                                         </a>
                                         <a href="#" onclick="deleteProgram(<?php echo $row['id']; ?>)">
                                             <button class="addButton1" style="width: 6rem;">Delete</button>
                                         </a>
-                                        <button onclick="popup12()" class="addButton" style="width: 10rem;">Manage Project</button>
+                                        <button
+                                            onclick="popupMP(<?php echo $row['id']; ?>, '<?php echo addslashes($row['organization_name']); ?>')"
+                                            class="addButton" style="width: 10rem;">Manage Project</button>
                                     </td>
-
                                 </tr>
                             <?php endwhile; ?>
                         </tbody>
+
                     </table>
                 </div>
             </div>
@@ -297,7 +299,7 @@ if (isset($_GET['delete_id'])) {
 
 
     <form method="POST" action="" enctype="multipart/form-data">
-        <div class="addContainer" style="display: none; background-color: none;">
+        <div class="addContainer2" style="display: none; background-color: none;">
             <div class="addContainer">
                 <div class="subAddContainer">
                     <div class="titleContainer">
@@ -431,12 +433,12 @@ if (isset($_GET['delete_id'])) {
                         </div> -->
 
                         <div class="inputContainer">
-                            <input class="inputEmail" type="text" name="project_name"
-                                placeholder="Project Name">
+                            <input class="inputEmail" type="text" name="project_name" placeholder="Project Name">
                         </div>
 
                         <div class="inputContainer" style="height: 10rem;">
-                            <textarea class="inputEmail" name="project_description" placeholder="Description"></textarea>
+                            <textarea class="inputEmail" name="project_description"
+                                placeholder="Description"></textarea>
                         </div>
 
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
@@ -461,6 +463,7 @@ if (isset($_GET['delete_id'])) {
             <div class="editContainer">
                 <div class="subAddContainer">
                     <div class="titleContainer">
+                        <p>Edit Organization</p>
                         <p>Edit Organization</p>
                     </div>
 
@@ -587,7 +590,7 @@ if (isset($_GET['delete_id'])) {
             const file = document.getElementById('imageUpload').files[0];
             const reader = new FileReader();
 
-            reader.onloadend = function() {
+            reader.onloadend = function () {
                 const image = document.getElementById('preview');
                 image.src = reader.result;
                 image.style.display = 'block'; // Display the image after loading
