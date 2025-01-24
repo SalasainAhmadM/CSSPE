@@ -34,6 +34,7 @@ $itemsResult = $conn->query($itemsQuery);
 // Fetch users with role 'Instructor'
 $teacherQuery = "SELECT id, CONCAT(first_name, ' ', COALESCE(middle_name, ''), ' ', last_name) AS full_name FROM users WHERE role = 'Instructor'";
 $teacherResult = $conn->query($teacherQuery);
+
 ?>
 
 <!DOCTYPE html>
@@ -360,16 +361,46 @@ $teacherResult = $conn->query($teacherQuery);
 
     <script>
         function borrowItem(itemId, itemName, itemBrand) {
-            const modal = document.querySelector('.editContainer');
-            modal.style.display = 'flex';
-
-            // Populate the readonly fields with the item name and brand
-            document.getElementById('itemName').value = itemName;
-            document.getElementById('itemBrand').value = itemBrand;
-
-            // Store the itemId for form submission
-            document.getElementById('itemId').value = itemId;
+            // Perform an AJAX request to check ban status
+            fetch('checkBanStatus.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: <?= json_encode($_SESSION['user_id']) ?>
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.banned) {
+                        // Show SweetAlert if user is banned
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Access Denied',
+                            text: 'You are currently banned from borrowing items.',
+                            confirmButtonText: 'Okay'
+                        });
+                    } else {
+                        // Proceed with the borrowing process
+                        // Open the modal or handle the borrowing logic
+                        document.getElementById('itemId').value = itemId;
+                        document.getElementById('itemName').value = itemName;
+                        document.getElementById('itemBrand').value = itemBrand;
+                        document.querySelector('.editContainer').style.display = 'flex';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while checking your ban status.',
+                        confirmButtonText: 'Okay'
+                    });
+                });
         }
+
 
         function closeModal() {
             const modal = document.querySelector('.editContainer');
@@ -378,7 +409,7 @@ $teacherResult = $conn->query($teacherQuery);
 
         document.querySelector('.addButton1').addEventListener('click', closeModal);
 
-        document.querySelector('.confirmButton').addEventListener('click', function () {
+        document.querySelector('.confirmButton').addEventListener('click', function() {
             // Get form values
             const itemId = document.getElementById('itemId').value;
             const teacherId = document.getElementById('teacherSelect').value;
@@ -420,9 +451,9 @@ $teacherResult = $conn->query($teacherQuery);
                     formData.append('schedule_to', scheduleTo);
 
                     fetch('borrow_item.php', {
-                        method: 'POST',
-                        body: formData
-                    })
+                            method: 'POST',
+                            body: formData
+                        })
                         .then(response => response.json())
                         .then(data => {
                             if (data.status === 'success') {
@@ -455,7 +486,7 @@ $teacherResult = $conn->query($teacherQuery);
         const searchBar = document.getElementById('searchBar');
         const inventoryGrid = document.getElementById('inventoryGrid');
 
-        searchBar.addEventListener('input', function () {
+        searchBar.addEventListener('input', function() {
             const searchTerm = searchBar.value.toLowerCase();
             const inventoryContainers = inventoryGrid.getElementsByClassName('inventoryContainer');
 

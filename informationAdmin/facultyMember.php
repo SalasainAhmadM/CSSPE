@@ -25,6 +25,7 @@ if ($result->num_rows > 0) {
 $query = "SELECT id, first_name, last_name, middle_name, email, address, contact_no, rank, password, created_at, role, department, image FROM users";
 $result = mysqli_query($conn, $query);
 
+
 // delete request
 if (isset($_GET['delete_id'])) {
     $user_id = $_GET['delete_id'];
@@ -39,6 +40,34 @@ if (isset($_GET['delete_id'])) {
         $_SESSION['message_type'] = "error";
     }
 }
+
+// ban request
+if (isset($_GET['ban_id'])) { 
+    $user_id = $_GET['ban_id'];
+    $ban_query = "UPDATE users SET ban = 1 WHERE id = ?";
+    $stmt = $conn->prepare($ban_query);
+
+    if ($stmt) {
+        $stmt->bind_param("i", $user_id);
+
+        if ($stmt->execute()) {
+            $_SESSION['message'] = "User has been banned successfully!";
+            $_SESSION['message_type'] = "success";
+        } else {
+            $_SESSION['message'] = "Error banning user: " . $stmt->error;
+            $_SESSION['message_type'] = "error";
+        }
+
+        $stmt->close();
+    } else {
+        $_SESSION['message'] = "Error preparing ban query: " . $conn->error;
+        $_SESSION['message_type'] = "error";
+    }
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit();
+}
+
+
 
 function fetchDepartments()
 {
@@ -397,6 +426,9 @@ if (isset($_POST['update_faculty'])) {
                                         <a href="#" onclick="deleteUser(<?php echo $row['id']; ?>)">
                                             <button class="addButton1" style="width: 6rem;">Delete</button>
                                         </a>
+                                        <a href="#" onclick="banUser(<?php echo $row['id']; ?>)">
+                                            <button class="addButton1" style="width: 6rem;">Ban</button>
+                                        </a>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>
@@ -681,6 +713,21 @@ if (isset($_POST['update_faculty'])) {
             }).then((result) => {
                 if (result.isConfirmed) {
                     window.location.href = "?delete_id=" + userId;
+                }
+            });
+        }
+
+        function banUser(userId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Are you sure you want to ban this user from borrowing an item?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, ban!',
+                cancelButtonText: 'No, cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "?ban_id=" + userId;
                 }
             });
         }

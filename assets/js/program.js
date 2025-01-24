@@ -28,6 +28,16 @@ function editProgram(){
     }
 }
 
+function editProject(){
+    const editProgramButton = document.querySelector('.editProject');
+
+    if(editProgramButton.style.display === 'none'){
+        editProgramButton.style.display = 'block';
+    } else{
+        editProgramButton .style.display = 'none'
+    }
+}
+
 function popup12(){
     const popupButton = document.querySelector('.popup');
 

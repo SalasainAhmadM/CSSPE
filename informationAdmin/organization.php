@@ -295,56 +295,6 @@ if (isset($_GET['delete_id'])) {
         </div>
     </div>
 
-    <div class="popup" style="display: none;">
-        <div class="popup">
-            <div class="mainContainer" style="margin-left: 250px;">
-                <div class="container">
-
-                    <div class="textContainer">
-                        <p class="text">Manage Project</p>
-                    </div>
-
-                    <div class="searchContainer">
-                        <input class="searchBar" type="text" placeholder="Search...">
-                        <div class="printButton" style="gap: 1rem; display: flex; width: 90%;">
-                            <button class="addButton size">Print</button>
-                            <button onclick="addProject()" class="addButton size">Add Project</button>
-                        </div>
-                    </div>
-
-                    <div class="tableContainer">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Project Name</th>
-                                    <!-- <th>Image</th> -->
-                                    <th>Description</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                <tr>
-                                    <td>Hakdog</td>
-                                    <!-- <td>
-                                        <img class="image" src="../assets/img/CSSPE.png" alt="">
-                                    </td> -->
-                                    <td>Hakdog</td>
-                                    <td class="button">
-                                        <button onclick="editProgram()" class="addButton"
-                                            style="width: 5rem;">Edit</button>
-                                        <button class="addButton1" style="width: 5rem;">Delete</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
 
     <form method="POST" action="" enctype="multipart/form-data">
         <div class="addContainer" style="display: none; background-color: none;">
@@ -399,6 +349,54 @@ if (isset($_GET['delete_id'])) {
     </form>
 
 
+    <div class="popup" style="display: none;">
+        <div class="popup">
+            <div class="mainContainer" style="margin-left: 250px;">
+                <div class="container">
+
+                    <div class="textContainer">
+                        <p class="text">Manage Project</p>
+                    </div>
+
+                    <div class="searchContainer">
+                        <input class="searchBar" type="text" placeholder="Search...">
+                        <div class="printButton" style="gap: 1rem; display: flex; width: 90%;">
+                            <button class="addButton size">Print</button>
+                            <button onclick="addProject()" class="addButton size">Add Project</button>
+                        </div>
+                    </div>
+
+                    <div class="tableContainer">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Project Name</th>
+                                    <!-- <th>Image</th> -->
+                                    <th>Description</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr>
+                                    <td>Hakdog</td>
+                                    <!-- <td>
+                                        <img class="image" src="../assets/img/CSSPE.png" alt="">
+                                    </td> -->
+                                    <td>Hakdog</td>
+                                    <td class="button">
+                                        <button onclick="editProject()" class="addButton"
+                                            style="width: 5rem;">Edit</button>
+                                        <button class="addButton1" style="width: 5rem;">Delete</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
     <form method="POST" action="" enctype="multipart/form-data">
@@ -455,13 +453,15 @@ if (isset($_GET['delete_id'])) {
 
 
 
+
+
     <!-- Edit Container -->
     <form method="POST" action="" enctype="multipart/form-data">
         <div class="editContainer" style="display: none; background-color: none;">
             <div class="editContainer">
                 <div class="subAddContainer">
                     <div class="titleContainer">
-                        <p>Add Organization</p>
+                        <p>Edit Organization</p>
                     </div>
 
                     <div class="subLoginContainer">
@@ -498,6 +498,39 @@ if (isset($_GET['delete_id'])) {
 
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
                             <button type="submit" name="update_organization" class="addButton"
+                                style="width: 6rem;">Save</button>
+                            <button onclick="addProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    
+    <form method="POST" action="" enctype="multipart/form-data">
+        <div class="editProject" style="display: none; background-color: none;">
+            <div class="addContainer">
+                <div class="subAddContainer">
+                    <div class="titleContainer">
+                        <p>Edit Project</p>
+                    </div>
+
+                    <div class="subLoginContainer">
+
+                        <!-- Hidden input to store event id -->
+                        <input type="hidden" name="project_id" id="project_id">
+
+                        <div class="inputContainer">
+                            <input class="inputEmail" type="text" name="project_name"
+                                placeholder="Project Name">
+                        </div>
+
+                        <div class="inputContainer" style="height: 10rem;">
+                            <textarea class="inputEmail" name="project_description" placeholder="Description"></textarea>
+                        </div>
+
+                        <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
+                            <button type="submit" name="add_organization" class="addButton"
                                 style="width: 6rem;">Add</button>
                             <button onclick="addProgram()" class="addButton1" style="width: 6rem;">Cancel</button>
                         </div>
@@ -506,57 +539,6 @@ if (isset($_GET['delete_id'])) {
             </div>
         </div>
     </form>
-
-
-    <div class="popup" style="display: none;">
-        <div class="popup">
-            <div class="mainContainer" style="margin-left: 250px;">
-                <div class="container">
-
-                    <div class="textContainer">
-                        <p class="text">Tech Club</p>
-                    </div>
-
-                    <div class="searchContainer">
-                        <input class="searchBar" type="text" placeholder="Search...">
-                        <div class="printButton" style="gap: 1rem; display: flex; width: 90%;">
-                            <button class="addButton size">Print</button>
-                            <button onclick="addProgram()" class="addButton size">Add Organization</button>
-                        </div>
-                    </div>
-
-                    <div class="tableContainer">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Project Name</th>
-                                    <th>Image</th>
-                                    <th>Description</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                <tr>
-                                    <td>Hakdog</td>
-                                    <td>
-                                        <img class="image" src="/dionSe/assets/img/CSSPE.png" alt="">
-                                    </td>
-                                    <td>Hakdog</td>
-                                    <td class="button">
-                                        <button onclick="editProgram()" class="addButton" style="width: 5rem;">Edit</button>
-                                        <button class="addButton1" style="width: 5rem;">Delete</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
 
     <script src="../assets/js/sidebar.js"></script>
     <script src="../assets/js/program.js"></script>
@@ -576,6 +558,20 @@ if (isset($_GET['delete_id'])) {
             document.getElementById('organization_image').style.display = 'block';
 
             document.getElementById('organization_description').value = description;
+
+            document.querySelector('.editContainer').style.display = 'block';
+        }
+
+        function cancelContainer() {
+            document.querySelector('.editContainer').style.display = 'none';
+        }
+    </script>
+
+    <script>
+        function editProject(id, name, description) {
+            document.getElementById('project_id').value = id;
+            document.getElementById('project_name').value = name;
+            document.getElementById('project_description').value = description;
 
             document.querySelector('.editContainer').style.display = 'block';
         }
