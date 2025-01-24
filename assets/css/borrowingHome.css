@@ -14,7 +14,7 @@
 .pagination {
     display: flex;
     justify-content: center;
-    margin: 20px 0;
+    margin: 5px 0;
 }
 
 .pagination a {
@@ -32,10 +32,11 @@
 }
 
 .pagination a.active {
-    background-color: #007bff;
+    background-color: rgb(109, 18, 10);
     color: white;
-    border-color: #007bff;
+    border-color: rgb(109, 18, 10);
 }
+
 
 .mainContainer{
     background-color: rgb(243, 243, 243);

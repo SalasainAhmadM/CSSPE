@@ -28,8 +28,19 @@ if ($result->num_rows > 0) {
     $fullName = "User Not Found";
 }
 
-$itemsQuery = "SELECT * FROM items";
+$limit = 6;
+$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
+
+$itemsQuery = "SELECT * FROM items LIMIT $limit OFFSET $offset";
 $itemsResult = $conn->query($itemsQuery);
+
+$totalitemsQuery = "SELECT COUNT(*) AS total FROM items";
+$totalitemsResult = $conn->query($totalitemsQuery);
+$totalRow = mysqli_fetch_assoc($totalitemsResult );
+$totalItems = $totalRow['total'];
+
+$totalPages = ceil($totalItems / $limit);
 
 // Fetch users with role 'Instructor'
 $teacherQuery = "SELECT id, CONCAT(first_name, ' ', COALESCE(middle_name, ''), ' ', last_name) AS full_name FROM users WHERE role = 'Instructor'";
@@ -268,6 +279,22 @@ $teacherResult = $conn->query($teacherQuery);
                         <?php endwhile; ?>
                     <?php else: ?>
                         <p>No items available</p>
+                    <?php endif; ?>
+                </div>
+
+
+                <div class="pagination">
+                    <?php if ($page > 1): ?>
+                        <a href="?page=<?php echo $page - 1; ?>" class="prev">Previous</a>
+                    <?php endif; ?>
+
+                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                        <a href="?page=<?php echo $i; ?>"
+                            class="<?php echo ($i === $page) ? 'active' : ''; ?>"><?php echo $i; ?></a>
+                    <?php endfor; ?>
+
+                    <?php if ($page < $totalPages): ?>
+                        <a href="?page=<?php echo $page + 1; ?>" class="next">Next</a>
                     <?php endif; ?>
                 </div>
 
