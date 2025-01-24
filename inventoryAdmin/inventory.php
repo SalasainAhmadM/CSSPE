@@ -147,6 +147,7 @@ $itemResult = $itemStmt->get_result();
                     <table>
                         <thead>
                             <tr>
+                                <th>ID</th>
                                 <th>Item Name</th>
                                 <th>Image</th>
                                 <th>Description</th>
@@ -158,6 +159,7 @@ $itemResult = $itemStmt->get_result();
                         <tbody id="tableBody">
                             <?php while ($item = $itemResult->fetch_assoc()): ?>
                                 <tr>
+                                    <td><?php echo htmlspecialchars($item['id']); ?></td>
                                     <td><?php echo htmlspecialchars($item['name']); ?></td>
                                     <td>
                                         <?php if (!empty($item['image'])): ?>

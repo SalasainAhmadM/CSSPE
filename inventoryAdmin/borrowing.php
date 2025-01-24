@@ -234,24 +234,45 @@ $teacherResult = $conn->query($teacherQuery);
                     </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
+                        <label for="borrowDate"
                             style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Borrow
                             Date:</label>
-                        <input class="inputEmail" type="date" placeholder="Date:">
-                    </div>
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Return
-                            Date:</label>
-                        <input class="inputEmail" type="date" placeholder="Return Date">
+                        <input id="borrowDate" class="inputEmail" type="date" placeholder="Date:">
                     </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
+                        <label for="returnDate"
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Return
+                            Date:</label>
+                        <input id="returnDate" class="inputEmail" type="date" placeholder="Return Date">
+                    </div>
+
+                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                        <label for="classDate"
                             style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Class
                             Date:</label>
-                        <input class="inputEmail" type="date" placeholder="Class Date">
+                        <input id="classDate" class="inputEmail" type="date" placeholder="Class Date">
                     </div>
+
+                    <script>
+                        function setMinDate() {
+                            const manilaTime = new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" });
+                            const today = new Date(manilaTime);
+
+                            const yyyy = today.getFullYear();
+                            const mm = String(today.getMonth() + 1).padStart(2, "0");
+                            const dd = String(today.getDate()).padStart(2, "0");
+                            const minDate = `${yyyy}-${mm}-${dd}`;
+
+                            const dateInputs = document.querySelectorAll('input[type="date"]');
+                            dateInputs.forEach(input => {
+                                input.min = minDate;
+                            });
+                        }
+
+                        setMinDate();
+                    </script>
+
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
                         <label for=""
@@ -551,7 +572,7 @@ $teacherResult = $conn->query($teacherQuery);
                                 <button class="addButton" style="width: 7rem;" onclick="approveTransaction(${transaction.transaction_id})">Approve</button>
                                 <button class="addButton1" style="width: 7rem;" 
                                     onclick="declineTransaction(${transaction.transaction_id}, '${transaction.item_id}', ${transaction.quantity_borrowed})">Decline</button>
-                                <button class="addButton" style="width: 7rem;" onclick="editTransaction(${transaction.transaction_id})">Edit</button>
+                               
                             </td>
                         `;
                                 tbody.appendChild(row);
@@ -567,7 +588,7 @@ $teacherResult = $conn->query($teacherQuery);
             xhr.send();
         }
 
-
+        // <button class="addButton" style="width: 7rem;" onclick="editTransaction(${transaction.transaction_id})">Edit</button>
         // Fetch transactions on page load
         document.addEventListener('DOMContentLoaded', fetchTransactions);
 
@@ -952,7 +973,17 @@ $teacherResult = $conn->query($teacherQuery);
 
     </script>
     <script src="../assets/js/sidebar.js"></script>
-    <script src="../assets/js/program.js"></script>
+    <script>
+        function addProgram() {
+            const addProgramButton = document.querySelector('.addContainer');
+
+            if (addProgramButton.style.display === 'none') {
+                addProgramButton.style.display = 'block';
+            } else {
+                addProgramButton.style.display = 'none'
+            }
+        }
+    </script>
 </body>
 
 </html>

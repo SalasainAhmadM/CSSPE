@@ -275,67 +275,445 @@ if (isset($_GET['delete_id'])) {
                                     <td><?php echo htmlspecialchars($row['description']); ?></td>
                                     <td class="button">
                                         <a href="#" onclick="editProgram(<?php echo $row['id']; ?>, 
-                                            '<?php echo addslashes($row['organization_name']); ?>',
-                                            '<?php echo addslashes($row['image']); ?>',
-                                            '<?php echo addslashes($row['description']); ?>')">
+                    '<?php echo addslashes($row['organization_name']); ?>',
+                    '<?php echo addslashes($row['image']); ?>',
+                    '<?php echo addslashes($row['description']); ?>')">
                                             <button class="addButton1" style="width: 6rem;">Edit</button>
                                         </a>
                                         <a href="#" onclick="deleteProgram(<?php echo $row['id']; ?>)">
                                             <button class="addButton1" style="width: 6rem;">Delete</button>
                                         </a>
-                                        <button onclick="popup12()" class="addButton" style="width: 10rem;">Manage Project</button>
+                                        <button
+                                            onclick="popupMP(<?php echo $row['id']; ?>, '<?php echo addslashes($row['organization_name']); ?>')"
+                                            class="addButton" style="width: 10rem;">Manage Project</button>
                                     </td>
-
                                 </tr>
                             <?php endwhile; ?>
                         </tbody>
+
                     </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="popup" style="display: none;">
+    <form method="POST" action="" enctype="multipart/form-data">
+        <div class="addContainer" id="manageProjectModal" style="display: none; background-color: none;">
+            <div class="addContainer">
+                <div class="subAddContainer">
+                    <div class="titleContainer">
+                        <p>Manage Projects for <span id="organizationName"></span></p>
+                    </div>
+
+                    <div class="subLoginContainer">
+
+                        <div class="uploadContainer">
+                            <div class="subUploadContainer">
+                                <div class="uploadContainer">
+                                    <div class="subUploadContainer">
+                                        <div class="displayImage">
+                                            <img class="image1" id="projectImagePreview" src="" alt="Image Preview"
+                                                style="max-width: 100%; display: none;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="uploadButton">
+                                <input id="projectImageUpload" type="file" name="project_image" accept="image/*"
+                                    style="display: none;" onchange="previewProjectImage()">
+                                <button type="button" onclick="triggerProjectImageUpload()" class="addButton"
+                                    style="height: 2rem; width: 5rem;">Upload</button>
+                            </div>
+                        </div>
+
+                        <div class="inputContainer">
+                            <input class="inputEmail" type="text" id="projectName" name="project_name"
+                                placeholder="Project Name" required>
+                        </div>
+
+                        <div class="inputContainer" style="height: 10rem;">
+                            <textarea class="inputEmail" id="projectDescription" name="project_description"
+                                placeholder="Description" required></textarea>
+                        </div>
+
+                        <!-- Hidden Field for Organization ID -->
+                        <input type="hidden" id="organizationId" name="organization_id" value="">
+
+                        <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
+                            <button type="button" onclick="addProject2()" class="addButton"
+                                style="width: 6rem;">Add</button>
+                            <button type="button" onclick="closeProjectModal()" class="addButton1"
+                                style="width: 6rem;">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function popupMP(organizationId, organizationName) {
+            Swal.fire({
+                title: `Manage Projects for ${organizationName}`,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: 'Add Project',
+                cancelButtonText: 'Show Projects',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Open the Add Project Modal
+                    document.getElementById('organizationId').value = organizationId;
+                    document.getElementById('organizationName').textContent = organizationName;
+                    document.getElementById('manageProjectModal').style.display = 'block';
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    // Open the Show Projects Popup
+                    showProjects(organizationId, organizationName);
+                }
+            });
+        }
+
+        function showProjects(organizationId, organizationName) {
+            // Display the popup
+            const manageProjectPopup = document.getElementById('manageProjectPopup');
+            manageProjectPopup.style.display = 'block';
+
+            // Fetch and display projects for the selected organization
+            fetchProjects(organizationId);
+        }
+
+        function fetchProjects(organizationId) {
+            fetch(`fetch_projects.php?organization_id=${organizationId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.getElementById('projectsTableBody');
+                    tbody.innerHTML = ''; // Clear previous content
+                    data.forEach(project => {
+                        const imageUrl = project.image ? project.image : '../assets/img/CSSPE.png';
+
+                        tbody.innerHTML += `
+                    <tr>
+                        <td>${project.project_name}</td>
+                        <td><img class="image" src="${imageUrl}" alt="Image" style="width: 50px; height: 50px;"></td>
+                        <td>${project.description}</td>
+                       <td class="button">
+            <button onclick="editProject2(${project.id})" class="addButton" style="width: 5rem;">Edit</button>
+            <button onclick="deleteProject(${project.id})" class="addButton1" style="width: 5rem;">Delete</button>
+        </td>
+                    </tr>
+                `;
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching projects:', error);
+                });
+        }
+
+        function editProject2(projectId) {
+            // Fetch the project details
+            fetch(`fetch_project_details.php?id=${projectId}`)
+                .then(response => response.json())
+                .then(project => {
+                    // Debug: Log the fetched project details
+                    console.log('Fetched project details:', project);
+
+                    // Check if the project details are valid
+                    if (project.error) {
+                        Swal.fire('Error', project.error, 'error');
+                        return;
+                    }
+
+                    // Show SweetAlert with current project details
+                    Swal.fire({
+                        title: 'Edit Project',
+                        html: `
+                    <div style="text-align: left; margin: 10px;">
+                        <label for="projectName" style="font-weight: bold;">Project Details</label>
+                        <input type="text" id="projectName2" class="swal2-input" placeholder="Enter project name" value="${project.project_name || ''}">
+                        
+                        <textarea id="projectDescription2" class="swal2-textarea" placeholder="Enter project description">${project.description || ''}</textarea>
+                        
+                        <input type="file" id="projectImage" class="swal2-file">
+                        
+                        ${project.image ? `<img src="${project.image}" alt="Project Image" style="width: 100%; margin-top: 10px; border-radius: 8px;">` : ''}
+                    </div>
+                `,
+                        confirmButtonText: 'Save Changes',
+                        showCancelButton: true,
+                        focusConfirm: false,
+                        preConfirm: () => {
+                            const projectName = document.querySelector('#projectName2').value.trim();
+                            const projectDescription = document.querySelector('#projectDescription2').value.trim();
+                            const projectImage = document.querySelector('#projectImage').files[0];
+
+                            // Debugging: Log the values to ensure they are being captured
+                            console.log('Project Name:', projectName);
+                            console.log('Project Description:', projectDescription);
+                            console.log('Project Image:', projectImage);
+
+                            // Validate input fields
+                            if (!projectName) {
+                                Swal.showValidationMessage('Project Name is required.');
+                                return false;
+                            }
+                            if (!projectDescription) {
+                                Swal.showValidationMessage('Project Description is required.');
+                                return false;
+                            }
+
+                            // Construct FormData object
+                            const formData = new FormData();
+                            formData.append('id', projectId);
+                            formData.append('project_name', projectName);
+                            formData.append('description', projectDescription);
+
+                            if (projectImage) {
+                                formData.append('image', projectImage);
+                            }
+
+                            return formData;
+                        }
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            // Send updated project data to the server
+                            fetch('update_project.php', {
+                                method: 'POST',
+                                body: result.value
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        Swal.fire({
+                                            icon: "success",
+                                            title: data.message || "Project updated successfully!",
+                                            showConfirmButton: false,
+                                            timer: 3000
+                                        });
+                                        fetchProjects(project.organization_id);
+                                    } else {
+                                        Swal.fire('Error', data.error || 'Failed to update project.', 'error');
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error updating project:', error);
+                                    Swal.fire('Error', 'An error occurred while updating the project.', 'error');
+                                });
+
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching project details:', error);
+                    Swal.fire('Error', 'Failed to fetch project details.', 'error');
+                });
+        }
+
+
+        function deleteProject(projectId) {
+            Swal.fire({
+                title: 'Delete Project',
+                text: "Are you sure you want to delete this project?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`delete_project.php?id=${projectId}`, {
+                        method: 'DELETE',
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: "success",
+                                    title: data.message || "Project deleted successfully!",
+                                    showConfirmButton: false,
+                                    timer: 3000
+                                });
+                                fetchProjects(data.organization_id);
+                            } else {
+                                Swal.fire({
+                                    icon: "error",
+                                    title: data.message || "An error occurred. Please try again.",
+                                    showConfirmButton: false,
+                                    timer: 3000
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error deleting project:', error);
+                            Swal.fire({
+                                icon: "error",
+                                title: "An error occurred. Please try again.",
+                                showConfirmButton: false,
+                                timer: 3000
+                            });
+                        });
+                }
+            });
+        }
+
+        function closeProjectModal() {
+            document.getElementById('manageProjectModal').style.display = 'none';
+        }
+
+        function triggerProjectImageUpload() {
+            document.getElementById('projectImageUpload').click();
+        }
+
+        function previewProjectImage() {
+            const file = document.getElementById('projectImageUpload').files[0];
+            const preview = document.getElementById('projectImagePreview');
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    preview.src = reader.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function addProject2() {
+            const projectName = document.getElementById('projectName').value.trim();
+            const projectDescription = document.getElementById('projectDescription').value.trim();
+            const organizationId = document.getElementById('organizationId').value;
+            const projectImageUpload = document.getElementById('projectImageUpload').files[0];
+
+            if (!projectName || !projectDescription || !organizationId) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Please fill out all fields",
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+                return;
+            }
+
+            // Assuming you want to handle the form via JavaScript (AJAX example)
+            const formData = new FormData();
+            formData.append("project_name", projectName);
+            formData.append("project_description", projectDescription);
+            formData.append("organization_id", organizationId);
+            if (projectImageUpload) {
+                formData.append("project_image", projectImageUpload);
+            }
+
+            fetch("add_project.php", {
+                method: "POST",
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: "success",
+                            title: data.message || "Project added successfully!",
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                        closeProjectModal();
+                        // Optionally refresh the project list
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: data.message || "An error occurred. Please try again.",
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                    }
+                })
+                .catch(error => {
+                    Swal.fire({
+                        icon: "error",
+                        title: "An error occurred. Please try again.",
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                    console.error("Error:", error);
+                });
+        }
+
+
+
+    </script>
+
+    <style>
+        .textContainer,
+        .textContainer2 {
+            height: 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: min(2rem, 1.5rem);
+            font-weight: bold;
+            width: 100%;
+        }
+
+        .tableContainer,
+        .tableContainer2 {
+            margin-top: 2rem;
+            width: 90%;
+            overflow: auto;
+            background-color: rgb(223, 222, 222);
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.699);
+            overflow: auto;
+        }
+
+        .tableContainer::-webkit-scrollbar,
+        .tableContainer2::-webkit-scrollbar {
+            overflow: auto;
+            width: 10px;
+            height: 10px;
+            cursor: pointer;
+        }
+
+        .tableContainer::-webkit-scrollbar-thumb,
+        .tableContainer2::-webkit-scrollbar-thumb {
+            background-color: rgb(109, 18, 10);
+            border-radius: 0.5rem;
+        }
+
+        .tableContainer::-webkit-scrollbar-track,
+        .tableContainer2::-webkit-scrollbar-track {
+            background-color: rgb(175, 158, 156);
+        }
+    </style>
+
+    <div id="manageProjectPopup" class="popup" style="display: none;">
         <div class="popup">
             <div class="mainContainer" style="margin-left: 250px;">
                 <div class="container">
 
-                    <div class="textContainer">
-                        <p class="text">Manage Project</p>
+                    <div class="textContainer2">
+                        <p class="text">Manage Projects</p>
                     </div>
 
                     <div class="searchContainer">
-                        <input class="searchBar" type="text" placeholder="Search...">
+                        <input class="searchBar" type="text" id="searchProjects" placeholder="Search...">
+
                         <div class="printButton" style="gap: 1rem; display: flex; width: 90%;">
-                            <button class="addButton size">Print</button>
-                            <button onclick="addProject()" class="addButton size">Add Project</button>
+                            <button class="addButton size" onclick="printTable2()">Print</button>
+                            <!-- <button onclick="openAddProjectModal()" class="addButton size">Add Project</button> -->
                         </div>
                     </div>
 
-                    <div class="tableContainer">
+                    <div class="tableContainer2">
                         <table>
                             <thead>
                                 <tr>
                                     <th>Project Name</th>
-                                    <!-- <th>Image</th> -->
+                                    <th>Image</th>
                                     <th>Description</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
 
-                            <tbody>
-                                <tr>
-                                    <td>Hakdog</td>
-                                    <!-- <td>
-                                        <img class="image" src="../assets/img/CSSPE.png" alt="">
-                                    </td> -->
-                                    <td>Hakdog</td>
-                                    <td class="button">
-                                        <button onclick="editProgram()" class="addButton"
-                                            style="width: 5rem;">Edit</button>
-                                        <button class="addButton1" style="width: 5rem;">Delete</button>
-                                    </td>
-                                </tr>
+                            <tbody id="projectsTableBody">
+                                <!-- Data will be populated dynamically -->
                             </tbody>
                         </table>
                     </div>
@@ -344,10 +722,100 @@ if (isset($_GET['delete_id'])) {
         </div>
     </div>
 
+    <script>
+        document.getElementById('searchProjects').addEventListener('input', function () {
+            const searchQuery = this.value.toLowerCase();  // Get the search query (converted to lowercase)
+            const rows = document.querySelectorAll('#projectsTableBody tr'); // Get all table rows
 
+            rows.forEach(row => {
+                const projectName = row.querySelector('td:first-child').textContent.toLowerCase(); // Get project name
+                if (projectName.includes(searchQuery)) {
+                    row.style.display = ''; // Show row if it matches the search query
+                } else {
+                    row.style.display = 'none'; // Hide row if it doesn't match
+                }
+            });
+        });
+
+
+        function printTable2() {
+            const tableContainer = document.querySelector('.tableContainer2');
+            const tableHeader = document.querySelector('.textContainer2');
+
+            // Temporarily hide the last column (Action column)
+            const rows = tableContainer.querySelectorAll('tr');
+            rows.forEach(row => {
+                const cells = row.children;
+                if (cells.length > 0) {
+                    cells[cells.length - 1].style.display = 'none'; // Hide the last cell
+                }
+            });
+
+            // Get the HTML for printing
+            const printContent = tableContainer.outerHTML;
+            const printTableHeader = tableHeader.outerHTML;
+
+            // Open a new window to print the content
+            const printWindow = window.open('', '', 'width=800, height=600');
+            printWindow.document.write(`
+    <html>
+    <head>
+        <title>Print Table</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+                color: #333;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 20px;
+            }
+            th, td {
+                border: 1px solid black;
+                padding: 8px;
+                text-align: left;
+            }
+            th, td img {
+                width: 90px;
+            }                   
+            th {
+                background-color: #f4f4f4;
+                font-weight: bold;
+            }
+            tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+            .table-header {
+                text-align: center;
+                font-size: 24px;
+                margin-bottom: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="table-header">Manage Projects</div>
+        ${printTableHeader}
+        ${printContent}
+    </body>
+    </html>
+    `);
+            printWindow.document.close();
+            printWindow.print();
+
+            // Restore the visibility of the last column (Action column)
+            rows.forEach(row => {
+                const cells = row.children;
+                if (cells.length > 0) {
+                    cells[cells.length - 1].style.display = ''; // Restore visibility
+                }
+            });
+        }
+    </script>
 
     <form method="POST" action="" enctype="multipart/form-data">
-        <div class="addContainer" style="display: none; background-color: none;">
+        <div class="addContainer2" style="display: none; background-color: none;">
             <div class="addContainer">
                 <div class="subAddContainer">
                     <div class="titleContainer">
@@ -433,12 +901,12 @@ if (isset($_GET['delete_id'])) {
                         </div> -->
 
                         <div class="inputContainer">
-                            <input class="inputEmail" type="text" name="project_name"
-                                placeholder="Project Name">
+                            <input class="inputEmail" type="text" name="project_name" placeholder="Project Name">
                         </div>
 
                         <div class="inputContainer" style="height: 10rem;">
-                            <textarea class="inputEmail" name="project_description" placeholder="Description"></textarea>
+                            <textarea class="inputEmail" name="project_description"
+                                placeholder="Description"></textarea>
                         </div>
 
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
@@ -461,7 +929,7 @@ if (isset($_GET['delete_id'])) {
             <div class="editContainer">
                 <div class="subAddContainer">
                     <div class="titleContainer">
-                        <p>Add Organization</p>
+                        <p>Edit Organization</p>
                     </div>
 
                     <div class="subLoginContainer">
@@ -508,53 +976,7 @@ if (isset($_GET['delete_id'])) {
     </form>
 
 
-    <div class="popup" style="display: none;">
-        <div class="popup">
-            <div class="mainContainer" style="margin-left: 250px;">
-                <div class="container">
 
-                    <div class="textContainer">
-                        <p class="text">Tech Club</p>
-                    </div>
-
-                    <div class="searchContainer">
-                        <input class="searchBar" type="text" placeholder="Search...">
-                        <div class="printButton" style="gap: 1rem; display: flex; width: 90%;">
-                            <button class="addButton size">Print</button>
-                            <button onclick="addProgram()" class="addButton size">Add Organization</button>
-                        </div>
-                    </div>
-
-                    <div class="tableContainer">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Project Name</th>
-                                    <th>Image</th>
-                                    <th>Description</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                <tr>
-                                    <td>Hakdog</td>
-                                    <td>
-                                        <img class="image" src="/dionSe/assets/img/CSSPE.png" alt="">
-                                    </td>
-                                    <td>Hakdog</td>
-                                    <td class="button">
-                                        <button onclick="editProgram()" class="addButton" style="width: 5rem;">Edit</button>
-                                        <button class="addButton1" style="width: 5rem;">Delete</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
 
 
@@ -591,7 +1013,7 @@ if (isset($_GET['delete_id'])) {
             const file = document.getElementById('imageUpload').files[0];
             const reader = new FileReader();
 
-            reader.onloadend = function() {
+            reader.onloadend = function () {
                 const image = document.getElementById('preview');
                 image.src = reader.result;
                 image.style.display = 'block'; // Display the image after loading

@@ -1,5 +1,5 @@
 function addProgram(){
-    const addProgramButton = document.querySelector('.addContainer');
+    const addProgramButton = document.querySelector('.addContainer2');
 
     if(addProgramButton.style.display === 'none'){
         addProgramButton.style.display = 'block';
@@ -28,12 +28,12 @@ function editProgram(){
     }
 }
 
-function popup12(){
-    const popupButton = document.querySelector('.popup');
+// function popup12(){
+//     const popupButton = document.querySelector('.popup');
 
-    if(popupButton.style.display === 'none'){
-        popupButton.style.display = 'block';
-    } else{
-        popupButton .style.display = 'none'
-    }
-}
+//     if(popupButton.style.display === 'none'){
+//         popupButton.style.display = 'block';
+//     } else{
+//         popupButton .style.display = 'none'
+//     }
+// }
