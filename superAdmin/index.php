@@ -19,7 +19,7 @@ if ($result->num_rows > 0) {
     $fullName = "User Not Found";
 }
 // Fetch data from the users table, excluding the super_admin role
-$query = "SELECT id, first_name, last_name, middle_name, email, address, contact_no, rank, password, created_at, role, department, image 
+$query = "SELECT id, first_name, last_name, middle_name, email, address, contact_no, rank, status, password, created_at, role, department, image 
           FROM users 
           WHERE role != 'super_admin'";
 $result = mysqli_query($conn, $query);
@@ -75,6 +75,7 @@ if (isset($_POST['add_faculty'])) {
     $contact_no = checkEmpty($_POST['contact_no']);
     $department = checkEmpty($_POST['department']);
     $rank = checkEmpty($_POST['rank']);
+    $status = 0;
 
     $password = mysqli_real_escape_string($conn, $_POST['password']);
     $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
@@ -107,8 +108,8 @@ if (isset($_POST['add_faculty'])) {
     }
 
     // Insert user data into the database
-    $insert_query = "INSERT INTO users (first_name, last_name, middle_name, email, address, contact_no, department, rank, password, image)
-                     VALUES ('$first_name', '$last_name', '$middle_name', '$email', '$address', '$contact_no', '$department', '$rank', '$hashedPassword', '$image_path')";
+    $insert_query = "INSERT INTO users (first_name, last_name, middle_name, email, address, contact_no, department, rank, status, password, image)
+                     VALUES ('$first_name', '$last_name', '$middle_name', '$email', '$address', '$contact_no', '$department', '$rank', '$status', '$hashedPassword', '$image_path')";
 
     if (mysqli_query($conn, $insert_query)) {
         echo "New user added successfully!";
@@ -132,6 +133,7 @@ if (isset($_POST['update_faculty'])) {
     $contact_no = mysqli_real_escape_string($conn, $_POST['contact_no']);
     $department = mysqli_real_escape_string($conn, $_POST['department']);
     $rank = mysqli_real_escape_string($conn, $_POST['rank']);
+    $status = mysqli_real_escape_string($conn, $_POST['status']);
 
     if (!empty($_POST['password'])) {
         $password = mysqli_real_escape_string($conn, $_POST['password']);
@@ -171,7 +173,7 @@ if (isset($_POST['update_faculty'])) {
     $update_query = "UPDATE users 
                      SET first_name = '$first_name', last_name = '$last_name', middle_name = '$middle_name', 
                          email = '$email', address = '$address', contact_no = '$contact_no', 
-                         department = '$department', rank = '$rank', 
+                         department = '$department', rank = '$rank', status = '$status', 
                          password = '$hashedPassword', image = '$image_path' 
                      WHERE id = $faculty_id";
 
@@ -356,6 +358,7 @@ if (isset($_POST['update_faculty'])) {
                                 <th>Department</th>
                                 <th>Position</th>
                                 <th>Role</th>
+                                <th>Status</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -377,6 +380,11 @@ if (isset($_POST['update_faculty'])) {
                                     <td><?php echo htmlspecialchars($row['department']); ?></td>
                                     <td><?php echo htmlspecialchars($row['rank']); ?></td>
                                     <td><?php echo htmlspecialchars($row['role']); ?></td>
+                                    <td>
+                                        <?php
+                                        echo htmlspecialchars($row['status'] == 0 ? 'Activated' : 'Deactivated');
+                                        ?>
+                                    </td>
                                     <td class="button">
                                         <a href="#" onclick="editProgram(<?php echo $row['id']; ?>,
                                         '<?php echo addslashes('../assets/img/' . $row['image']); ?>',
@@ -387,7 +395,8 @@ if (isset($_POST['update_faculty'])) {
                                         '<?php echo addslashes($row['address']); ?>',
                                         '<?php echo addslashes($row['contact_no']); ?>',
                                         '<?php echo addslashes($row['department']); ?>',
-                                        '<?php echo addslashes($row['rank']); ?>')">
+                                        '<?php echo addslashes($row['rank']); ?>',
+                                        '<?php echo addslashes($row['status']); ?>')">
                                             <button class="addButton1" style="width: 6rem;">Edit</button>
                                         </a>
                                         <a href="#" onclick="deleteUser(<?php echo $row['id']; ?>)">
@@ -495,6 +504,13 @@ if (isset($_POST['update_faculty'])) {
                             </select>
                         </div>
 
+                        <div class="inputContainer">
+                            <select class="inputEmail" name="status" id="status">
+                                <option value="0">Activated</option>
+                                <option value="1">Deactivated</option>
+                            </select>
+                        </div>
+
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
                             <button type="submit" name="update_faculty" class="addButton"
                                 style="width: 6rem;">Save</button>
@@ -521,7 +537,7 @@ if (isset($_POST['update_faculty'])) {
         const togglePassword = document.getElementById('togglePassword');
         const passwordField = document.getElementById('password');
 
-        togglePassword.addEventListener('click', function () {
+        togglePassword.addEventListener('click', function() {
             // Toggle the password field type
             const type = passwordField.type === 'password' ? 'text' : 'password';
             passwordField.type = type;
@@ -557,7 +573,7 @@ if (isset($_POST['update_faculty'])) {
         }
 
 
-        function editProgram(id, image, first_name, middle_name, last_name, email, address, contact_no, department, rank) {
+        function editProgram(id, image, first_name, middle_name, last_name, email, address, contact_no, department, rank, status) {
             const defaultImage = '../assets/img/CSSPE.png';
             document.getElementById('faculty_id').value = id;
 
@@ -573,6 +589,7 @@ if (isset($_POST['update_faculty'])) {
             document.getElementById('contact_no').value = contact_no;
             document.getElementById('department').value = department;
             document.getElementById('rank').value = rank;
+            document.getElementById('status').value = status;
 
             document.querySelector('.editContainer').style.display = 'block';
         }
@@ -582,7 +599,7 @@ if (isset($_POST['update_faculty'])) {
         }
 
 
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function() {
             <?php if (isset($_SESSION['message']) && isset($_SESSION['message_type'])): ?>
                 Swal.fire({
                     icon: "<?php echo $_SESSION['message_type']; ?>",
