@@ -29,6 +29,104 @@ $stmt_borrow_history->bind_param("i", $userid);
 $stmt_borrow_history->execute();
 $borrow_history_result = $stmt_borrow_history->get_result();
 
+// Fetch lost, damaged, and replaced items
+$sql_item_status = "SELECT 
+                        status, COUNT(*) AS count 
+                    FROM returned_items 
+                    WHERE transaction_id IN (
+                        SELECT transaction_id 
+                        FROM item_transactions 
+                        WHERE users_id = ?
+                    ) 
+                    GROUP BY status";
+$stmt_item_status = $conn->prepare($sql_item_status);
+$stmt_item_status->bind_param("i", $userid);
+$stmt_item_status->execute();
+$item_status_result = $stmt_item_status->get_result();
+
+$statuses = [
+    'Lost' => 0,
+    'Damaged' => 0,
+    'Replaced' => 0,
+];
+
+while ($row = $item_status_result->fetch_assoc()) {
+    $statuses[$row['status']] = $row['count'];
+}
+
+$stmt_item_status->close();
+
+
+// Fetch Lost Items for Logged-in User
+$lostQuery = "
+    SELECT 
+        r.return_id,
+        i.name AS item_name,
+        i.brand,
+        r.quantity_returned,
+        r.returned_at,
+        r.remarks,
+        CONCAT(u.first_name, ' ', u.last_name) AS fullname,
+        u.contact_no,
+        u.email
+    FROM returned_items r
+    JOIN items i ON r.item_id = i.id
+    JOIN item_transactions t ON r.transaction_id = t.transaction_id
+    JOIN users u ON t.users_id = u.id
+    WHERE r.status = 'Lost' AND u.id = ?
+";
+$lostStmt = $conn->prepare($lostQuery);
+$lostStmt->bind_param("i", $userid);
+$lostStmt->execute();
+$lostItems = $lostStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+// Fetch Damaged Items for Logged-in User
+$damagedQuery = "
+    SELECT 
+        r.return_id,
+        i.name AS item_name,
+        i.brand,
+        r.quantity_returned,
+        r.returned_at,
+        r.remarks,
+        CONCAT(u.first_name, ' ', u.last_name) AS fullname,
+        u.contact_no,
+        u.email
+    FROM returned_items r
+    JOIN items i ON r.item_id = i.id
+    JOIN item_transactions t ON r.transaction_id = t.transaction_id
+    JOIN users u ON t.users_id = u.id
+    WHERE r.status = 'Damaged' AND u.id = ?
+";
+$damagedStmt = $conn->prepare($damagedQuery);
+$damagedStmt->bind_param("i", $userid);
+$damagedStmt->execute();
+$damagedItems = $damagedStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+// Fetch Replaced Items for Logged-in User
+$replacedQuery = "
+    SELECT 
+        r.return_id,
+        i.name AS item_name,
+        i.brand,
+        r.quantity_returned,
+        r.returned_at,
+        r.remarks,
+        CONCAT(u.first_name, ' ', u.last_name) AS fullname,
+        u.contact_no,
+        u.email
+    FROM returned_items r
+    JOIN items i ON r.item_id = i.id
+    JOIN item_transactions t ON r.transaction_id = t.transaction_id
+    JOIN users u ON t.users_id = u.id
+    WHERE r.status = 'Replaced' AND u.id = ?
+";
+$replacedStmt = $conn->prepare($replacedQuery);
+$replacedStmt->bind_param("i", $userid);
+$replacedStmt->execute();
+$replacedItems = $replacedStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $userid = $_SESSION['user_id'];
 
@@ -374,7 +472,7 @@ $conn->close();
                                 <p>Lost</p>
                             </div>
                             <div class="numberContainer">
-                                <p>22</p>
+                                <p><?php echo $statuses['Lost']; ?></p>
                             </div>
                         </div>
 
@@ -383,7 +481,7 @@ $conn->close();
                                 <p>Damaged</p>
                             </div>
                             <div class="numberContainer">
-                                <p>2</p>
+                                <p><?php echo $statuses['Damaged']; ?></p>
                             </div>
                         </div>
 
@@ -392,7 +490,7 @@ $conn->close();
                                 <p>Replaced Item</p>
                             </div>
                             <div class="numberContainer">
-                                <p>2</p>
+                                <p><?php echo $statuses['Replaced']; ?></p>
                             </div>
                         </div>
 
@@ -533,6 +631,7 @@ $conn->close();
         </div>
     </div>
 
+    <!-- Lost Items Table -->
     <div class="summaryContainer lost" style="display: none; background-color: none;">
         <div class="summaryContainer">
             <div class="subSummaryContainer">
@@ -545,38 +644,46 @@ $conn->close();
                             <tr>
                                 <th>Id</th>
                                 <th>Item Name</th>
-                                <th>Brands</th>
+                                <th>Brand</th>
                                 <th>Quantity</th>
                                 <th>Date Lost</th>
                                 <th>Fullname</th>
                                 <th>Contact Number</th>
                                 <th>Email</th>
                                 <th>Remark</th>
-                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td colspan="10" style="text-align: center;">No lost items.</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <button class="replacedButton" onclick="updateStatus('')">
-                                        Update
-                                    </button>
-                                </td>
-                            </tr>
+                            <?php if (!empty($lostItems)): ?>
+                                <?php foreach ($lostItems as $item): ?>
+                                    <tr>
+                                        <td><?php echo $item['return_id']; ?></td>
+                                        <td><?php echo $item['item_name']; ?></td>
+                                        <td><?php echo $item['brand']; ?></td>
+                                        <td><?php echo $item['quantity_returned']; ?></td>
+                                        <td><?php echo $item['returned_at']; ?></td>
+                                        <td><?php echo $item['fullname']; ?></td>
+                                        <td><?php echo $item['contact_no']; ?></td>
+                                        <td><?php echo $item['email']; ?></td>
+                                        <td><?php echo $item['remarks']; ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="9" style="text-align: center;">No lost items.</td>
+                                </tr>
+                            <?php endif; ?>
                         </tbody>
-
                     </table>
                 </div>
                 <div class="buttonContainer">
-                    <button class="addButton">Print</button>
+                    <!-- <button class="addButton">Print</button> -->
                     <button onclick="lost()" class="addButton">Close</button>
                 </div>
             </div>
         </div>
     </div>
+
 
 
     <div class="summaryContainer damage" style="display: none; background-color: none;">
@@ -605,23 +712,32 @@ $conn->close();
                         </thead>
 
                         <tbody>
-                            <tr>
-                                <td colspan="8" style="text-align: center;">No damaged items.</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <button class="replacedButton" onclick="updateStatusDamaged('')">
-                                        Update
-                                    </button>
-                                </td>
-                            </tr>
+                            <?php if (!empty($damagedItems)): ?>
+                                <?php foreach ($damagedItems as $item): ?>
+                                    <tr>
+                                        <td><?php echo $item['return_id']; ?></td>
+                                        <td><?php echo $item['item_name']; ?></td>
+                                        <td><?php echo $item['brand']; ?></td>
+                                        <td><?php echo $item['quantity_returned']; ?></td>
+                                        <td><?php echo $item['returned_at']; ?></td>
+                                        <td><?php echo $item['fullname']; ?></td>
+                                        <td><?php echo $item['contact_no']; ?></td>
+                                        <td><?php echo $item['email']; ?></td>
+                                        <td><?php echo $item['remarks']; ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="9" style="text-align: center;">No damaged items.</td>
+                                </tr>
+                            <?php endif; ?>
                         </tbody>
 
                     </table>
                 </div>
 
                 <div class="buttonContainer">
-                    <button class="addButton">Print</button>
+                    <!-- <button class="addButton">Print</button> -->
                     <button onclick="damage()" class="addButton">Close</button>
                 </div>
             </div>
@@ -653,19 +769,32 @@ $conn->close();
                         </thead>
 
                         <tbody>
-                            <tr>
-                                <td colspan="8" style="text-align: center;">No replaced items.</td>
-                            </tr>
-                            <tr>
-
-                            </tr>
+                            <?php if (!empty($replacedItems)): ?>
+                                <?php foreach ($replacedItems as $item): ?>
+                                    <tr>
+                                        <td><?php echo $item['return_id']; ?></td>
+                                        <td><?php echo $item['item_name']; ?></td>
+                                        <td><?php echo $item['brand']; ?></td>
+                                        <td><?php echo $item['quantity_returned']; ?></td>
+                                        <td><?php echo $item['returned_at']; ?></td>
+                                        <td><?php echo $item['fullname']; ?></td>
+                                        <td><?php echo $item['contact_no']; ?></td>
+                                        <td><?php echo $item['email']; ?></td>
+                                        <td><?php echo $item['remarks']; ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="9" style="text-align: center;">No lost items.</td>
+                                </tr>
+                            <?php endif; ?>
                         </tbody>
 
                     </table>
                 </div>
 
                 <div class="buttonContainer">
-                    <button class="addButton">Print</button>
+                    <!-- <button class="addButton">Print</button> -->
                     <button onclick="replace1()" class="addButton">Close</button>
                 </div>
             </div>

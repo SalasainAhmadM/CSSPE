@@ -4,15 +4,20 @@ require_once '../../conn/conn.php';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $transaction_id = intval($_POST['transaction_id']);
     $status = $_POST['status'];
+    $status_remark = isset($_POST['status_remark']) ? trim($_POST['status_remark']) : '';
 
     if (empty($transaction_id) || !in_array($status, ['Approved', 'Declined'])) {
         echo json_encode(['status' => 'error', 'message' => 'Invalid input.']);
         exit;
     }
 
-    $query = "UPDATE item_transactions SET status = ? WHERE transaction_id = ?";
+    if (empty($status_remark)) {
+        $status_remark = 'N/A';
+    }
+
+    $query = "UPDATE item_transactions SET status = ?, status_remark = ? WHERE transaction_id = ?";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param('si', $status, $transaction_id);
+    $stmt->bind_param('ssi', $status, $status_remark, $transaction_id);
 
     if ($stmt->execute()) {
         echo json_encode(['status' => 'success', 'message' => 'Transaction updated successfully.']);
