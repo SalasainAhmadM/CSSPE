@@ -2,6 +2,65 @@
 session_start();
 require_once './conn/conn.php';
 
+
+function deactivateUsers()
+{
+    global $conn;
+
+    $currentDate = new DateTime();
+    $day = $currentDate->format('d');
+    $month = $currentDate->format('m');
+    $year = $currentDate->format('Y');
+    $time = $currentDate->format('H:i:s');
+    $logDate = $currentDate->format('Y-m-d');
+
+    // Deactivation date
+    if ($day == '24' && $month == '01') {
+
+        $query = "SELECT deactivation_triggered FROM config WHERE year = ?";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("i", $year);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            if ($row['deactivation_triggered'] == 1) {
+                "Deactivation has already been triggered this year.";
+                return; 
+            }
+        }
+
+        // Deactivate all users except those with 'super_admin', 'inventory_admin', 'information_admin' in their role
+        $updateQuery = "UPDATE users SET status = 1 WHERE status != 1 AND role NOT LIKE '%super_admin%' AND role NOT LIKE '%inventory_admin%' AND role NOT LIKE '%information_admin%'";
+        if ($conn->query($updateQuery) === TRUE) {
+
+            $logMessage = "Deactivated all user accounts on $logDate at $time (Day: $day, Month: $month, Year: $year).";
+            $logQuery = "INSERT INTO deactivation_logs (message, log_date) VALUES (?, ?)";
+            $logStmt = $conn->prepare($logQuery);
+            $logStmt->bind_param("ss", $logMessage, $logDate);
+            $logStmt->execute();
+
+            // Update the config table to mark the deactivation as triggered for this year
+            $updateConfigQuery = "INSERT INTO config (year, deactivation_triggered) VALUES (?, 1) ON DUPLICATE KEY UPDATE deactivation_triggered = 1";
+            $updateConfigStmt = $conn->prepare($updateConfigQuery);
+            $updateConfigStmt->bind_param("i", $year);
+            $updateConfigStmt->execute();
+
+            echo "All user accounts have been deactivated for the year, except admins.";
+        } else {
+            echo "Error deactivating users: " . $conn->error;
+        }
+    } else {
+        "Today is not the deactivation date, so no action has been taken.";
+    }
+}
+
+
+deactivateUsers();
+
+
+
 function registerUser($firstName, $lastName, $middleName, $email, $address, $contactNo, $rank, $password, $department)
 {
     global $conn;
@@ -99,6 +158,15 @@ function loginUser($email, $password)
 
     if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
+
+        // Check if the account is deactivated
+        if ($user['status'] == 1) {
+            echo "<script>
+                            alert('Your account is deactivated! Please contact support for more details.');
+                          </script>";
+            return;
+        }
+
         if (password_verify($password, $user['password'])) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['first_name'] = $user['first_name'];
@@ -149,7 +217,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $message = registerUser($firstName, $lastName, $middleName, $email, $address, $contactNo, $rank, $password, $department);
         }
-
     } elseif (isset($_POST['login'])) {
         $email = $_POST['email'];
         $password = $_POST['password'];
@@ -211,15 +278,16 @@ function fetchDepartments()
     <link rel="stylesheet" href="./assets/css/login.css">
 
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"> <!-- Include FontAwesome -->
-    
+
     <style>
         .passwordContainer {
             position: relative;
             display: flex;
             align-items: center;
         }
-        
+
         .toggle-password-icon {
             position: absolute;
             right: 35px;
@@ -227,7 +295,7 @@ function fetchDepartments()
             color: #aaa;
             font-size: 18px;
         }
-        
+
         .toggle-password-icon:hover {
             color: #333;
         }
@@ -408,7 +476,7 @@ function fetchDepartments()
                             <input id="registerPassword" class="inputEmail" type="password" name="password" placeholder="Password:">
                             <i id="toggleRegisterPassword" class="fas fa-eye toggle-password-icon"></i>
                         </div>
-                        
+
                         <div class="inputContainer passwordContainer">
                             <input id="confirmPassword" class="inputEmail" type="password" name="confirm_password" placeholder="Confirm Password:">
                             <i id="toggleConfirmPassword" class="fas fa-eye toggle-password-icon"></i>
@@ -442,14 +510,14 @@ function fetchDepartments()
             });
         </script>
     <?php endif; ?>
-    
+
     <script>
         // Function to toggle password visibility
         function setupPasswordToggle(toggleId, passwordFieldId) {
             const toggleIcon = document.getElementById(toggleId);
             const passwordField = document.getElementById(passwordFieldId);
-    
-            toggleIcon.addEventListener("click", function () {
+
+            toggleIcon.addEventListener("click", function() {
                 if (passwordField.type === "password") {
                     passwordField.type = "text";
                     toggleIcon.classList.remove("fa-eye");
@@ -461,7 +529,7 @@ function fetchDepartments()
                 }
             });
         }
-    
+
         // Apply to login and register fields
         setupPasswordToggle("togglePassword", "passwordField"); // For login
         setupPasswordToggle("toggleRegisterPassword", "registerPassword"); // For register password
