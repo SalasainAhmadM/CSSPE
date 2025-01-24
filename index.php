@@ -135,7 +135,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $lastName = $_POST['last_name'];
         $middleName = $_POST['middle_name'] ?? null;
         $email = $_POST['email'];
-        $address = $_POST['address'];
+        $address1 = $_POST['address1'];
+        $address2 = $_POST['address2'];
+        $address = $address1 . '' . $address2;  // Concatenate addresses
         $contactNo = $_POST['contact_no'];
         $rank = $_POST['rank'];
         $department = $_POST['department'];
@@ -147,7 +149,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $message = registerUser($firstName, $lastName, $middleName, $email, $address, $contactNo, $rank, $password, $department);
         }
-
 
     } elseif (isset($_POST['login'])) {
         $email = $_POST['email'];
@@ -373,8 +374,9 @@ function fetchDepartments()
                         <div class="inputContainer">
                             <input class="inputEmail" type="email" name="email" placeholder="Email:" required>
                         </div>
-                        <div class="inputContainer">
-                            <input class="inputEmail" type="text" name="address" placeholder="Address:" required>
+                        <div class="inputContainer" style="padding: 0 10px;">
+                            <input class="inputEmail" style="margin-right:10px" type="text" name="address1" placeholder="House Number, Street Name, Barangay" required>
+                            <input class="inputEmail" type="text" name="address2" placeholder="Address:" value=", Zamboanga City" required>
                         </div>
                         <div class="inputContainer">
                             <input class="inputEmail" type="text" name="contact_no" placeholder="Contact No.:" required>
