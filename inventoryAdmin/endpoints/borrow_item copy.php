@@ -2,51 +2,78 @@
 require_once '../../conn/conn.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $item_id = $_POST['brand_item'];
-    $teacher_id = $_POST['teacher'];
-    $quantity = $_POST['quantity'];
+    $item_id = intval($_POST['item_id']);
+    $teacher_id = intval($_POST['teacher']);
+    $quantity = intval($_POST['quantity']);
     $borrow_date = $_POST['borrow_date'];
+    $return_date = $_POST['return_date'];
+    $class_date = $_POST['class_date'];
     $schedule_from = $_POST['schedule_from'];
     $schedule_to = $_POST['schedule_to'];
 
-    // Validate required inputs
-    if (empty($item_id) || empty($teacher_id) || empty($quantity) || empty($borrow_date) || empty($schedule_from) || empty($schedule_to)) {
+    if (empty($item_id) || empty($teacher_id) || empty($quantity) || empty($borrow_date) || empty($return_date) || empty($class_date) || empty($schedule_from) || empty($schedule_to)) {
         echo json_encode(['status' => 'error', 'message' => 'All fields are required.']);
         exit;
     }
 
-    // Get current datetime in Philippine timezone
-    $dateTime = new DateTime('now', new DateTimeZone('Asia/Manila'));
-    $currentDateTime = $dateTime->format('Y-m-d H:i:s');
+    $conn->begin_transaction();
 
-    // Combine borrow_date with current time
-    $borrowed_at = $borrow_date . ' ' . $dateTime->format('H:i:s');
+    try {
+        // Check available quantity
+        $query = "SELECT quantity, quantity_origin, name FROM items WHERE id = ?";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param('i', $item_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-    // Insert into `item_transactions` table
-    $query = "INSERT INTO item_transactions (
-                quantity_borrowed, 
-                borrowed_at, 
-                item_id, 
-                users_id, 
-                schedule_from, 
-                schedule_to
-              ) VALUES (?, ?, ?, ?, ?, ?)";
+        if ($result->num_rows === 0) {
+            throw new Exception('Item not found.');
+        }
 
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param(
-        'isiiis',
-        $quantity,
-        $borrowed_at,
-        $item_id,
-        $teacher_id,
-        $schedule_from,
-        $schedule_to
-    );
+        $item = $result->fetch_assoc();
+        if ($quantity > $item['quantity']) {
+            throw new Exception('Insufficient quantity available.');
+        }
 
-    if ($stmt->execute()) {
+        // Insert into `item_transactions`
+        $borrowed_at = $borrow_date . ' ' . (new DateTime('now', new DateTimeZone('Asia/Manila')))->format('H:i:s');
+        $query = "INSERT INTO item_transactions (quantity_borrowed, borrowed_at, return_date, class_date, item_id, users_id, schedule_from, schedule_to) 
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param('isssisss', $quantity, $borrowed_at, $return_date, $class_date, $item_id, $teacher_id, $schedule_from, $schedule_to);
+        if (!$stmt->execute()) {
+            throw new Exception('Failed to record transaction.');
+        }
+
+        // Update `items` table
+        $newQuantity = $item['quantity'] - $quantity;
+        $query = "UPDATE items SET quantity = ? WHERE id = ?";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param('ii', $newQuantity, $item_id);
+        if (!$stmt->execute()) {
+            throw new Exception('Failed to update item quantity.');
+        }
+
+        // Check if the quantity is 20% or less of the original quantity
+        $threshold = $item['quantity_origin'] * 0.2;
+        if ($newQuantity <= $threshold) {
+            // Insert a notification into `notif_items`
+            $description = "{$item['name']} has critical stocks.";
+            $query = "INSERT INTO notif_items (description) VALUES (?)";
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param('s', $description);
+            if (!$stmt->execute()) {
+                throw new Exception('Failed to create notification.');
+            }
+        }
+
+        $conn->commit();
         echo json_encode(['status' => 'success', 'message' => 'Item borrowed successfully.']);
-    } else {
-        echo json_encode(['status' => 'error', 'message' => 'Failed to borrow the item.']);
+    } catch (Exception $e) {
+        $conn->rollback();
+        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
     }
+} else {
+    echo json_encode(['status' => 'error', 'message' => 'Invalid request method.']);
 }
 ?>

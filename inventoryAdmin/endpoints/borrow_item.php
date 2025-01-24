@@ -67,6 +67,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+        // Check if the item is frequently borrowed
+        $query = "SELECT COUNT(*) AS borrow_count FROM item_transactions WHERE item_id = ? AND borrowed_at > NOW() - INTERVAL 7 DAY";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param('i', $item_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+
+        $borrow_count = $row['borrow_count'];
+        $frequency_threshold = 5;
+        if ($borrow_count >= $frequency_threshold) {
+            $description = "{$item['name']} is being frequently borrowed.";
+            $query = "INSERT INTO notif_items (description) VALUES (?)";
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param('s', $description);
+            if (!$stmt->execute()) {
+                throw new Exception('Failed to create frequent borrow notification.');
+            }
+        }
+
         $conn->commit();
         echo json_encode(['status' => 'success', 'message' => 'Item borrowed successfully.']);
     } catch (Exception $e) {

@@ -645,7 +645,17 @@ $itemResult = $itemStmt->get_result();
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
     <script src="../assets/js/sidebar.js"></script>
-    <script src="../assets/js/program.js"></script>
+    <script>
+        function addProgram() {
+            const addProgramButton = document.querySelector('.addContainer');
+
+            if (addProgramButton.style.display === 'none') {
+                addProgramButton.style.display = 'block';
+            } else {
+                addProgramButton.style.display = 'none'
+            }
+        }
+    </script>
     <!-- <script src="../assets/js/uploadImage.js"></script> -->
 </body>
 
