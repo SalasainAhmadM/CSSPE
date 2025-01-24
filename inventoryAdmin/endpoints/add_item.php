@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name = trim($_POST['name']);
     $brand = trim($_POST['brand']);
     $quantity = intval($_POST['quantity']);
+    $type = trim($_POST['type']);
     $description = trim($_POST['description']);
     $image = null;
 
@@ -38,9 +39,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    $query = "INSERT INTO items (name, description, brand, quantity, quantity_origin, users_id, image) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    $query = "INSERT INTO items (name, description, brand, quantity, type, quantity_origin, users_id, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("sssssis", $name, $description, $brand, $quantity, $quantity, $inventoryAdminId, $image);
+    $stmt->bind_param("ssssssis", $name, $description, $brand, $quantity, $type, $quantity, $inventoryAdminId, $image);
 
     if ($stmt->execute()) {
         echo json_encode(['status' => 'success', 'message' => 'Item added successfully!']);

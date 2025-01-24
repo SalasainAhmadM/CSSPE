@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name = htmlspecialchars(trim($_POST['name']));
     $brand = htmlspecialchars(trim($_POST['brand']));
     $quantity = intval($_POST['quantity']);
+    $type = htmlspecialchars(trim($_POST['type']));
     $description = htmlspecialchars(trim($_POST['description']));
     $image = null;
 
@@ -58,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    $query = "UPDATE items SET name = ?, description = ?, brand = ?, quantity = ?, quantity_origin = ?";
+    $query = "UPDATE items SET name = ?, type = ?, description = ?, brand = ?, quantity = ?, quantity_origin = ?";
     if ($image) {
         $query .= ", image = ?";
     }
@@ -66,9 +67,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $stmt = $conn->prepare($query);
     if ($image) {
-        $stmt->bind_param("sssissi", $name, $description, $brand, $quantity, $newQuantityOrigin, $image, $id);
+        $stmt->bind_param("ssssissi", $name, $type, $description, $brand, $quantity, $newQuantityOrigin, $image, $id);
     } else {
-        $stmt->bind_param("sssiii", $name, $description, $brand, $quantity, $newQuantityOrigin, $id);
+        $stmt->bind_param("ssssiii", $name, $type, $description, $brand, $quantity, $newQuantityOrigin, $id);
     }
 
     if ($stmt->execute()) {

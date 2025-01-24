@@ -20,7 +20,7 @@ if ($result->num_rows > 0) {
     $fullName = "User Not Found";
 }
 
-$itemQuery = "SELECT id, name, description, brand, quantity, image FROM items";
+$itemQuery = "SELECT id, name, description, brand, quantity, type, image FROM items";
 $itemStmt = $conn->prepare($itemQuery);
 $itemStmt->execute();
 $itemResult = $itemStmt->get_result();
@@ -153,6 +153,7 @@ $itemResult = $itemStmt->get_result();
                                 <th>Description</th>
                                 <th>Brand</th>
                                 <th>Quantity</th>
+                                <th>Type</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -173,12 +174,19 @@ $itemResult = $itemStmt->get_result();
                                     <td><?php echo htmlspecialchars($item['description']); ?></td>
                                     <td><?php echo htmlspecialchars($item['brand']); ?></td>
                                     <td><?php echo htmlspecialchars($item['quantity']); ?></td>
+                                    <td>
+                                        <?php
+                                        echo htmlspecialchars($item['type'] === 'sport' ? 'Sport' : ($item['type'] === 'gadgets' ? 'Gadget' : 'Unknown'));
+                                        ?>
+                                    </td>
+
                                     <td class="button">
                                         <button onclick="editItem(this)" class="addButton" style="width: 5rem;"
                                             data-id="<?php echo $item['id']; ?>"
                                             data-name="<?php echo htmlspecialchars($item['name']); ?>"
                                             data-description="<?php echo htmlspecialchars($item['description']); ?>"
                                             data-brand="<?php echo htmlspecialchars($item['brand']); ?>"
+                                            data-type="<?php echo htmlspecialchars($item['type']); ?>"
                                             data-quantity="<?php echo htmlspecialchars($item['quantity']); ?>"
                                             data-image="../assets/uploads/<?php echo htmlspecialchars($item['image']); ?>">Edit</button>
                                         <button onclick="deleteItem(<?php echo $item['id']; ?>)" class="addButton1"
@@ -232,6 +240,13 @@ $itemResult = $itemStmt->get_result();
 
                     <div class="inputContainer">
                         <input id="itemQuantity" class="inputEmail" type="number" placeholder="Quantity:" required>
+                    </div>
+                    <div class="inputContainer">
+                        <select id="itemType" class="inputEmail" required>
+                            <option value="" disabled selected hidden>Type:</option>
+                            <option value="sport">Sport</option>
+                            <option value="gadgets">Gadget</option>
+                        </select>
                     </div>
 
                     <div class="inputContainer" style="height: 10rem;">
@@ -300,13 +315,24 @@ $itemResult = $itemStmt->get_result();
                             style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Quantity:</label>
                         <input class="inputEmail" type="number" placeholder="Quantity:">
                     </div>
+
+                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                        <label for="type"
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">
+                            Type:
+                        </label>
+                        <select id="type" name="type" class="inputEmail">
+                            <option value="sport">Sport</option>
+                            <option value="gadgets">Gadget</option>
+                        </select>
+                    </div>
+
                     <!--  -->
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;  min-height: 12rem;">
                         <label for=""
                             style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Description:</label>
-                        <textarea style="min-height: 10rem;" class="inputEmail" name="" id=""
-                            placeholder="Description"></textarea>
-
+                        <textarea style="min-height: 10rem;" class="inputEmail" name="" id="description"
+                            placeholder="Edit Description:"></textarea>
                     </div>
 
                     <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
@@ -379,6 +405,7 @@ $itemResult = $itemStmt->get_result();
             formData.append('brand', document.getElementById('itemBrand').value.trim());
             formData.append('quantity', document.getElementById('itemQuantity').value);
             formData.append('description', document.getElementById('itemDescription').value.trim());
+            formData.append('type', document.getElementById('itemType').value.trim());
 
             const imageUpload = document.getElementById('addImageUpload');
             if (imageUpload.files.length > 0) {
@@ -428,15 +455,22 @@ $itemResult = $itemStmt->get_result();
             const description = button.getAttribute('data-description');
             const brand = button.getAttribute('data-brand');
             const quantity = button.getAttribute('data-quantity');
+            const type = button.getAttribute('data-type');
             const image = button.getAttribute('data-image');
 
             document.querySelector('.editContainer').style.display = 'block';
 
-            // Populate form fields
             document.querySelector('.editContainer input[placeholder="Item Name:"]').value = name;
             document.querySelector('.editContainer input[placeholder="Brand:"]').value = brand;
             document.querySelector('.editContainer input[placeholder="Quantity:"]').value = quantity;
-            document.querySelector('.editContainer textarea[placeholder="Description"]').value = description;
+
+            const typeDropdown = document.querySelector('.editContainer select[name="type"]');
+            typeDropdown.value = type || 'sport';
+
+            document.querySelector('.editContainer textarea[placeholder="Edit Description:"]').value = description || '';
+
+
+            // Handle the preview image
 
             const previewImage = document.getElementById('previewImage');
 
@@ -460,9 +494,10 @@ $itemResult = $itemStmt->get_result();
             const name = document.querySelector('.editContainer input[placeholder="Item Name:"]').value.trim();
             const brand = document.querySelector('.editContainer input[placeholder="Brand:"]').value.trim();
             const quantity = document.querySelector('.editContainer input[placeholder="Quantity:"]').value.trim();
-            const description = document.querySelector('.editContainer textarea[placeholder="Description"]').value.trim();
+            const type = document.querySelector('.editContainer select[name="type"]').value.trim();
+            const description = document.querySelector('.editContainer textarea[placeholder="Edit Description:"]').value.trim();
 
-            if (!id || !name || !brand || !quantity || !description) {
+            if (!id || !name || !brand || !quantity || !type || !description) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Missing Information',
@@ -476,6 +511,7 @@ $itemResult = $itemStmt->get_result();
             formData.append('name', name);
             formData.append('brand', brand);
             formData.append('quantity', quantity);
+            formData.append('type', type);
             formData.append('description', description);
 
             const imageInput = document.getElementById('imageUpload');
@@ -518,6 +554,7 @@ $itemResult = $itemStmt->get_result();
                     });
                 });
         }
+
 
         // Delete Item Function
         function deleteItem(itemId) {
@@ -653,6 +690,15 @@ $itemResult = $itemStmt->get_result();
                 addProgramButton.style.display = 'block';
             } else {
                 addProgramButton.style.display = 'none'
+            }
+        }
+        function editProgram() {
+            const editProgramButton = document.querySelector('.editContainer');
+
+            if (editProgramButton.style.display === 'none') {
+                editProgramButton.style.display = 'block';
+            } else {
+                editProgramButton.style.display = 'none'
             }
         }
     </script>
