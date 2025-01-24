@@ -24,7 +24,7 @@ $limit = 6;
 $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
-$itemQuery = "SELECT id, name, description, brand, quantity, type, image FROM items LIMIT $limit OFFSET $offset";
+$itemQuery = "SELECT id, name, description, brand, quantity, type, note, image FROM items LIMIT $limit OFFSET $offset";
 $itemStmt = $conn->prepare($itemQuery);
 $itemStmt->execute();
 $itemResult = $itemStmt->get_result();
@@ -172,6 +172,7 @@ $totalPages = ceil($totalItems / $limit);
                                 <th>Brand</th>
                                 <th>Quantity</th>
                                 <th>Type</th>
+                                <th>Warning Note</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -197,13 +198,14 @@ $totalPages = ceil($totalItems / $limit);
                                         echo htmlspecialchars($item['type'] === 'sport' ? 'Sport' : ($item['type'] === 'gadgets' ? 'Gadget' : 'Unknown'));
                                         ?>
                                     </td>
-
+                                    <td><?php echo htmlspecialchars($item['note']); ?></td>
                                     <td class="button">
                                         <button onclick="editItem(this)" class="addButton" style="width: 5rem;"
                                             data-id="<?php echo $item['id']; ?>"
                                             data-name="<?php echo htmlspecialchars($item['name']); ?>"
                                             data-description="<?php echo htmlspecialchars($item['description']); ?>"
                                             data-brand="<?php echo htmlspecialchars($item['brand']); ?>"
+                                            data-note="<?php echo htmlspecialchars($item['note']); ?>"
                                             data-type="<?php echo htmlspecialchars($item['type']); ?>"
                                             data-quantity="<?php echo htmlspecialchars($item['quantity']); ?>"
                                             data-image="../assets/uploads/<?php echo htmlspecialchars($item['image']); ?>">Edit</button>
@@ -281,7 +283,9 @@ $totalPages = ceil($totalItems / $limit);
                             <option value="gadgets">Gadget</option>
                         </select>
                     </div>
-
+                    <div class="inputContainer">
+                        <input id="itemNote" class="inputEmail" type="text" placeholder="Note: (Optional)" required>
+                    </div>
                     <div class="inputContainer" style="height: 10rem;">
                         <textarea id="itemDescription" class="inputEmail" placeholder="Description" required></textarea>
                     </div>
@@ -360,6 +364,11 @@ $totalPages = ceil($totalItems / $limit);
                         </select>
                     </div>
 
+                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                        <label for=""
+                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Note:</label>
+                        <input class="inputEmail" type="text" placeholder="Note:">
+                    </div>
                     <!--  -->
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;  min-height: 12rem;">
                         <label for=""
@@ -383,7 +392,7 @@ $totalPages = ceil($totalItems / $limit);
     <!-- Add this script at the bottom of your HTML or in a separate JS file -->
     <script>
         // Function to filter the table based on selected type
-        document.getElementById('rankFilter').addEventListener('change', function() {
+        document.getElementById('rankFilter').addEventListener('change', function () {
             filterTableByType();
         });
 
@@ -395,7 +404,7 @@ $totalPages = ceil($totalItems / $limit);
             var rows = document.querySelectorAll('#tableBody tr');
 
             // Loop through all rows and show/hide based on type match
-            rows.forEach(function(row) {
+            rows.forEach(function (row) {
                 var typeCell = row.cells[6]; // 'Type' column (index starts from 0)
                 var type = typeCell ? typeCell.textContent.toLowerCase() : '';
 
@@ -416,7 +425,7 @@ $totalPages = ceil($totalItems / $limit);
         const tableBody = document.getElementById('tableBody');
 
         // Add an input event listener to the search bar
-        searchBar.addEventListener('input', function() {
+        searchBar.addEventListener('input', function () {
             const searchTerm = searchBar.value.toLowerCase();
             const rows = tableBody.getElementsByTagName('tr');
 
@@ -443,7 +452,7 @@ $totalPages = ceil($totalItems / $limit);
 
             if (fileInput.files && fileInput.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     preview.src = e.target.result; // Update the image preview
                     preview.style.display = 'block'; // Make the preview visible
                 };
@@ -461,7 +470,7 @@ $totalPages = ceil($totalItems / $limit);
 
 
         // Add Item Form Submission
-        document.getElementById('addItemForm').addEventListener('submit', function(e) {
+        document.getElementById('addItemForm').addEventListener('submit', function (e) {
             e.preventDefault();
 
             const formData = new FormData();
@@ -470,6 +479,7 @@ $totalPages = ceil($totalItems / $limit);
             formData.append('quantity', document.getElementById('itemQuantity').value);
             formData.append('description', document.getElementById('itemDescription').value.trim());
             formData.append('type', document.getElementById('itemType').value.trim());
+            formData.append('note', document.getElementById('itemNote').value.trim());
 
             const imageUpload = document.getElementById('addImageUpload');
             if (imageUpload.files.length > 0) {
@@ -477,9 +487,9 @@ $totalPages = ceil($totalItems / $limit);
             }
 
             fetch('./endpoints/add_item.php', {
-                    method: 'POST',
-                    body: formData,
-                })
+                method: 'POST',
+                body: formData,
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
@@ -518,6 +528,7 @@ $totalPages = ceil($totalItems / $limit);
             const name = button.getAttribute('data-name');
             const description = button.getAttribute('data-description');
             const brand = button.getAttribute('data-brand');
+            const note = button.getAttribute('data-note');
             const quantity = button.getAttribute('data-quantity');
             const type = button.getAttribute('data-type');
             const image = button.getAttribute('data-image');
@@ -526,6 +537,7 @@ $totalPages = ceil($totalItems / $limit);
 
             document.querySelector('.editContainer input[placeholder="Item Name:"]').value = name;
             document.querySelector('.editContainer input[placeholder="Brand:"]').value = brand;
+            document.querySelector('.editContainer input[placeholder="Note:"]').value = note;
             document.querySelector('.editContainer input[placeholder="Quantity:"]').value = quantity;
 
             const typeDropdown = document.querySelector('.editContainer select[name="type"]');
@@ -557,6 +569,7 @@ $totalPages = ceil($totalItems / $limit);
             const id = document.getElementById('previewImage').getAttribute('data-id');
             const name = document.querySelector('.editContainer input[placeholder="Item Name:"]').value.trim();
             const brand = document.querySelector('.editContainer input[placeholder="Brand:"]').value.trim();
+            const note = document.querySelector('.editContainer input[placeholder="Note:"]').value.trim();
             const quantity = document.querySelector('.editContainer input[placeholder="Quantity:"]').value.trim();
             const type = document.querySelector('.editContainer select[name="type"]').value.trim();
             const description = document.querySelector('.editContainer textarea[placeholder="Edit Description:"]').value.trim();
@@ -574,6 +587,7 @@ $totalPages = ceil($totalItems / $limit);
             formData.append('id', id);
             formData.append('name', name);
             formData.append('brand', brand);
+            formData.append('note', note);
             formData.append('quantity', quantity);
             formData.append('type', type);
             formData.append('description', description);
@@ -584,9 +598,9 @@ $totalPages = ceil($totalItems / $limit);
             }
 
             fetch('./endpoints/edit_item.php', {
-                    method: 'POST',
-                    body: formData,
-                })
+                method: 'POST',
+                body: formData,
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
@@ -635,14 +649,14 @@ $totalPages = ceil($totalItems / $limit);
                 if (result.isConfirmed) {
                     // Proceed with deletion
                     fetch('./endpoints/delete_item.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                id: itemId
-                            })
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            id: itemId
                         })
+                    })
                         .then((response) => response.json())
                         .then((data) => {
                             if (data.status === 'success') {

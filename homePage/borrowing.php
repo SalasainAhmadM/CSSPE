@@ -37,7 +37,7 @@ $itemsResult = $conn->query($itemsQuery);
 
 $totalitemsQuery = "SELECT COUNT(*) AS total FROM items";
 $totalitemsResult = $conn->query($totalitemsQuery);
-$totalRow = mysqli_fetch_assoc($totalitemsResult );
+$totalRow = mysqli_fetch_assoc($totalitemsResult);
 $totalItems = $totalRow['total'];
 
 $totalPages = ceil($totalItems / $limit);
@@ -252,11 +252,13 @@ $teacherResult = $conn->query($teacherQuery);
                         <?php while ($item = $itemsResult->fetch_assoc()): ?>
                             <div class="inventoryContainer" data-title="<?= htmlspecialchars($item['name']) ?>">
                                 <div class="subInventoryContainer">
-                                    <div class="imageContainer" style="border-bottom: solid gray 1px;">
+                                    <div class="imageContainer" style="border-bottom: solid gray 1px;"
+                                        onclick="showNote('<?= htmlspecialchars($item['note'] ?: 'No note available') ?>')">
                                         <img style="height: 50px;" class="image"
                                             src="../assets/uploads/<?= htmlspecialchars($item['image'] ?: '../../assets/img/CSSPE.png') ?>"
                                             alt="Item Image">
                                     </div>
+
                                     <div class="infoContainer">
                                         <p><?= htmlspecialchars($item['name']) ?></p>
                                     </div>
@@ -391,17 +393,27 @@ $teacherResult = $conn->query($teacherQuery);
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+        function showNote(note) {
+            Swal.fire({
+                title: 'Item Note',
+                text: note,
+                icon: 'info',
+                confirmButtonText: 'Close',
+            });
+        }
+
+
         function borrowItem(itemId, itemName, itemBrand) {
             // Perform an AJAX request to check ban status
             fetch('checkBanStatus.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        userId: <?= json_encode($_SESSION['user_id']) ?>
-                    })
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userId: <?= json_encode($_SESSION['user_id']) ?>
                 })
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.banned) {
@@ -440,7 +452,7 @@ $teacherResult = $conn->query($teacherQuery);
 
         document.querySelector('.addButton1').addEventListener('click', closeModal);
 
-        document.querySelector('.confirmButton').addEventListener('click', function() {
+        document.querySelector('.confirmButton').addEventListener('click', function () {
             // Get form values
             const itemId = document.getElementById('itemId').value;
             const teacherId = document.getElementById('teacherSelect').value;
@@ -482,9 +494,9 @@ $teacherResult = $conn->query($teacherQuery);
                     formData.append('schedule_to', scheduleTo);
 
                     fetch('borrow_item.php', {
-                            method: 'POST',
-                            body: formData
-                        })
+                        method: 'POST',
+                        body: formData
+                    })
                         .then(response => response.json())
                         .then(data => {
                             if (data.status === 'success') {
@@ -517,7 +529,7 @@ $teacherResult = $conn->query($teacherQuery);
         const searchBar = document.getElementById('searchBar');
         const inventoryGrid = document.getElementById('inventoryGrid');
 
-        searchBar.addEventListener('input', function() {
+        searchBar.addEventListener('input', function () {
             const searchTerm = searchBar.value.toLowerCase();
             const inventoryContainers = inventoryGrid.getElementsByClassName('inventoryContainer');
 

@@ -647,7 +647,7 @@ $conn->close();
                                 <th>Brand</th>
                                 <th>Quantity</th>
                                 <th>Date Lost</th>
-                                <th>Fullname</th>
+                                <!-- <th>Fullname</th> -->
                                 <th>Contact Number</th>
                                 <th>Email</th>
                                 <th>Remark</th>
@@ -662,7 +662,7 @@ $conn->close();
                                         <td><?php echo $item['brand']; ?></td>
                                         <td><?php echo $item['quantity_returned']; ?></td>
                                         <td><?php echo $item['returned_at']; ?></td>
-                                        <td><?php echo $item['fullname']; ?></td>
+                                        <!-- <td><?php echo $item['fullname']; ?></td> -->
                                         <td><?php echo $item['contact_no']; ?></td>
                                         <td><?php echo $item['email']; ?></td>
                                         <td><?php echo $item['remarks']; ?></td>
@@ -703,7 +703,7 @@ $conn->close();
                                 <th>Brands</th>
                                 <th>Quantity</th>
                                 <th>Date Returned</th>
-                                <th>Fullname</th>
+                                <!-- <th>Fullname</th> -->
                                 <th>Contact Number</th>
                                 <th>Email</th>
                                 <th>Remark</th>
@@ -720,7 +720,7 @@ $conn->close();
                                         <td><?php echo $item['brand']; ?></td>
                                         <td><?php echo $item['quantity_returned']; ?></td>
                                         <td><?php echo $item['returned_at']; ?></td>
-                                        <td><?php echo $item['fullname']; ?></td>
+                                        <!-- <td><?php echo $item['fullname']; ?></td> -->
                                         <td><?php echo $item['contact_no']; ?></td>
                                         <td><?php echo $item['email']; ?></td>
                                         <td><?php echo $item['remarks']; ?></td>
@@ -761,7 +761,7 @@ $conn->close();
                                 <th>Brand</th>
                                 <th>Quantity</th>
                                 <th>Date Replace</th>
-                                <th>Fullname</th>
+                                <!-- <th>Fullname</th> -->
                                 <th>Contact Number</th>
                                 <th>Email</th>
                                 <th>Remark</th>
@@ -777,7 +777,7 @@ $conn->close();
                                         <td><?php echo $item['brand']; ?></td>
                                         <td><?php echo $item['quantity_returned']; ?></td>
                                         <td><?php echo $item['returned_at']; ?></td>
-                                        <td><?php echo $item['fullname']; ?></td>
+                                        <!-- <td><?php echo $item['fullname']; ?></td> -->
                                         <td><?php echo $item['contact_no']; ?></td>
                                         <td><?php echo $item['email']; ?></td>
                                         <td><?php echo $item['remarks']; ?></td>

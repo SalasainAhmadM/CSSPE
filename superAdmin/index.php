@@ -287,7 +287,13 @@ if (isset($_POST['update_faculty'])) {
                                 </div>
                             </div>
                         </a>
-
+                        <a href="../superAdmin/school_year.php">
+                            <div class="buttonContainer1">
+                                <div class="nameOfIconContainer">
+                                    <p>School Year</p>
+                                </div>
+                            </div>
+                        </a>
                         <a href="../informationAdmin/">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">
@@ -326,6 +332,7 @@ if (isset($_POST['update_faculty'])) {
 
                         <div class="collegeNameContainer">
                             <p>CSSPE Inventory & Information System</p>
+                            <!-- <p>School Year 1st Semester</p> -->
                         </div>
                     </div>
                 </div>
@@ -537,7 +544,7 @@ if (isset($_POST['update_faculty'])) {
         const togglePassword = document.getElementById('togglePassword');
         const passwordField = document.getElementById('password');
 
-        togglePassword.addEventListener('click', function() {
+        togglePassword.addEventListener('click', function () {
             // Toggle the password field type
             const type = passwordField.type === 'password' ? 'text' : 'password';
             passwordField.type = type;
@@ -599,7 +606,7 @@ if (isset($_POST['update_faculty'])) {
         }
 
 
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             <?php if (isset($_SESSION['message']) && isset($_SESSION['message_type'])): ?>
                 Swal.fire({
                     icon: "<?php echo $_SESSION['message_type']; ?>",

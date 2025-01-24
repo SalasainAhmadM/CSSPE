@@ -204,7 +204,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
                             </div>
                         </a>
-
+                        <a href="../superAdmin/school_year.php">
+                            <div class="buttonContainer1">
+                                <div class="nameOfIconContainer">
+                                    <p>School Year</p>
+                                </div>
+                            </div>
+                        </a>
                         <a href="../informationAdmin/">
                             <div class="buttonContainer1">
                                 <div class="nameOfIconContainer">

@@ -108,6 +108,7 @@ CREATE TABLE `items` (
   `updated_at` datetime NOT NULL,
   `users_id` int(11) NOT NULL,
   `image` varchar(255) DEFAULT NULL
+  `note` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --

@@ -15,7 +15,7 @@ function deactivateUsers()
     $logDate = $currentDate->format('Y-m-d');
 
     // Deactivation date
-    if ($day == '24' && $month == '01') {
+    if ($day == '24' && $month == '05') {
 
         $query = "SELECT deactivation_triggered FROM config WHERE year = ?";
         $stmt = $conn->prepare($query);
@@ -27,7 +27,7 @@ function deactivateUsers()
             $row = $result->fetch_assoc();
             if ($row['deactivation_triggered'] == 1) {
                 "Deactivation has already been triggered this year.";
-                return; 
+                return;
             }
         }
 
@@ -279,7 +279,8 @@ function fetchDepartments()
 
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"> <!-- Include FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- Include FontAwesome -->
 
     <style>
         .passwordContainer {
@@ -334,7 +335,8 @@ function fetchDepartments()
                             </div>
 
                             <div class="inputContainer passwordContainer">
-                                <input id="passwordField" class="inputEmail" type="password" name="password" placeholder="Password:">
+                                <input id="passwordField" class="inputEmail" type="password" name="password"
+                                    placeholder="Password:">
                                 <i id="togglePassword" class="fas fa-eye toggle-password-icon"></i>
                             </div>
 
@@ -443,8 +445,10 @@ function fetchDepartments()
                             <input class="inputEmail" type="email" name="email" placeholder="Email:" required>
                         </div>
                         <div class="inputContainer" style="padding: 0 10px;">
-                            <input class="inputEmail" style="margin-right:10px" type="text" name="address1" placeholder="House Number, Street Name, Barangay" required>
-                            <input class="inputEmail" type="text" name="address2" placeholder="Address:" value=", Zamboanga City" required>
+                            <input class="inputEmail" style="margin-right:10px" type="text" name="address1"
+                                placeholder="House Number, Street Name, Barangay" required>
+                            <input class="inputEmail" type="text" name="address2" placeholder="Address:"
+                                value=", Zamboanga City" required>
                         </div>
                         <div class="inputContainer">
                             <input class="inputEmail" type="text" name="contact_no" placeholder="Contact No.:" required>
@@ -473,12 +477,14 @@ function fetchDepartments()
                             </select>
                         </div>
                         <div class="inputContainer passwordContainer">
-                            <input id="registerPassword" class="inputEmail" type="password" name="password" placeholder="Password:">
+                            <input id="registerPassword" class="inputEmail" type="password" name="password"
+                                placeholder="Password:">
                             <i id="toggleRegisterPassword" class="fas fa-eye toggle-password-icon"></i>
                         </div>
 
                         <div class="inputContainer passwordContainer">
-                            <input id="confirmPassword" class="inputEmail" type="password" name="confirm_password" placeholder="Confirm Password:">
+                            <input id="confirmPassword" class="inputEmail" type="password" name="confirm_password"
+                                placeholder="Confirm Password:">
                             <i id="toggleConfirmPassword" class="fas fa-eye toggle-password-icon"></i>
                         </div>
                         <div class="inputContainer">
@@ -517,7 +523,7 @@ function fetchDepartments()
             const toggleIcon = document.getElementById(toggleId);
             const passwordField = document.getElementById(passwordFieldId);
 
-            toggleIcon.addEventListener("click", function() {
+            toggleIcon.addEventListener("click", function () {
                 if (passwordField.type === "password") {
                     passwordField.type = "text";
                     toggleIcon.classList.remove("fa-eye");
