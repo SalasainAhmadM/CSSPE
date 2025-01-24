@@ -1,5 +1,5 @@
 function addProgram(){
-    const addProgramButton = document.querySelector('.addContainer2');
+    const addProgramButton = document.querySelector('.addContainer');
 
     if(addProgramButton.style.display === 'none'){
         addProgramButton.style.display = 'block';

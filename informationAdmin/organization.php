@@ -464,7 +464,6 @@ if (isset($_GET['delete_id'])) {
                 <div class="subAddContainer">
                     <div class="titleContainer">
                         <p>Edit Organization</p>
-                        <p>Edit Organization</p>
                     </div>
 
                     <div class="subLoginContainer">
@@ -509,7 +508,7 @@ if (isset($_GET['delete_id'])) {
             </div>
         </div>
     </form>
-    
+
     <form method="POST" action="" enctype="multipart/form-data">
         <div class="editProject" style="display: none; background-color: none;">
             <div class="addContainer">
@@ -544,7 +543,17 @@ if (isset($_GET['delete_id'])) {
     </form>
 
     <script src="../assets/js/sidebar.js"></script>
-    <script src="../assets/js/program.js"></script>
+    <script>
+        function addProgram() {
+            const addProgramButton = document.querySelector('.addContainer2');
+
+            if (addProgramButton.style.display === 'none') {
+                addProgramButton.style.display = 'block';
+            } else {
+                addProgramButton.style.display = 'none'
+            }
+        }
+    </script>
     <script src="../assets/js/uploadImage.js"></script>
     <script src="../assets/js/printTable.js"></script>
     <script src="../assets/js/search.js"></script>
@@ -590,7 +599,7 @@ if (isset($_GET['delete_id'])) {
             const file = document.getElementById('imageUpload').files[0];
             const reader = new FileReader();
 
-            reader.onloadend = function () {
+            reader.onloadend = function() {
                 const image = document.getElementById('preview');
                 image.src = reader.result;
                 image.style.display = 'block'; // Display the image after loading
