@@ -20,10 +20,23 @@ if ($result->num_rows > 0) {
     $fullName = "User Not Found";
 }
 
-$itemQuery = "SELECT id, name, description, brand, quantity, type, image FROM items";
+$limit = 6;
+$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
+
+$itemQuery = "SELECT id, name, description, brand, quantity, type, image FROM items LIMIT $limit OFFSET $offset";
 $itemStmt = $conn->prepare($itemQuery);
 $itemStmt->execute();
 $itemResult = $itemStmt->get_result();
+
+$totalitemsQuery = "SELECT COUNT(*) AS total FROM items";
+$totalitemsResult = $conn->query($totalitemsQuery);
+$totalRow = mysqli_fetch_assoc($totalitemsResult);
+$totalItems = $totalRow['total'];
+
+$totalPages = ceil($totalItems / $limit);
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -136,6 +149,11 @@ $itemResult = $itemStmt->get_result();
                 </div>
 
                 <div class="searchContainer">
+                    <select name="" class="addButton size" id="rankFilter">
+                        <option value="">Choose type</option>
+                        <option value="Sport">Sport</option>
+                        <option value="Gadget">Gadget</option>
+                    </select>
                     <input id="searchBar" class="searchBar" type="text" placeholder="Search...">
                     <div class="printButton" style="gap: 1rem; display: flex; width: 90%;">
                         <button class="addButton size" onclick="printTable()">Print</button>
@@ -196,6 +214,21 @@ $itemResult = $itemStmt->get_result();
                             <?php endwhile; ?>
                         </tbody>
                     </table>
+                </div>
+
+                <div class="pagination">
+                    <?php if ($page > 1): ?>
+                        <a href="?page=<?php echo $page - 1; ?>" class="prev">Previous</a>
+                    <?php endif; ?>
+
+                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                        <a href="?page=<?php echo $i; ?>"
+                            class="<?php echo ($i === $page) ? 'active' : ''; ?>"><?php echo $i; ?></a>
+                    <?php endfor; ?>
+
+                    <?php if ($page < $totalPages): ?>
+                        <a href="?page=<?php echo $page + 1; ?>" class="next">Next</a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -346,13 +379,44 @@ $itemResult = $itemStmt->get_result();
         </div>
     </div>
 
+
+    <!-- Add this script at the bottom of your HTML or in a separate JS file -->
+    <script>
+        // Function to filter the table based on selected type
+        document.getElementById('rankFilter').addEventListener('change', function() {
+            filterTableByType();
+        });
+
+        function filterTableByType() {
+            // Get the selected value from the dropdown
+            var selectedType = document.getElementById('rankFilter').value.toLowerCase();
+
+            // Get all table rows
+            var rows = document.querySelectorAll('#tableBody tr');
+
+            // Loop through all rows and show/hide based on type match
+            rows.forEach(function(row) {
+                var typeCell = row.cells[6]; // 'Type' column (index starts from 0)
+                var type = typeCell ? typeCell.textContent.toLowerCase() : '';
+
+                // Check if the selected type matches the type in the row, or if 'All' is selected
+                if (selectedType === '' || type.includes(selectedType)) {
+                    row.style.display = ''; // Show the row
+                } else {
+                    row.style.display = 'none'; // Hide the row
+                }
+            });
+        }
+    </script>
+
+
     <script>
         // Get references to the search bar and table body
         const searchBar = document.getElementById('searchBar');
         const tableBody = document.getElementById('tableBody');
 
         // Add an input event listener to the search bar
-        searchBar.addEventListener('input', function () {
+        searchBar.addEventListener('input', function() {
             const searchTerm = searchBar.value.toLowerCase();
             const rows = tableBody.getElementsByTagName('tr');
 
@@ -379,7 +443,7 @@ $itemResult = $itemStmt->get_result();
 
             if (fileInput.files && fileInput.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function (e) {
+                reader.onload = function(e) {
                     preview.src = e.target.result; // Update the image preview
                     preview.style.display = 'block'; // Make the preview visible
                 };
@@ -397,7 +461,7 @@ $itemResult = $itemStmt->get_result();
 
 
         // Add Item Form Submission
-        document.getElementById('addItemForm').addEventListener('submit', function (e) {
+        document.getElementById('addItemForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
             const formData = new FormData();
@@ -413,9 +477,9 @@ $itemResult = $itemStmt->get_result();
             }
 
             fetch('./endpoints/add_item.php', {
-                method: 'POST',
-                body: formData,
-            })
+                    method: 'POST',
+                    body: formData,
+                })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
@@ -520,9 +584,9 @@ $itemResult = $itemStmt->get_result();
             }
 
             fetch('./endpoints/edit_item.php', {
-                method: 'POST',
-                body: formData,
-            })
+                    method: 'POST',
+                    body: formData,
+                })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
@@ -571,12 +635,14 @@ $itemResult = $itemStmt->get_result();
                 if (result.isConfirmed) {
                     // Proceed with deletion
                     fetch('./endpoints/delete_item.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ id: itemId })
-                    })
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                id: itemId
+                            })
+                        })
                         .then((response) => response.json())
                         .then((data) => {
                             if (data.status === 'success') {
@@ -692,6 +758,7 @@ $itemResult = $itemStmt->get_result();
                 addProgramButton.style.display = 'none'
             }
         }
+
         function editProgram() {
             const editProgramButton = document.querySelector('.editContainer');
 
