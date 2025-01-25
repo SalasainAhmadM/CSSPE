@@ -77,88 +77,30 @@ try {
     $stmt->bind_param('ii', $return_quantity, $item_id);
     $stmt->execute();
 
-    // Insert records into returned_items table with unique_id_remark
+    // Insert records into returned_items table
     $statuses = [
-        'Good' => $data['good_ids'] ?? [], // Remaining unchecked unique IDs
-        'Damaged' => $data['damaged_ids'] ?? [],
-        'Lost' => $data['lost_ids'] ?? [],
-        'Replaced' => $data['replaced_ids'] ?? []
+        'Good' => $return_quantity,
+        'Damaged' => $damaged,
+        'Lost' => $lost,
+        'Replaced' => $replaced
     ];
 
     $insert_query = "
-        INSERT INTO returned_items (transaction_id, item_id, quantity_returned, status, unique_id_remark, remarks)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO returned_items (transaction_id, item_id, quantity_returned, status, remarks)
+        VALUES (?, ?, ?, ?, ?)
     ";
     $stmt = $conn->prepare($insert_query);
 
-    foreach ($statuses as $status => $ids) {
-        foreach ($ids as $item_quantity_id) {
-            // Fetch the unique ID for this item_quantity_id
-            $unique_id_query = "SELECT unique_id FROM item_quantities WHERE id = ?";
-            $unique_id_stmt = $conn->prepare($unique_id_query);
-            $unique_id_stmt->bind_param('i', $item_quantity_id);
-            $unique_id_stmt->execute();
-            $unique_id_result = $unique_id_stmt->get_result();
-            $unique_id_row = $unique_id_result->fetch_assoc();
-
-            if ($unique_id_row) {
-                $unique_id = $unique_id_row['unique_id'];
-                $remarks = ($status === 'Good') ? '' : $status; // Remarks are empty for 'Good' status
-                $single_quantity = 1; // Always insert quantity as 1
-
-                // Insert into returned_items with the unique ID and status
-                $stmt->bind_param('iiisss', $transaction_id, $item_id, $single_quantity, $status, $unique_id, $remarks);
-                $stmt->execute();
-            }
-        }
-    }
-
-
-    // Insert into item_status_tracking table for damaged, lost, or replaced items
-    $item_status_quantities = [
-        'Damaged' => $data['damaged_ids'] ?? [],
-        'Lost' => $data['lost_ids'] ?? [],
-        'Replaced' => $data['replaced_ids'] ?? []
-    ];
-
-    $insert_tracking_query = "
-        INSERT INTO item_status_tracking (item_quantity_id, remarks)
-        VALUES (?, ?)
-    ";
-    $stmt = $conn->prepare($insert_tracking_query);
-
-    foreach ($item_status_quantities as $status => $ids) {
-        foreach ($ids as $item_quantity_id) {
-            $remarks = $status;
-            $stmt->bind_param('is', $item_quantity_id, $remarks);
+    foreach ($statuses as $status => $quantity) {
+        if ($quantity > 0) {
+            $remarks = ''; // Add logic to handle remarks if necessary
+            $stmt->bind_param('iiiss', $transaction_id, $item_id, $quantity, $status, $remarks);
             $stmt->execute();
         }
     }
 
-    // Call the function to delete matching records from transaction_item_quantities
-    deleteTransactionItemQuantities($conn, $transaction_id);
-
     echo json_encode(['status' => 'success', 'message' => 'Return recorded successfully.']);
 } catch (Exception $e) {
     echo json_encode(['status' => 'error', 'message' => 'An error occurred: ' . $e->getMessage()]);
-}
-
-/**
- * Deletes matching records from the transaction_item_quantities table.
- *
- * @param mysqli $conn
- * @param int $transaction_id
- */
-function deleteTransactionItemQuantities($conn, $transaction_id)
-{
-    try {
-        $delete_query = "DELETE FROM transaction_item_quantities WHERE transaction_id = ?";
-        $stmt = $conn->prepare($delete_query);
-        $stmt->bind_param('i', $transaction_id);
-        $stmt->execute();
-    } catch (Exception $e) {
-        echo json_encode(['status' => 'error', 'message' => 'Failed to delete records: ' . $e->getMessage()]);
-        exit;
-    }
 }
 ?>

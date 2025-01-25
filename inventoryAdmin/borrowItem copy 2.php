@@ -371,61 +371,35 @@ if ($result->num_rows > 0) {
 
             const transactionId = document.querySelector('.addContainer').getAttribute('data-transaction-id');
 
-            // Track selected items globally to exclude from subsequent modals
-            let selectedIds = new Set();
-
             function showUniqueIdAlert(type, quantity, uniqueIds) {
                 return new Promise((resolve) => {
-                    // Filter out already selected IDs
-                    const availableIds = uniqueIds.filter((idPair) => {
-                        const [id] = idPair.split(':');
-                        return !selectedIds.has(id);
-                    });
-
-                    // Generate checkboxes for remaining IDs
-                    const checkboxes = availableIds.map((idPair) => {
+                    const checkboxes = uniqueIds.map((idPair) => {
                         const [id, uniqueId] = idPair.split(':');
-                        return `<div>
-                            <input type="checkbox" value="${id}" id="checkbox-${id}" onclick="limitSelections('${type}', ${quantity})" />
-                            ${uniqueId}
-                        </div>`;
+                        return `<div><input type="checkbox" value="${id}" id="checkbox-${id}" /> ${uniqueId}</div>`;
                     }).join('');
-
-                    if (availableIds.length === 0) {
-                        Swal.fire({
-                            title: `No ${type} Items Available`,
-                            text: `All items have already been selected.`,
-                            icon: 'info',
-                            confirmButtonText: 'OK'
-                        });
-                        resolve([]);
-                        return;
-                    }
 
                     Swal.fire({
                         title: `Select ${type} Items`,
                         html: `
-                    <p>${type} Quantity: ${quantity}</p>
-                    ${checkboxes}
-                `,
+                <p>${type} Quantity: ${quantity}</p>
+                ${checkboxes}
+            `,
                         showCancelButton: true,
                         confirmButtonText: 'Confirm',
                         cancelButtonText: 'Cancel',
                         preConfirm: () => {
-                            const selected = [];
-                            availableIds.forEach((idPair) => {
+                            const selectedIds = [];
+                            uniqueIds.forEach((idPair) => {
                                 const [id] = idPair.split(':');
                                 const checkbox = document.getElementById(`checkbox-${id}`);
                                 if (checkbox && checkbox.checked) {
-                                    selected.push(id);
+                                    selectedIds.push(id);
                                 }
                             });
-                            return selected;
+                            return selectedIds;
                         }
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            // Add newly selected IDs to the global set
-                            result.value.forEach((id) => selectedIds.add(id));
                             resolve(result.value);
                         } else {
                             resolve([]);
@@ -434,18 +408,6 @@ if ($result->num_rows > 0) {
                 });
             }
 
-            // Limit selections in modals based on quantity
-            window.limitSelections = function (type, maxSelections) {
-                const checkboxes = document.querySelectorAll(`input[type="checkbox"]`);
-                const selectedCount = Array.from(checkboxes).filter((cb) => cb.checked).length;
-
-                // Disable unchecked checkboxes if the limit is reached
-                checkboxes.forEach((checkbox) => {
-                    if (!checkbox.checked) {
-                        checkbox.disabled = selectedCount >= maxSelections;
-                    }
-                });
-            };
 
             // Fetch unique IDs and display SweetAlerts if required
             const xhr = new XMLHttpRequest();
@@ -532,7 +494,6 @@ if ($result->num_rows > 0) {
             };
             xhr.send();
         }
-
 
 
         function openReturnModal(transactionId) {

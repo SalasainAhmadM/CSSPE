@@ -20,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
+    // Handle image upload
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
         $targetDir = '../../assets/uploads/';
         $fileName = uniqid() . '-' . basename($_FILES['image']['name']);
@@ -40,12 +41,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
+    // Insert item into `items` table
     $query = "INSERT INTO items (name, description, brand, quantity, type, note, quantity_origin, users_id, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($query);
     $stmt->bind_param("sssssssis", $name, $description, $brand, $quantity, $type, $note, $quantity, $inventoryAdminId, $image);
 
     if ($stmt->execute()) {
-        echo json_encode(['status' => 'success', 'message' => 'Item added successfully!']);
+        $itemId = $stmt->insert_id; // Get the last inserted ID for the `items` table
+
+        // Generate 6-digit unique IDs for each quantity and insert into `item_quantities`
+        $queryQuantities = "INSERT INTO item_quantities (item_id, unique_id) VALUES (?, ?)";
+        $stmtQuantities = $conn->prepare($queryQuantities);
+
+        for ($i = 0; $i < $quantity; $i++) {
+            $uniqueId = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+
+            // Ensure the unique ID does not already exist in the database
+            $checkQuery = "SELECT COUNT(*) FROM item_quantities WHERE unique_id = ?";
+            $checkStmt = $conn->prepare($checkQuery);
+            $checkStmt->bind_param("s", $uniqueId);
+            $checkStmt->execute();
+            $checkStmt->bind_result($count);
+            $checkStmt->fetch();
+            $checkStmt->close();
+
+            if ($count > 0) {
+                $i--; // Retry this iteration with a new ID
+                continue;
+            }
+
+            $stmtQuantities->bind_param("is", $itemId, $uniqueId);
+            $stmtQuantities->execute();
+        }
+
+        $stmtQuantities->close();
+
+        echo json_encode(['status' => 'success', 'message' => 'Item and quantities added successfully!']);
     } else {
         echo json_encode(['status' => 'error', 'message' => 'Failed to add item.']);
     }

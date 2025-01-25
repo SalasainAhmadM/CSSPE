@@ -164,7 +164,6 @@ $recentlyAddedItems = $recentlyAddedResult->fetch_all(MYSQLI_ASSOC);
 $lostQuery = "
     SELECT 
         r.return_id,
-        r.unique_id_remark,
         i.name AS item_name,
         i.id AS item_id,
         i.brand,
@@ -189,7 +188,6 @@ $lostItems = $lostStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $damagedQuery = "
     SELECT 
         r.return_id,
-        r.unique_id_remark,
         i.name AS item_name,
         i.id AS item_id,
         i.brand,
@@ -214,7 +212,6 @@ $damagedItems = $damagedStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $replacedQuery = "
     SELECT 
         r.return_id,
-        r.unique_id_remark,
         i.name AS item_name,
         i.id AS item_id,
         i.brand,
@@ -704,9 +701,9 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                             <tr>
                                 <th>Id</th>
                                 <th>Item ID</th>
-                                <th>Unique ID</th>
                                 <th>Item Name</th>
                                 <th>Brands</th>
+                                <th>Quantity</th>
                                 <th>Date Lost</th>
                                 <th>Fullname</th>
                                 <th>Contact Number</th>
@@ -725,9 +722,9 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                     <tr>
                                         <td><?= $item['return_id']; ?></td>
                                         <td><?= $item['item_id']; ?></td>
-                                        <td><?= $item['unique_id_remark']; ?></td>
                                         <td><?= $item['item_name']; ?></td>
                                         <td><?= $item['brand']; ?></td>
+                                        <td><?= $item['quantity_returned']; ?></td>
                                         <td><?= $item['returned_at']; ?></td>
                                         <td><?= $item['first_name'] . ' ' . $item['last_name']; ?></td>
                                         <td><?= $item['contact_no']; ?></td>
@@ -752,6 +749,67 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             </div>
         </div>
     </div>
+    <script>
+        function updateStatus(returnId) {
+            Swal.fire({
+                title: 'Replace Item',
+                text: 'Remark?',
+                input: 'text',
+                inputValue: 'Lost but now Replaced', // Default value for remarks
+                inputAttributes: {
+                    autocapitalize: 'off',
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Submit',
+                showLoaderOnConfirm: true,
+                preConfirm: (newRemarks) => {
+                    if (!newRemarks || newRemarks.trim() === "") {
+                        Swal.showValidationMessage('Remarks cannot be empty.');
+                        return false;
+                    }
+
+                    return Swal.fire({
+                        title: 'Confirm Update',
+                        text: 'Are you sure you want to update the status to "Replaced"?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, update it!',
+                        cancelButtonText: 'No, cancel',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Send the AJAX request
+                            return fetch('./endpoints/update_returned_item.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    return_id: returnId,
+                                    new_remarks: newRemarks,
+                                    new_status: 'Replaced',
+                                }),
+                            })
+                                .then((response) => response.json())
+                                .then((data) => {
+                                    if (data.status === 'success') {
+                                        Swal.fire('Updated!', data.message, 'success').then(() => {
+                                            location.reload();
+                                        });
+                                    } else {
+                                        Swal.fire('Error!', data.message, 'error');
+                                    }
+                                })
+                                .catch((error) => {
+                                    console.error('Error:', error);
+                                    Swal.fire('Error!', 'An error occurred while updating the status.', 'error');
+                                });
+                        }
+                    });
+                },
+            });
+        }
+
+    </script>
 
 
     <div class="summaryContainer damage" style="display: none; background-color: none;">
@@ -768,9 +826,9 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                             <tr>
                                 <th>Id</th>
                                 <th>Item ID</th>
-                                <th>Unique ID</th>
                                 <th>Item Name</th>
                                 <th>Brands</th>
+                                <th>Quantity</th>
                                 <th>Date Returned</th>
                                 <th>Fullname</th>
                                 <th>Contact Number</th>
@@ -790,9 +848,9 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                     <tr>
                                         <td><?= $item['return_id']; ?></td>
                                         <td><?= $item['item_id']; ?></td>
-                                        <td><?= $item['unique_id_remark']; ?></td>
                                         <td><?= $item['item_name']; ?></td>
                                         <td><?= $item['brand']; ?></td>
+                                        <td><?= $item['quantity_returned']; ?></td>
                                         <td><?= $item['returned_at']; ?></td>
                                         <td><?= $item['first_name'] . ' ' . $item['last_name']; ?></td>
                                         <td><?= $item['contact_no']; ?></td>
@@ -819,8 +877,67 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             </div>
         </div>
     </div>
+    <script>
+        function updateStatusDamaged(returnId) {
+            Swal.fire({
+                title: 'Replace Item',
+                text: 'Remark?',
+                input: 'text',
+                inputValue: 'Damaged but now Replaced', // Default value for remarks
+                inputAttributes: {
+                    autocapitalize: 'off',
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Submit',
+                showLoaderOnConfirm: true,
+                preConfirm: (newRemarks) => {
+                    if (!newRemarks || newRemarks.trim() === "") {
+                        Swal.showValidationMessage('Remarks cannot be empty.');
+                        return false;
+                    }
 
+                    return Swal.fire({
+                        title: 'Confirm Update',
+                        text: 'Are you sure you want to update the status to "Replaced"?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, update it!',
+                        cancelButtonText: 'No, cancel',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Send the AJAX request
+                            return fetch('./endpoints/update_returned_item.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    return_id: returnId,
+                                    new_remarks: newRemarks,
+                                    new_status: 'Replaced',
+                                }),
+                            })
+                                .then((response) => response.json())
+                                .then((data) => {
+                                    if (data.status === 'success') {
+                                        Swal.fire('Updated!', data.message, 'success').then(() => {
+                                            location.reload();
+                                        });
+                                    } else {
+                                        Swal.fire('Error!', data.message, 'error');
+                                    }
+                                })
+                                .catch((error) => {
+                                    console.error('Error:', error);
+                                    Swal.fire('Error!', 'An error occurred while updating the status.', 'error');
+                                });
+                        }
+                    });
+                },
+            });
+        }
 
+    </script>
 
     <div class="summaryContainer replace" style="display: none; background-color: none;">
         <div class="summaryContainer">
@@ -836,9 +953,9 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                             <tr>
                                 <th>Id</th>
                                 <th>Item ID</th>
-                                <th>Unique ID</th>
                                 <th>Item Name</th>
                                 <th>Brand</th>
+                                <th>Quantity</th>
                                 <th>Date Replace</th>
                                 <th>Fullname</th>
                                 <th>Contact Number</th>
@@ -857,9 +974,9 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                     <tr>
                                         <td><?= $item['return_id']; ?></td>
                                         <td><?= $item['item_id']; ?></td>
-                                        <td><?= $item['unique_id_remark']; ?></td>
                                         <td><?= $item['item_name']; ?></td>
                                         <td><?= $item['brand']; ?></td>
+                                        <td><?= $item['quantity_returned']; ?></td>
                                         <td><?= $item['returned_at']; ?></td>
                                         <td><?= $item['first_name'] . ' ' . $item['last_name']; ?></td>
                                         <td><?= $item['contact_no']; ?></td>
@@ -987,129 +1104,7 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             </div>
         </div>
     </div>
-    <script>
-        function updateStatus(returnId) {
-            Swal.fire({
-                title: 'Replace Item',
-                text: 'Remark?',
-                input: 'text',
-                inputValue: 'Lost but now Replaced', // Default value for remarks
-                inputAttributes: {
-                    autocapitalize: 'off',
-                },
-                showCancelButton: true,
-                confirmButtonText: 'Submit',
-                showLoaderOnConfirm: true,
-                preConfirm: (newRemarks) => {
-                    if (!newRemarks || newRemarks.trim() === "") {
-                        Swal.showValidationMessage('Remarks cannot be empty.');
-                        return false;
-                    }
 
-                    return Swal.fire({
-                        title: 'Confirm Update',
-                        text: 'Are you sure you want to update the status to "Replaced"?',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Yes, update it!',
-                        cancelButtonText: 'No, cancel',
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // Send the AJAX request
-                            return fetch('./endpoints/update_returned_item.php', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    return_id: returnId,
-                                    new_remarks: newRemarks,
-                                    new_status: 'Replaced',
-                                }),
-                            })
-                                .then((response) => response.json())
-                                .then((data) => {
-                                    if (data.status === 'success') {
-                                        Swal.fire('Updated!', data.message, 'success').then(() => {
-                                            location.reload();
-                                        });
-                                    } else {
-                                        Swal.fire('Error!', data.message, 'error');
-                                    }
-                                })
-                                .catch((error) => {
-                                    console.error('Error:', error);
-                                    Swal.fire('Error!', 'An error occurred while updating the status.', 'error');
-                                });
-                        }
-                    });
-                },
-            });
-        }
-
-    </script>
-
-    <script>
-        function updateStatusDamaged(returnId) {
-            Swal.fire({
-                title: 'Replace Item',
-                text: 'Remark?',
-                input: 'text',
-                inputValue: 'Damaged but now Replaced', // Default value for remarks
-                inputAttributes: {
-                    autocapitalize: 'off',
-                },
-                showCancelButton: true,
-                confirmButtonText: 'Submit',
-                showLoaderOnConfirm: true,
-                preConfirm: (newRemarks) => {
-                    if (!newRemarks || newRemarks.trim() === "") {
-                        Swal.showValidationMessage('Remarks cannot be empty.');
-                        return false;
-                    }
-
-                    return Swal.fire({
-                        title: 'Confirm Update',
-                        text: 'Are you sure you want to update the status to "Replaced"?',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Yes, update it!',
-                        cancelButtonText: 'No, cancel',
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // Send the AJAX request
-                            return fetch('./endpoints/update_returned_item.php', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    return_id: returnId,
-                                    new_remarks: newRemarks,
-                                    new_status: 'Replaced',
-                                }),
-                            })
-                                .then((response) => response.json())
-                                .then((data) => {
-                                    if (data.status === 'success') {
-                                        Swal.fire('Updated!', data.message, 'success').then(() => {
-                                            location.reload();
-                                        });
-                                    } else {
-                                        Swal.fire('Error!', data.message, 'error');
-                                    }
-                                })
-                                .catch((error) => {
-                                    console.error('Error:', error);
-                                    Swal.fire('Error!', 'An error occurred while updating the status.', 'error');
-                                });
-                        }
-                    });
-                },
-            });
-        }
-
-    </script>
     <script>
         document.getElementById('searchBar').addEventListener('keyup', function () {
             const searchTerm = this.value.toLowerCase();

@@ -509,7 +509,7 @@ if (isset($_GET['delete_id'])) {
             </div>
         </div>
     </form>
-    
+
     <form method="POST" action="" enctype="multipart/form-data">
         <div class="editProject" style="display: none; background-color: none;">
             <div class="addContainer">
@@ -524,12 +524,12 @@ if (isset($_GET['delete_id'])) {
                         <input type="hidden" name="project_id" id="project_id">
 
                         <div class="inputContainer">
-                            <input class="inputEmail" type="text" name="project_name"
-                                placeholder="Project Name">
+                            <input class="inputEmail" type="text" name="project_name" placeholder="Project Name">
                         </div>
 
                         <div class="inputContainer" style="height: 10rem;">
-                            <textarea class="inputEmail" name="project_description" placeholder="Description"></textarea>
+                            <textarea class="inputEmail" name="project_description"
+                                placeholder="Description"></textarea>
                         </div>
 
                         <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
@@ -544,7 +544,7 @@ if (isset($_GET['delete_id'])) {
     </form>
 
     <script src="../assets/js/sidebar.js"></script>
-    <script src="../assets/js/program.js"></script>
+    <!-- <script src="../assets/js/program.js"></script> -->
     <script src="../assets/js/uploadImage.js"></script>
     <script src="../assets/js/printTable.js"></script>
     <script src="../assets/js/search.js"></script>
@@ -625,6 +625,26 @@ if (isset($_GET['delete_id'])) {
             });
             <?php unset($_SESSION['message'], $_SESSION['message_type']); ?>
         <?php endif; ?>
+
+        function addProject() {
+            const addProgramButton = document.querySelector('.addProject');
+
+            if (addProgramButton.style.display === 'none') {
+                addProgramButton.style.display = 'block';
+            } else {
+                addProgramButton.style.display = 'none'
+            }
+        }
+        function addProgram() {
+            const addProgramButton = document.querySelector('.addContainer2');
+
+            if (addProgramButton.style.display === 'none') {
+                addProgramButton.style.display = 'block';
+            } else {
+                addProgramButton.style.display = 'none'
+            }
+        }
+
     </script>
 
 </body>

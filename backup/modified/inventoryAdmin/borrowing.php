@@ -37,7 +37,7 @@ $originQuery = "SELECT id, name, brand FROM items";
 $originResult = $conn->query($originQuery);
 
 // Fetch users with role 'Instructor'
-$teacherQuery = "SELECT id, CONCAT(first_name, ' ', COALESCE(middle_name, ''), ' ', last_name) AS full_name FROM users WHERE role = 'Instructor' AND ban = 0";
+$teacherQuery = "SELECT id, CONCAT(first_name, ' ', COALESCE(middle_name, ''), ' ', last_name) AS full_name FROM users WHERE role = 'Instructor'";
 $teacherResult = $conn->query($teacherQuery);
 ?>
 <!DOCTYPE html>
@@ -52,37 +52,6 @@ $teacherResult = $conn->query($teacherQuery);
     <link rel="stylesheet" href="../assets/css/borrowing.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
 </head>
-<style>
-    .hover-unique-id {
-        position: relative;
-        cursor: pointer;
-    }
-
-    .hover-unique-id .tooltip {
-        display: none;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: #f5f5f5;
-        color: #000;
-        border: 1px solid #ccc;
-        padding: 5px;
-        white-space: pre-wrap;
-        z-index: 10;
-        font-family: Arial, sans-serif;
-        font-size: 1rem;
-        text-align: center;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-        border-radius: 5px;
-        min-width: 100px;
-        max-width: 200px;
-    }
-
-    .hover-unique-id:hover .tooltip {
-        display: block;
-    }
-</style>
 
 <body>
     <div class="body">
@@ -211,10 +180,10 @@ $teacherResult = $conn->query($teacherQuery);
                         <thead>
                             <tr>
                                 <th>Id</th>
-                                <th>Item Id</th>
                                 <th>Item Name</th>
                                 <th>Brand</th>
                                 <th>Quantity</th>
+                                <th>Class Schedule</th>
                                 <th>Borrow Date</th>
                                 <th>Return Date</th>
                                 <th>Fullname</th>
@@ -242,7 +211,7 @@ $teacherResult = $conn->query($teacherQuery);
     <div class="addContainer" style="display: none; background-color: none; ">
         <div class="addContainer">
             <div class="subAddContainer"
-                style="background-color: white; padding: 20px; border-radius: 10px;transform: scale(0.80);">
+                style="background-color: white; padding: 20px; border-radius: 10px;transform: scale(0.65);">
                 <div class="titleContainer">
                     <p>Borrow Item</p>
                 </div>
@@ -284,15 +253,15 @@ $teacherResult = $conn->query($teacherQuery);
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
                         <label for=""
                             style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Quantity:</label>
-                        <input class="inputEmail" placeholder="Enter Quantity" type="number">
+                        <input class="inputEmail" type="number">
                     </div>
 
-                    <!-- <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
                         <label for="borrowDate"
                             style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Borrow
                             Date:</label>
                         <input id="borrowDate" class="inputEmail" type="date" placeholder="Date:">
-                    </div> -->
+                    </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
                         <label for="returnDate"
@@ -301,12 +270,12 @@ $teacherResult = $conn->query($teacherQuery);
                         <input id="returnDate" class="inputEmail" type="date" placeholder="Return Date">
                     </div>
 
-                    <!-- <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
                         <label for="classDate"
                             style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Class
                             Date:</label>
                         <input id="classDate" class="inputEmail" type="date" placeholder="Class Date">
-                    </div> -->
+                    </div>
 
                     <script>
                         function setMinDate() {
@@ -328,7 +297,7 @@ $teacherResult = $conn->query($teacherQuery);
                     </script>
 
 
-                    <!-- <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
                         <label for=""
                             style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Class
                             schedule time from:</label>
@@ -340,7 +309,7 @@ $teacherResult = $conn->query($teacherQuery);
                             style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Class
                             schedule time to:</label>
                         <input class="inputEmail" type="time" placeholder="To">
-                    </div> -->
+                    </div>
 
                     <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 0.9rem;">
                         <button class="addButton" style="width: 6rem;" onclick="confirmBorrow()">Add</button>
@@ -633,16 +602,10 @@ $teacherResult = $conn->query($teacherQuery);
                                 const row = document.createElement('tr');
                                 row.innerHTML = `
                             <td>${transaction.transaction_id}</td>
-                             <td>${transaction.item_id}</td>
                             <td>${transaction.item_name}</td>
                             <td>${transaction.item_brand}</td>
-                             <td>
-                               <span class="hover-unique-id">
-                               ${transaction.quantity_borrowed}
-                               <div class="tooltip">${transaction.unique_ids}</div>
-                               </span>
-
-                            </td>
+                            <td>${transaction.quantity_borrowed}</td>
+                            <td>${transaction.class_date} - ${formatTime24To12(transaction.schedule_from)} - ${formatTime24To12(transaction.schedule_to)}</td>
                             <td>${transaction.borrowed_at ? formatDateTimeWithNewline(transaction.borrowed_at) : 'N/A'}</td>
                             <td>${transaction.return_date}</td>
                             <td>${transaction.first_name} ${transaction.last_name}</td>
@@ -705,10 +668,14 @@ $teacherResult = $conn->query($teacherQuery);
             const itemId = document.getElementById('origin_item').value;
             const teacherId = document.getElementById('teacher').value;
             const quantity = parseInt(document.querySelector('input[type="number"]').value, 10);
+            const borrowDate = document.querySelector('input[placeholder="Date:"]').value;
             const returnDate = document.querySelector('input[placeholder="Return Date"]').value;
+            const classDate = document.querySelector('input[placeholder="Class Date"]').value;
+            const scheduleFrom = document.querySelector('input[placeholder="From:"]').value;
+            const scheduleTo = document.querySelector('input[placeholder="To"]').value;
             const availableQuantity = parseInt(document.getElementById('item_quantity').value, 10);
 
-            if (!itemId || !teacherId || isNaN(quantity) || !returnDate) {
+            if (!itemId || !teacherId || isNaN(quantity) || !borrowDate || !returnDate || !classDate || !scheduleFrom || !scheduleTo) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Missing Fields',
@@ -761,7 +728,11 @@ $teacherResult = $conn->query($teacherQuery);
                                         document.getElementById('item_quantity').value = '';
                                         document.getElementById('teacher').value = '';
                                         document.querySelector('input[type="number"]').value = '';
+                                        document.querySelector('input[placeholder="Date:"]').value = '';
                                         document.querySelector('input[placeholder="Return Date"]').value = '';
+                                        document.querySelector('input[placeholder="Class Date"]').value = '';
+                                        document.querySelector('input[placeholder="From:"]').value = '';
+                                        document.querySelector('input[placeholder="To"]').value = '';
 
 
                                         setTimeout(() => {
@@ -788,7 +759,7 @@ $teacherResult = $conn->query($teacherQuery);
                         }
                     };
 
-                    const params = `item_id=${itemId}&teacher=${teacherId}&quantity=${quantity}&return_date=${returnDate}`;
+                    const params = `item_id=${itemId}&teacher=${teacherId}&quantity=${quantity}&borrow_date=${borrowDate}&return_date=${returnDate}&class_date=${classDate}&schedule_from=${scheduleFrom}&schedule_to=${scheduleTo}`;
                     xhr.send(params);
                 }
             });
@@ -931,7 +902,7 @@ $teacherResult = $conn->query($teacherQuery);
                     const response = JSON.parse(xhr.responseText);
                     if (response.status === 'success') {
                         const teacherDropdown = document.getElementById('edit_teacher');
-                        teacherDropdown.innerHTML = '<option value="">Choose a Teacher1</option>'; // Default option
+                        teacherDropdown.innerHTML = '<option value="">Choose a Teacher</option>'; // Default option
 
                         response.data.forEach((teacher) => {
                             const option = document.createElement('option');

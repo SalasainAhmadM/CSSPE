@@ -395,7 +395,7 @@ $teacherResult = $conn->query($teacherQuery);
     <script>
         function showNote(note) {
             Swal.fire({
-                title: 'Item Note',
+                title: 'Warning Note',
                 text: note,
                 icon: 'info',
                 confirmButtonText: 'Close',

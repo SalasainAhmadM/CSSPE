@@ -31,37 +31,6 @@ if ($result->num_rows > 0) {
     <link rel="stylesheet" href="../assets/css/borrowing.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
 </head>
-<style>
-    .hover-unique-id {
-        position: relative;
-        cursor: pointer;
-    }
-
-    .hover-unique-id .tooltip {
-        display: none;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: #f5f5f5;
-        color: #000;
-        border: 1px solid #ccc;
-        padding: 5px;
-        white-space: pre-wrap;
-        z-index: 10;
-        font-family: Arial, sans-serif;
-        font-size: 1rem;
-        text-align: center;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-        border-radius: 5px;
-        min-width: 100px;
-        max-width: 200px;
-    }
-
-    .hover-unique-id:hover .tooltip {
-        display: block;
-    }
-</style>
 
 <body>
     <div class="body">
@@ -180,10 +149,10 @@ if ($result->num_rows > 0) {
                         <thead>
                             <tr>
                                 <th>Id</th>
-                                <th>Item Id</th>
                                 <th>Item Name</th>
                                 <th>Brand</th>
                                 <th>Quantity</th>
+                                <th>Class Schedule</th>
                                 <th>Borrow Date</th>
                                 <th>Return Date</th>
                                 <th>Fullname</th>
@@ -281,6 +250,84 @@ if ($result->num_rows > 0) {
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        function confirmReturn() {
+            const itemName = document.getElementById('itemName').value.trim();
+            const itemBrand = document.getElementById('itemBrand').value.trim();
+            const quantityBorrowed = document.getElementById('quantityBorrowed').value.trim();
+            const returnQuantity = document.getElementById('returnQuantity').value.trim();
+            const damaged = document.getElementById('damaged').value.trim();
+            const lost = document.getElementById('lost').value.trim();
+            const replaced = document.getElementById('replaced').value.trim();
+
+            if (!returnQuantity || returnQuantity <= 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Return Quantity',
+                    text: 'Please enter a valid return quantity.',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Do you want to confirm the return?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, confirm it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const transactionId = document.querySelector('.addContainer').getAttribute('data-transaction-id');
+
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', './endpoints/return_items.php', true);
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState === 4 && xhr.status === 200) {
+                            try {
+                                const response = JSON.parse(xhr.responseText);
+                                if (response.status === 'success') {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: response.message,
+                                        showConfirmButton: false,
+                                        timer: 3000
+                                    });
+                                    closeReturnModal();
+                                    fetchTransactions();
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: response.message
+                                    });
+                                }
+                            } catch (e) {
+                                console.error('Error parsing response:', e);
+                            }
+                        }
+                    };
+
+                    const requestData = {
+                        transaction_id: transactionId,
+                        return_quantity: returnQuantity,
+                        damaged: damaged,
+                        lost: lost,
+                        replaced: replaced,
+                    };
+
+                    xhr.send(JSON.stringify(requestData));
+                }
+            });
+        }
+
+        function closeReturnModal() {
+            document.querySelector('.addContainer').style.display = 'none';
+            document.querySelector('.addContainer').removeAttribute('data-transaction-id');
+        }
+
         function fetchTransactions() {
             const xhr = new XMLHttpRequest();
             xhr.open('GET', './endpoints/get_item_transactions_approved.php', true);
@@ -314,16 +361,10 @@ if ($result->num_rows > 0) {
                                 const row = document.createElement('tr');
                                 row.innerHTML = `
                             <td>${transaction.transaction_id}</td>
-                             <td>${transaction.item_id}</td>
                             <td>${transaction.item_name}</td>
                             <td>${transaction.item_brand}</td>
-                            <td>
-                               <span class="hover-unique-id">
-                               ${transaction.quantity_borrowed}
-                               <div class="tooltip">${transaction.unique_ids}</div>
-                               </span>
-
-                            </td>
+                            <td>${transaction.quantity_borrowed}</td>
+                            <td>${transaction.class_date} - ${formatTime24To12(transaction.schedule_from)} - ${formatTime24To12(transaction.schedule_to)}</td>
                             <td>${transaction.borrowed_at ? formatDateTimeWithNewline(transaction.borrowed_at) : 'N/A'}</td>
                             <td>${transaction.return_date}</td>
                             <td>${transaction.first_name} ${transaction.last_name}</td>
@@ -334,7 +375,7 @@ if ($result->num_rows > 0) {
                                 <button class="addButton" style="height: 2rem;" onclick="editStatusRemark(${transaction.transaction_id}, '${transaction.status_remark}')"><i class="fa-solid fa-pen-to-square"></i></button>
                             </td>
                             <td class="button">
-                                <button class="addButton" style="width: 7rem;" onclick="openReturnModal(${transaction.transaction_id})">Return</button>
+                               <button class="addButton" style="width: 7rem;" onclick="openReturnModal(${transaction.transaction_id})">Return</button>
                             </td>
                         `;
                                 tbody.appendChild(row);
@@ -348,240 +389,6 @@ if ($result->num_rows > 0) {
                 }
             };
             xhr.send();
-        }
-
-        function confirmReturn() {
-            const itemName = document.getElementById('itemName').value.trim();
-            const itemBrand = document.getElementById('itemBrand').value.trim();
-            const quantityBorrowed = document.getElementById('quantityBorrowed').value.trim();
-            const returnQuantity = document.getElementById('returnQuantity').value.trim();
-            const damaged = parseInt(document.getElementById('damaged').value.trim(), 10);
-            const lost = parseInt(document.getElementById('lost').value.trim(), 10);
-            const replaced = parseInt(document.getElementById('replaced').value.trim(), 10);
-
-            if (!returnQuantity || returnQuantity <= 0) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid Return Quantity',
-                    text: 'Please enter a valid return quantity.',
-                    confirmButtonText: 'OK'
-                });
-                return;
-            }
-
-            const transactionId = document.querySelector('.addContainer').getAttribute('data-transaction-id');
-
-            // Track selected items globally to exclude from subsequent modals
-            let selectedIds = new Set();
-
-            function showUniqueIdAlert(type, quantity, uniqueIds) {
-                return new Promise((resolve) => {
-                    // Filter out already selected IDs
-                    const availableIds = uniqueIds.filter((idPair) => {
-                        const [id] = idPair.split(':');
-                        return !selectedIds.has(id);
-                    });
-
-                    // Generate checkboxes for remaining IDs
-                    const checkboxes = availableIds.map((idPair) => {
-                        const [id, uniqueId] = idPair.split(':');
-                        return `<div>
-                            <input type="checkbox" value="${id}" id="checkbox-${id}" onclick="limitSelections('${type}', ${quantity})" />
-                            ${uniqueId}
-                        </div>`;
-                    }).join('');
-
-                    if (availableIds.length === 0) {
-                        Swal.fire({
-                            title: `No ${type} Items Available`,
-                            text: `All items have already been selected.`,
-                            icon: 'info',
-                            confirmButtonText: 'OK'
-                        });
-                        resolve([]);
-                        return;
-                    }
-
-                    Swal.fire({
-                        title: `Select ${type} Items`,
-                        html: `
-                    <p>${type} Quantity: ${quantity}</p>
-                    ${checkboxes}
-                `,
-                        showCancelButton: true,
-                        confirmButtonText: 'Confirm',
-                        cancelButtonText: 'Cancel',
-                        preConfirm: () => {
-                            const selected = [];
-                            availableIds.forEach((idPair) => {
-                                const [id] = idPair.split(':');
-                                const checkbox = document.getElementById(`checkbox-${id}`);
-                                if (checkbox && checkbox.checked) {
-                                    selected.push(id);
-                                }
-                            });
-                            return selected;
-                        }
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // Add newly selected IDs to the global set
-                            result.value.forEach((id) => selectedIds.add(id));
-                            resolve(result.value);
-                        } else {
-                            resolve([]);
-                        }
-                    });
-                });
-            }
-
-            // Limit selections in modals based on quantity
-            window.limitSelections = function (type, maxSelections) {
-                const checkboxes = document.querySelectorAll(`input[type="checkbox"]`);
-                const selectedCount = Array.from(checkboxes).filter((cb) => cb.checked).length;
-
-                // Disable unchecked checkboxes if the limit is reached
-                checkboxes.forEach((checkbox) => {
-                    if (!checkbox.checked) {
-                        checkbox.disabled = selectedCount >= maxSelections;
-                    }
-                });
-            };
-
-            // Fetch unique IDs and display SweetAlerts if required
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', `./endpoints/return_transaction_details.php?transaction_id=${transactionId}`, true);
-            xhr.onreadystatechange = async function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    try {
-                        const response = JSON.parse(xhr.responseText);
-                        if (response.status === 'success') {
-                            const transaction = response.data;
-                            const uniqueIds = transaction.unique_ids ? transaction.unique_ids.split(',') : [];
-                            let damagedIds = [], lostIds = [], replacedIds = [];
-
-                            if (damaged > 0) {
-                                damagedIds = await showUniqueIdAlert('Damaged', damaged, uniqueIds);
-                            }
-                            if (lost > 0) {
-                                lostIds = await showUniqueIdAlert('Lost', lost, uniqueIds);
-                            }
-                            if (replaced > 0) {
-                                replacedIds = await showUniqueIdAlert('Replaced', replaced, uniqueIds);
-                            }
-
-                            Swal.fire({
-                                title: 'Are you sure?',
-                                text: 'Do you want to confirm the return?',
-                                icon: 'question',
-                                showCancelButton: true,
-                                confirmButtonText: 'Yes, confirm it!',
-                                cancelButtonText: 'Cancel'
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    const xhr = new XMLHttpRequest();
-                                    xhr.open('POST', './endpoints/return_items.php', true);
-                                    xhr.setRequestHeader('Content-Type', 'application/json');
-
-                                    xhr.onreadystatechange = function () {
-                                        if (xhr.readyState === 4 && xhr.status === 200) {
-                                            try {
-                                                const response = JSON.parse(xhr.responseText);
-                                                if (response.status === 'success') {
-                                                    Swal.fire({
-                                                        icon: 'success',
-                                                        title: response.message,
-                                                        showConfirmButton: false,
-                                                        timer: 3000
-                                                    });
-                                                    closeReturnModal();
-                                                    fetchTransactions();
-                                                } else {
-                                                    Swal.fire({
-                                                        icon: 'error',
-                                                        title: 'Error',
-                                                        text: response.message
-                                                    });
-                                                }
-                                            } catch (e) {
-                                                console.error('Error parsing response:', e);
-                                            }
-                                        }
-                                    };
-
-                                    const requestData = {
-                                        transaction_id: transactionId,
-                                        return_quantity: returnQuantity,
-                                        damaged: damaged,
-                                        lost: lost,
-                                        replaced: replaced,
-                                        damaged_ids: damagedIds,
-                                        lost_ids: lostIds,
-                                        replaced_ids: replacedIds
-                                    };
-
-                                    xhr.send(JSON.stringify(requestData));
-                                }
-                            });
-                        } else {
-                            alert(response.message);
-                        }
-                    } catch (e) {
-                        console.error('Error parsing response:', e);
-                    }
-                }
-            };
-            xhr.send();
-        }
-
-
-
-        function openReturnModal(transactionId) {
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', `./endpoints/return_transaction_details.php?transaction_id=${transactionId}`, true);
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    console.log('Response received:', xhr.responseText); // Debug log
-                    try {
-                        const response = JSON.parse(xhr.responseText);
-                        if (response.status === 'success') {
-                            const transaction = response.data;
-
-                            // Populate modal fields
-                            document.getElementById('itemName').value = transaction.item_name || '';
-                            document.getElementById('itemBrand').value = transaction.item_brand || '';
-                            document.getElementById('quantityBorrowed').value = transaction.quantity_borrowed || '';
-                            document.getElementById('returnQuantity').value = transaction.quantity_borrowed || '';
-                            document.getElementById('damaged').value = 0;
-                            document.getElementById('lost').value = 0;
-                            document.getElementById('replaced').value = 0;
-
-                            // Process unique IDs
-                            const uniqueIds = transaction.unique_ids ? transaction.unique_ids.split(',') : [];
-                            console.log('Unique IDs:', uniqueIds); // Debug log
-
-                            // Set the transaction ID as a data attribute
-                            const modal = document.querySelector('.addContainer');
-                            modal.setAttribute('data-transaction-id', transactionId);
-
-                            // Show the modal
-                            modal.style.display = 'flex';
-                        } else {
-                            alert(response.message);
-                        }
-                    } catch (e) {
-                        console.error('Error parsing response:', e);
-                    }
-                }
-            };
-            xhr.send();
-        }
-
-
-
-
-        function closeReturnModal() {
-            document.querySelector('.addContainer').style.display = 'none';
-            document.querySelector('.addContainer').removeAttribute('data-transaction-id');
         }
 
         function editStatusRemark(transactionId, currentRemark) {
@@ -627,6 +434,44 @@ if ($result->num_rows > 0) {
                     });
                 }
             });
+        }
+
+
+        function openReturnModal(transactionId) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', `./endpoints/return_transaction_details.php?transaction_id=${transactionId}`, true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    console.log('Response received:', xhr.responseText); // Debug log
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.status === 'success') {
+                            const transaction = response.data;
+
+                            // Populate modal fields
+                            document.getElementById('itemName').value = transaction.item_name || '';
+                            document.getElementById('itemBrand').value = transaction.item_brand || '';
+                            document.getElementById('quantityBorrowed').value = transaction.quantity_borrowed || '';
+                            document.getElementById('returnQuantity').value = transaction.quantity_borrowed || '';
+                            document.getElementById('damaged').value = 0;
+                            document.getElementById('lost').value = 0;
+                            document.getElementById('replaced').value = 0;
+
+                            // Set the transaction ID as a data attribute
+                            const modal = document.querySelector('.addContainer');
+                            modal.setAttribute('data-transaction-id', transactionId);
+
+                            // Show the modal
+                            modal.style.display = 'flex';
+                        } else {
+                            alert(response.message);
+                        }
+                    } catch (e) {
+                        console.error('Error parsing response:', e);
+                    }
+                }
+            };
+            xhr.send();
         }
 
 

@@ -46,7 +46,7 @@ $schoolYearFilter = isset($_GET['school_year']) && !empty($_GET['school_year']) 
 
 // Fetch filtered items
 $itemQuery = "
-    SELECT id, name, description, brand, quantity, type, note, image 
+    SELECT id, name, description, type, note, image 
     FROM items 
     WHERE (? IS NULL OR created_at BETWEEN 
         (SELECT start_date FROM school_years WHERE id = ?) AND 
@@ -216,8 +216,6 @@ $totalPages = ceil($totalItems / $limit);
                                 <th>Item Name</th>
                                 <th>Image</th>
                                 <th>Description</th>
-                                <th>Brand</th>
-                                <th>Quantity</th>
                                 <th>Type</th>
                                 <th>Warning Note</th>
                                 <th>Action</th>
@@ -238,8 +236,6 @@ $totalPages = ceil($totalItems / $limit);
                                         <?php endif; ?>
                                     </td>
                                     <td><?php echo htmlspecialchars($item['description']); ?></td>
-                                    <td><?php echo htmlspecialchars($item['brand']); ?></td>
-                                    <td><?php echo htmlspecialchars($item['quantity']); ?></td>
                                     <td><?php echo htmlspecialchars($item['type'] === 'sport' ? 'Sport' : ($item['type'] === 'gadgets' ? 'Gadget' : 'Unknown')); ?>
                                     </td>
                                     <td><?php echo htmlspecialchars($item['note']); ?></td>
@@ -248,17 +244,11 @@ $totalPages = ceil($totalItems / $limit);
                                             data-id="<?php echo $item['id']; ?>"
                                             data-name="<?php echo htmlspecialchars($item['name']); ?>"
                                             data-description="<?php echo htmlspecialchars($item['description']); ?>"
-                                            data-brand="<?php echo htmlspecialchars($item['brand']); ?>"
                                             data-note="<?php echo htmlspecialchars($item['note']); ?>"
                                             data-type="<?php echo htmlspecialchars($item['type']); ?>"
-                                            data-quantity="<?php echo htmlspecialchars($item['quantity']); ?>"
                                             data-image="../assets/uploads/<?php echo htmlspecialchars($item['image']); ?>">Edit</button>
-                                        <button
-                                            onclick="window.location.href='inventory_items.php?id=<?php echo $item['id']; ?>'"
-                                            class="addButton" style="width: 5rem;">View</button>
                                         <button onclick="deleteItem(<?php echo $item['id']; ?>)" class="addButton1"
                                             style="width: 5rem;">Delete</button>
-
                                     </td>
                                 </tr>
                             <?php endwhile; ?>
@@ -297,8 +287,57 @@ $totalPages = ceil($totalItems / $limit);
                         <a href="?page=<?php echo $page + 1; ?>" class="next">Next</a>
                     <?php endif; ?>
                 </div>
+
+                <div class="tableContainer">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Item Name</th>
+                                <th>Image</th>
+                                <th>Description</th>
+                                <th>Type</th>
+                                <th>Warning Note</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <?php while ($item = $itemResult->fetch_assoc()): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($item['id']); ?></td>
+                                    <td><?php echo htmlspecialchars($item['name']); ?></td>
+                                    <td>
+                                        <?php if (!empty($item['image'])): ?>
+                                            <img class="image"
+                                                src="../assets/uploads/<?php echo htmlspecialchars($item['image']); ?>"
+                                                alt="Item Image" style="width: 50px; height: 50px;">
+                                        <?php else: ?>
+                                            <span>No Image</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($item['description']); ?></td>
+                                    <td><?php echo htmlspecialchars($item['type'] === 'sport' ? 'Sport' : ($item['type'] === 'gadgets' ? 'Gadget' : 'Unknown')); ?>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($item['note']); ?></td>
+                                    <td class="button">
+                                        <button onclick="editItem(this)" class="addButton" style="width: 5rem;"
+                                            data-id="<?php echo $item['id']; ?>"
+                                            data-name="<?php echo htmlspecialchars($item['name']); ?>"
+                                            data-description="<?php echo htmlspecialchars($item['description']); ?>"
+                                            data-note="<?php echo htmlspecialchars($item['note']); ?>"
+                                            data-type="<?php echo htmlspecialchars($item['type']); ?>"
+                                            data-image="../assets/uploads/<?php echo htmlspecialchars($item['image']); ?>">Edit</button>
+                                        <button onclick="deleteItem(<?php echo $item['id']; ?>)" class="addButton1"
+                                            style="width: 5rem;">Delete</button>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
+
     </div>
 
 
@@ -335,13 +374,6 @@ $totalPages = ceil($totalItems / $limit);
                     </div>
 
                     <div class="inputContainer">
-                        <input id="itemBrand" class="inputEmail" type="text" placeholder="Brand:" required>
-                    </div>
-
-                    <div class="inputContainer">
-                        <input id="itemQuantity" class="inputEmail" type="number" placeholder="Quantity:" required>
-                    </div>
-                    <div class="inputContainer">
                         <select id="itemType" class="inputEmail" required>
                             <option value="" disabled selected hidden>Type:</option>
                             <option value="sport">Sport</option>
@@ -349,7 +381,7 @@ $totalPages = ceil($totalItems / $limit);
                         </select>
                     </div>
                     <div class="inputContainer">
-                        <input id="itemNote" class="inputEmail" type="text" placeholder="Note: (Optional)">
+                        <input id="itemNote" class="inputEmail" type="text" placeholder="Note: (Optional)" required>
                     </div>
                     <div class="inputContainer" style="height: 10rem;">
                         <textarea id="itemDescription" class="inputEmail" placeholder="Description" required></textarea>
@@ -406,17 +438,6 @@ $totalPages = ceil($totalItems / $limit);
                         <input class="inputEmail" type="text" placeholder="Item Name:">
                     </div>
 
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Brand:</label>
-                        <input class="inputEmail" type="text" placeholder="Brand:">
-                    </div>
-
-                    <div class="inputContainer" style="flex-direction: column; height: 5rem;">
-                        <label for=""
-                            style="justify-content: left; display: flex; width: 100%; margin-left: 10%; font-size: 1.2rem;">Quantity:</label>
-                        <input class="inputEmail" type="number" placeholder="Quantity:">
-                    </div>
 
                     <div class="inputContainer" style="flex-direction: column; height: 5rem;">
                         <label for="type"
@@ -540,8 +561,6 @@ $totalPages = ceil($totalItems / $limit);
 
             const formData = new FormData();
             formData.append('name', document.getElementById('itemName').value.trim());
-            formData.append('brand', document.getElementById('itemBrand').value.trim());
-            formData.append('quantity', document.getElementById('itemQuantity').value);
             formData.append('description', document.getElementById('itemDescription').value.trim());
             formData.append('type', document.getElementById('itemType').value.trim());
             formData.append('note', document.getElementById('itemNote').value.trim());
@@ -592,18 +611,14 @@ $totalPages = ceil($totalItems / $limit);
             const id = button.getAttribute('data-id');
             const name = button.getAttribute('data-name');
             const description = button.getAttribute('data-description');
-            const brand = button.getAttribute('data-brand');
             const note = button.getAttribute('data-note');
-            const quantity = button.getAttribute('data-quantity');
             const type = button.getAttribute('data-type');
             const image = button.getAttribute('data-image');
 
             document.querySelector('.editContainer').style.display = 'block';
 
             document.querySelector('.editContainer input[placeholder="Item Name:"]').value = name;
-            document.querySelector('.editContainer input[placeholder="Brand:"]').value = brand;
             document.querySelector('.editContainer input[placeholder="Note:"]').value = note;
-            document.querySelector('.editContainer input[placeholder="Quantity:"]').value = quantity;
 
             const typeDropdown = document.querySelector('.editContainer select[name="type"]');
             typeDropdown.value = type || 'sport';
@@ -633,13 +648,11 @@ $totalPages = ceil($totalItems / $limit);
         function saveItem() {
             const id = document.getElementById('previewImage').getAttribute('data-id');
             const name = document.querySelector('.editContainer input[placeholder="Item Name:"]').value.trim();
-            const brand = document.querySelector('.editContainer input[placeholder="Brand:"]').value.trim();
             const note = document.querySelector('.editContainer input[placeholder="Note:"]').value.trim();
-            const quantity = document.querySelector('.editContainer input[placeholder="Quantity:"]').value.trim();
             const type = document.querySelector('.editContainer select[name="type"]').value.trim();
             const description = document.querySelector('.editContainer textarea[placeholder="Edit Description:"]').value.trim();
 
-            if (!id || !name || !brand || !quantity || !type || !description) {
+            if (!id || !name || !type || !description) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Missing Information',
@@ -651,9 +664,7 @@ $totalPages = ceil($totalItems / $limit);
             const formData = new FormData();
             formData.append('id', id);
             formData.append('name', name);
-            formData.append('brand', brand);
             formData.append('note', note);
-            formData.append('quantity', quantity);
             formData.append('type', type);
             formData.append('description', description);
 

@@ -41,36 +41,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception('Failed to record transaction.');
         }
 
-        $transaction_id = $conn->insert_id;
-
-        // Fetch available item quantities ensuring uniqueness
-        $query = "SELECT id FROM item_quantities WHERE item_id = ? AND id NOT IN (
-                    SELECT item_quantity_id FROM transaction_item_quantities
-                 ) LIMIT ?";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param('ii', $item_id, $quantity);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        $item_quantities = [];
-        while ($row = $result->fetch_assoc()) {
-            $item_quantities[] = $row['id'];
-        }
-
-        if (count($item_quantities) < $quantity) {
-            throw new Exception('Not enough unique item quantities available.');
-        }
-
-        // Add to `transaction_item_quantities`
-        $query = "INSERT INTO transaction_item_quantities (transaction_id, item_quantity_id) VALUES (?, ?)";
-        $stmt = $conn->prepare($query);
-        foreach ($item_quantities as $item_quantity_id) {
-            $stmt->bind_param('ii', $transaction_id, $item_quantity_id);
-            if (!$stmt->execute()) {
-                throw new Exception('Failed to record item quantities for transaction.');
-            }
-        }
-
         // Update `items` table
         $newQuantity = $item['quantity'] - $quantity;
         $query = "UPDATE items SET quantity = ? WHERE id = ?";

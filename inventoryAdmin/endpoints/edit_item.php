@@ -40,6 +40,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $quantityChange = $quantity - $currentQuantity;
     $newQuantityOrigin = $quantityOrigin + $quantityChange;
 
+    // Handle item_quantities adjustments
+    if ($quantityChange > 0) {
+        // Add new `item_quantities` rows
+        $stmtInsert = $conn->prepare("INSERT INTO item_quantities (item_id, unique_id) VALUES (?, ?)");
+        for ($i = 0; $i < $quantityChange; $i++) {
+            $uniqueId = str_pad(mt_rand(0, 999999), 6, '0', STR_PAD_LEFT);
+            $stmtInsert->bind_param("is", $id, $uniqueId);
+            $stmtInsert->execute();
+        }
+        $stmtInsert->close();
+    } elseif ($quantityChange < 0) {
+        // Remove excess `item_quantities` rows
+        $quantityToDelete = abs($quantityChange);
+
+        // Fetch IDs to delete
+        $stmtSelect = $conn->prepare("SELECT id FROM item_quantities WHERE item_id = ? ORDER BY id DESC LIMIT ?");
+        $stmtSelect->bind_param("ii", $id, $quantityToDelete);
+        $stmtSelect->execute();
+        $result = $stmtSelect->get_result();
+
+        $idsToDelete = [];
+        while ($row = $result->fetch_assoc()) {
+            $idsToDelete[] = $row['id'];
+        }
+        $stmtSelect->close();
+
+        if (!empty($idsToDelete)) {
+            $placeholders = implode(',', array_fill(0, count($idsToDelete), '?'));
+            $stmtDelete = $conn->prepare("DELETE FROM item_quantities WHERE id IN ($placeholders)");
+            $stmtDelete->bind_param(str_repeat('i', count($idsToDelete)), ...$idsToDelete);
+            $stmtDelete->execute();
+            $stmtDelete->close();
+        }
+    }
+
+
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
         $targetDir = '../../assets/uploads/';
         $fileName = uniqid() . '-' . basename($_FILES['image']['name']);
@@ -60,6 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
+    // Update `items` table
     $query = "UPDATE items SET name = ?, type = ?, note = ?, description = ?, brand = ?, quantity = ?, quantity_origin = ?";
     if ($image) {
         $query .= ", image = ?";

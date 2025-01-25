@@ -4,7 +4,7 @@ require_once '../../conn/conn.php';
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $query = "SELECT id, first_name, last_name FROM users WHERE role = 'Instructor'  AND ban = 0";
+    $query = "SELECT id, first_name, last_name FROM users WHERE role = 'Instructor'";
     $result = $conn->query($query);
 
     if ($result->num_rows > 0) {
