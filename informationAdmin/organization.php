@@ -464,7 +464,6 @@ if (isset($_GET['delete_id'])) {
                 <div class="subAddContainer">
                     <div class="titleContainer">
                         <p>Edit Organization</p>
-                        <p>Edit Organization</p>
                     </div>
 
                     <div class="subLoginContainer">
@@ -544,7 +543,7 @@ if (isset($_GET['delete_id'])) {
     </form>
 
     <script src="../assets/js/sidebar.js"></script>
-    <!-- <script src="../assets/js/program.js"></script> -->
+
     <script src="../assets/js/uploadImage.js"></script>
     <script src="../assets/js/printTable.js"></script>
     <script src="../assets/js/search.js"></script>

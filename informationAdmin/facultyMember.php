@@ -443,7 +443,7 @@ if (isset($_POST['update_faculty'])) {
     <form method="POST" action="" enctype="multipart/form-data">
         <div class="addContainer" style="display: none; background-color: none;">
             <div class="addContainer">
-                <div class="subAddContainer">
+                <div class="subAddContainer" style="transform: scale(0.9);">
                     <div class="titleContainer">
                         <p>Add Faculty Member</p>
                     </div>
@@ -543,7 +543,7 @@ if (isset($_POST['update_faculty'])) {
     <form method="POST" action="" enctype="multipart/form-data">
         <div class="editContainer" style="display: none; background-color: none;">
             <div class="editContainer">
-                <div class="subAddContainer">
+                <div class="subAddContainer" style="transform: scale(0.9);">
                     <div class="titleContainer">
                         <p>Edit Faculty Member Information</p>
                     </div>
