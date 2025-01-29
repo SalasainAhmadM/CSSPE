@@ -309,7 +309,7 @@ $teacherResult = $conn->query($teacherQuery);
     <div class="editContainer"
         style="display: none; background-color: rgba(0, 0, 0, 0.5); position: fixed; top: 0; left: 0; width: 100%; height: 100%; justify-content: center; align-items: center;">
         <div class="subAddContainer"
-            style="background-color: white; padding: 20px; border-radius: 10px;transform: scale(0.65);">
+            style="background-color: white; padding: 20px; border-radius: 10px;transform: scale(0.80);">
             <div class="titleContainer">
                 <p>Borrowed Item</p>
             </div>
@@ -353,10 +353,10 @@ $teacherResult = $conn->query($teacherQuery);
                 </div>
 
                 <!-- Borrow Date -->
-                <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                <!-- <div class="inputContainer" style="flex-direction: column; height: 5rem;">
                     <label>Borrow Date:</label>
                     <input id="borrowDate" class="inputEmail" type="date">
-                </div>
+                </div> -->
 
                 <!-- Return Date -->
                 <div class="inputContainer" style="flex-direction: column; height: 5rem;">
@@ -365,13 +365,13 @@ $teacherResult = $conn->query($teacherQuery);
                 </div>
 
                 <!-- Class Date -->
-                <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                <!-- <div class="inputContainer" style="flex-direction: column; height: 5rem;">
                     <label>Class Date:</label>
                     <input id="classDate" class="inputEmail" type="date">
-                </div>
+                </div> -->
 
                 <!-- Schedule Time -->
-                <div class="inputContainer" style="flex-direction: column; height: 5rem;">
+                <!-- <div class="inputContainer" style="flex-direction: column; height: 5rem;">
                     <label>Class schedule time from:</label>
                     <input id="timeFrom" class="inputEmail" type="time">
                 </div>
@@ -379,7 +379,7 @@ $teacherResult = $conn->query($teacherQuery);
                 <div class="inputContainer" style="flex-direction: column; height: 5rem;">
                     <label>Class schedule time to:</label>
                     <input id="timeTo" class="inputEmail" type="time">
-                </div>
+                </div> -->
 
                 <!-- Buttons -->
                 <div class="inputContainer" style="gap: 0.5rem; justify-content: right; padding-right: 1rem;">
@@ -390,6 +390,24 @@ $teacherResult = $conn->query($teacherQuery);
         </div>
     </div>
 
+    <script>
+        function setMinDate() {
+            const manilaTime = new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" });
+            const today = new Date(manilaTime);
+
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, "0");
+            const dd = String(today.getDate()).padStart(2, "0");
+            const minDate = `${yyyy}-${mm}-${dd}`;
+
+            const dateInputs = document.querySelectorAll('input[type="date"]');
+            dateInputs.forEach(input => {
+                input.min = minDate;
+            });
+        }
+
+        setMinDate();
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
@@ -457,13 +475,9 @@ $teacherResult = $conn->query($teacherQuery);
             const itemId = document.getElementById('itemId').value;
             const teacherId = document.getElementById('teacherSelect').value;
             const quantity = document.getElementById('quantity').value;
-            const borrowDate = document.getElementById('borrowDate').value;
             const returnDate = document.getElementById('returnDate').value;
-            const classDate = document.getElementById('classDate').value;
-            const scheduleFrom = document.getElementById('timeFrom').value;
-            const scheduleTo = document.getElementById('timeTo').value;
 
-            if (!teacherId || !quantity || !borrowDate || !returnDate || !classDate || !scheduleFrom || !scheduleTo) {
+            if (!teacherId || !quantity || !returnDate) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Missing Information',
@@ -487,11 +501,7 @@ $teacherResult = $conn->query($teacherQuery);
                     formData.append('item_id', itemId);
                     formData.append('teacher', teacherId);
                     formData.append('quantity', quantity);
-                    formData.append('borrow_date', borrowDate);
                     formData.append('return_date', returnDate);
-                    formData.append('class_date', classDate);
-                    formData.append('schedule_from', scheduleFrom);
-                    formData.append('schedule_to', scheduleTo);
 
                     fetch('borrow_item.php', {
                         method: 'POST',

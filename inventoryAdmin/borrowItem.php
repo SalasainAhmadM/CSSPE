@@ -458,6 +458,9 @@ if ($result->num_rows > 0) {
                             const transaction = response.data;
                             const uniqueIds = transaction.unique_ids ? transaction.unique_ids.split(',') : [];
                             let damagedIds = [], lostIds = [], replacedIds = [];
+                            const allUniqueIds = uniqueIds.map(idPair => idPair.split(':')[0]); // Extract all unique IDs
+                            const selectedIds = new Set([...damagedIds, ...lostIds, ...replacedIds]);
+                            const goodIds = allUniqueIds.filter(id => !selectedIds.has(id)); // IDs not marked as damaged, lost, or replaced
 
                             if (damaged > 0) {
                                 damagedIds = await showUniqueIdAlert('Damaged', damaged, uniqueIds);
@@ -516,7 +519,8 @@ if ($result->num_rows > 0) {
                                         replaced: replaced,
                                         damaged_ids: damagedIds,
                                         lost_ids: lostIds,
-                                        replaced_ids: replacedIds
+                                        replaced_ids: replacedIds,
+                                        good_ids: goodIds
                                     };
 
                                     xhr.send(JSON.stringify(requestData));

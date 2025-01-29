@@ -79,11 +79,15 @@ try {
 
     // Insert records into returned_items table with unique_id_remark
     $statuses = [
-        'Good' => $data['good_ids'] ?? [], // Remaining unchecked unique IDs
         'Damaged' => $data['damaged_ids'] ?? [],
         'Lost' => $data['lost_ids'] ?? [],
         'Replaced' => $data['replaced_ids'] ?? []
     ];
+
+    $all_non_good_ids = array_merge($statuses['Damaged'], $statuses['Lost'], $statuses['Replaced']);
+    $good_ids = array_diff($data['good_ids'] ?? [], $all_non_good_ids); // Exclude already used IDs
+
+    $statuses['Good'] = $good_ids;
 
     $insert_query = "
         INSERT INTO returned_items (transaction_id, item_id, quantity_returned, status, unique_id_remark, remarks)
@@ -112,7 +116,6 @@ try {
             }
         }
     }
-
 
     // Insert into item_status_tracking table for damaged, lost, or replaced items
     $item_status_quantities = [

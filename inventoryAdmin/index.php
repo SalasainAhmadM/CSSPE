@@ -91,12 +91,18 @@ $borrowedQuery = "
         u.first_name, 
         u.last_name, 
         u.contact_no, 
-        u.email
+        u.email,
+        GROUP_CONCAT(iq.unique_id ORDER BY iq.id SEPARATOR ', ') AS unique_ids
     FROM item_transactions t
     JOIN items i ON t.item_id = i.id
     JOIN users u ON t.users_id = u.id
+    JOIN transaction_item_quantities tiq ON t.transaction_id = tiq.transaction_id
+    JOIN item_quantities iq ON tiq.item_quantity_id = iq.id
     WHERE t.status IN ('Pending', 'Approved')
+    GROUP BY t.transaction_id
+    HAVING COUNT(iq.unique_id) >= t.quantity_borrowed
 ";
+
 $borrowedStmt = $conn->prepare($borrowedQuery);
 $borrowedStmt->execute();
 $borrowedResult = $borrowedStmt->get_result();
@@ -114,11 +120,14 @@ $returnedQuery = "
         u.first_name, 
         u.last_name, 
         u.contact_no, 
-        u.email
+        u.email,
+        GROUP_CONCAT(r.unique_id_remark SEPARATOR ', ') AS unique_ids
     FROM item_transactions t
     JOIN items i ON t.item_id = i.id
     JOIN users u ON t.users_id = u.id
+    LEFT JOIN returned_items r ON t.transaction_id = r.transaction_id AND t.item_id = r.item_id
     WHERE t.status = 'Returned'
+    GROUP BY t.transaction_id, i.id, i.brand, t.quantity_returned, t.returned_at, u.first_name, u.last_name, u.contact_no, u.email
 ";
 $returnedStmt = $conn->prepare($returnedQuery);
 $returnedStmt->execute();
@@ -274,6 +283,36 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <link rel="stylesheet" href="../assets/css/dashboard.css">
 </head>
 <style>
+    .hover-unique-id {
+        position: relative;
+        cursor: pointer;
+    }
+
+    .hover-unique-id .tooltip {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #f5f5f5;
+        color: #000;
+        border: 1px solid #ccc;
+        padding: 5px;
+        white-space: pre-wrap;
+        z-index: 10;
+        font-family: Arial, sans-serif;
+        font-size: 1rem;
+        text-align: center;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 5px;
+        min-width: 100px;
+        max-width: 200px;
+    }
+
+    .hover-unique-id:hover .tooltip {
+        display: block;
+    }
+
     .replacedButton {
         width: 92%;
         height: 3rem;
@@ -562,7 +601,7 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                         <tbody>
                             <?php if (empty($borrowedItems)): ?>
                                 <tr>
-                                    <td colspan="8" style="text-align: center;">No borrowed items.</td>
+                                    <td colspan="9" style="text-align: center;">No borrowed items.</td>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($borrowedItems as $item): ?>
@@ -571,7 +610,13 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                         <td><?= $item['item_id']; ?></td>
                                         <td><?= $item['item_name']; ?></td>
                                         <td><?= $item['brand']; ?></td>
-                                        <td><?= $item['quantity_borrowed']; ?></td>
+                                        <td>
+                                            <span class="hover-unique-id">
+                                                <?= $item['quantity_borrowed']; ?>
+                                                <div class="tooltip"><?= htmlspecialchars($item['unique_ids']); ?></div>
+                                            </span>
+                                        </td>
+
                                         <td><?= $item['return_date']; ?></td>
                                         <td><?= $item['first_name'] . ' ' . $item['last_name']; ?></td>
                                         <td><?= $item['contact_no']; ?></td>
@@ -580,6 +625,7 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </tbody>
+
                     </table>
                 </div>
 
@@ -626,7 +672,12 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                         <td><?= $item['item_id']; ?></td>
                                         <td><?= $item['item_name']; ?></td>
                                         <td><?= $item['brand']; ?></td>
-                                        <td><?= $item['quantity_returned']; ?></td>
+                                        <td>
+                                            <span class="hover-unique-id">
+                                                <?= $item['quantity_returned']; ?>
+                                                <div class="tooltip"><?= htmlspecialchars($item['unique_ids']); ?></div>
+                                            </span>
+                                        </td>
                                         <td><?= $item['returned_at']; ?></td>
                                         <td><?= $item['first_name'] . ' ' . $item['last_name']; ?></td>
                                         <td><?= $item['contact_no']; ?></td>
