@@ -136,6 +136,7 @@ $notifResult = $conn->query($notifQuery);
                 </div>
                 <style>
                     .notificationContainer {
+                        position: relative;
                         display: flex;
                         align-items: center;
                         justify-content: space-between;
@@ -164,10 +165,13 @@ $notifResult = $conn->query($notifQuery);
                     }
 
                     .deleteContainer {
+                        position: absolute;
+                        right: 15px;
+                        top: 50%;
+                        transform: translateY(-50%);
                         display: flex;
-                        align-items: center;
-                        justify-content: flex-end;
-                        margin-left: 1rem;
+                        align-items: right;
+                        justify-content: right;
                     }
 
                     .deleteButton {
@@ -180,18 +184,31 @@ $notifResult = $conn->query($notifQuery);
                         font-size: 0.9rem;
                         width: auto;
                         min-width: 60px;
-
                     }
                 </style>
-                <div class="dashboardContainer">
+                <div class="searchContainer">
+                    <input class="searchBar" type="text" placeholder="Search..." oninput="searchCard()"
+                        id="searchInput">
+                    <select class="addButton size" id="filterDropdown" onchange="filterByDate()">
+                        <option value="">Filter</option>
+                        <option value="all">All</option>
+                        <option value="day">This day</option>
+                        <option value="week">This week</option>
+                        <option value="month">This month</option>
+                    </select>
+                </div>
+
+                <div style="margin-top: 20px" class="dashboardContainer" id="notifContainer">
                     <?php if ($notifResult && $notifResult->num_rows > 0): ?>
                         <?php while ($notif = $notifResult->fetch_assoc()): ?>
-                            <div class="notificationContainer" data-notif-id="<?php echo $notif['id']; ?>">
+                            <div class="notificationContainer" data-notif-id="<?php echo $notif['id']; ?>"
+                                data-description="<?php echo htmlspecialchars($notif['description']); ?>"
+                                data-created-at="<?php echo htmlspecialchars($notif['created_at']); ?>">
+
                                 <div class="subNotificaitonContainer">
                                     <div class="messageContainer">
                                         <p><?php echo htmlspecialchars($notif['description']); ?></p>
                                     </div>
-
                                     <div class="dateContainer">
                                         <p style="margin-left: 0.5rem;"><?php echo htmlspecialchars($notif['created_at']); ?>
                                         </p>
@@ -213,6 +230,48 @@ $notifResult = $conn->query($notifQuery);
                         </div>
                     <?php endif; ?>
                 </div>
+
+                <script>
+                    function searchCard() {
+                        let input = document.getElementById('searchInput').value.toLowerCase();
+                        let notifContainers = document.querySelectorAll('.notificationContainer');
+
+                        notifContainers.forEach(container => {
+                            let description = container.getAttribute('data-description').toLowerCase();
+                            if (description.includes(input)) {
+                                container.style.display = "block";
+                            } else {
+                                container.style.display = "none";
+                            }
+                        });
+                    }
+
+                    function filterByDate() {
+                        let filterValue = document.getElementById('filterDropdown').value;
+                        let notifContainers = document.querySelectorAll('.notificationContainer');
+                        let currentDate = new Date();
+
+                        notifContainers.forEach(container => {
+                            let createdAt = new Date(container.getAttribute('data-created-at'));
+                            let show = false;
+
+                            if (filterValue === "all") {
+                                show = true;
+                            } else if (filterValue === "day") {
+                                show = createdAt.toDateString() === currentDate.toDateString();
+                            } else if (filterValue === "week") {
+                                let oneWeekAgo = new Date();
+                                oneWeekAgo.setDate(currentDate.getDate() - 7);
+                                show = createdAt >= oneWeekAgo;
+                            } else if (filterValue === "month") {
+                                show = createdAt.getMonth() === currentDate.getMonth() && createdAt.getFullYear() === currentDate.getFullYear();
+                            }
+
+                            container.style.display = show ? "block" : "none";
+                        });
+                    }
+                </script>
+
 
             </div>
         </div>

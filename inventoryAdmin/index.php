@@ -88,6 +88,7 @@ $borrowedQuery = "
         i.brand, 
         t.quantity_borrowed, 
         t.return_date, 
+        t.borrowed_at, 
         u.first_name, 
         u.last_name, 
         u.contact_no, 
@@ -283,6 +284,20 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <link rel="stylesheet" href="../assets/css/dashboard.css">
 </head>
 <style>
+    .filterButton {
+        width: 92%;
+        height: 3rem;
+        border: none;
+        border-radius: 0.5rem;
+        background-color: rgb(109, 18, 10);
+        color: white;
+        font-size: min(1.2rem, 1.1rem);
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.15s;
+        box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.699);
+    }
+
     .hover-unique-id {
         position: relative;
         cursor: pointer;
@@ -592,20 +607,21 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                 <th>Item Name</th>
                                 <th>Brands</th>
                                 <th>Quantity</th>
+                                <th>Borrow Date</th>
                                 <th>Expected Return Date</th>
                                 <th>Fullname</th>
                                 <th>Contact Number</th>
                                 <th>Email</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="borrowedTable">
                             <?php if (empty($borrowedItems)): ?>
                                 <tr>
                                     <td colspan="9" style="text-align: center;">No borrowed items.</td>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($borrowedItems as $item): ?>
-                                    <tr>
+                                    <tr class="borrowed-row" data-borrowed-at="<?= htmlspecialchars($item['borrowed_at']); ?>">
                                         <td><?= $item['transaction_id']; ?></td>
                                         <td><?= $item['item_id']; ?></td>
                                         <td><?= $item['item_name']; ?></td>
@@ -616,7 +632,7 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                                 <div class="tooltip"><?= htmlspecialchars($item['unique_ids']); ?></div>
                                             </span>
                                         </td>
-
+                                        <td><?= $item['borrowed_at']; ?></td>
                                         <td><?= $item['return_date']; ?></td>
                                         <td><?= $item['first_name'] . ' ' . $item['last_name']; ?></td>
                                         <td><?= $item['contact_no']; ?></td>
@@ -625,17 +641,45 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </tbody>
-
                     </table>
                 </div>
 
                 <div class="buttonContainer">
+                    <select class="filterButton size" id="filterDropdown" onchange="filterByDate()">
+                        <option value="">Filter</option>
+                        <option value="all">All</option>
+                        <option value="month">This month</option>
+                        <option value="year">This year</option>
+                    </select>
                     <button class="addButton" onclick="printBorrowed()">Print</button>
                     <button onclick="borrowed()" class="addButton">Close</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        function filterByDate() {
+            let filterValue = document.getElementById('filterDropdown').value;
+            let borrowedRows = document.querySelectorAll('.borrowed-row');
+            let currentDate = new Date();
+
+            borrowedRows.forEach(row => {
+                let borrowedAt = new Date(row.getAttribute('data-borrowed-at'));
+                let show = false;
+
+                if (filterValue === "all") {
+                    show = true;
+                } else if (filterValue === "month") {
+                    show = borrowedAt.getMonth() === currentDate.getMonth() && borrowedAt.getFullYear() === currentDate.getFullYear();
+                } else if (filterValue === "year") {
+                    show = borrowedAt.getFullYear() === currentDate.getFullYear();
+                }
+
+                row.style.display = show ? "table-row" : "none";
+            });
+        }
+    </script>
 
     <div class="summaryContainer return" style="display: none; background-color: none;">
         <div class="summaryContainer">
@@ -667,7 +711,7 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($returnedItems as $item): ?>
-                                    <tr>
+                                    <tr class="returned-row" data-returned_at="<?= htmlspecialchars($item['returned_at']); ?>">
                                         <td><?= $item['transaction_id']; ?></td>
                                         <td><?= $item['item_id']; ?></td>
                                         <td><?= $item['item_name']; ?></td>
@@ -690,13 +734,41 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 </div>
 
                 <div class="buttonContainer">
+                    <select class="filterButton size" id="filterDropdown2" onchange="filterByDate2()">
+                        <option value="">Filter</option>
+                        <option value="all">All</option>
+                        <option value="month">This month</option>
+                        <option value="year">This year</option>
+                    </select>
                     <button class="addButton">Print</button>
                     <button onclick="return1()" class="addButton">Close</button>
                 </div>
             </div>
         </div>
     </div>
+    <script>
+        function filterByDate2() {
+            let filterValue = document.getElementById('filterDropdown2').value;
+            let returnedRows = document.querySelectorAll('.returned-row');
+            let currentDate = new Date();
 
+            returnedRows.forEach(row => {
+                let returnedAt = new Date(row.getAttribute('data-returned_at'));
+                let show = false;
+
+                if (filterValue === "all") {
+                    show = true;
+                } else if (filterValue === "month") {
+                    show = returnedAt.getMonth() === currentDate.getMonth() && returnedAt.getFullYear() === currentDate.getFullYear();
+                } else if (filterValue === "year") {
+                    show = returnedAt.getFullYear() === currentDate.getFullYear();
+                }
+
+                row.style.display = show ? "table-row" : "none";
+            });
+        }
+
+    </script>
     <div class="summaryContainer available" style="display: none;">
         <div class="summaryContainer">
             <div class="subSummaryContainer">
@@ -773,7 +845,7 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($lostItems as $item): ?>
-                                    <tr>
+                                    <tr class="lost-row" data-lost_at="<?= htmlspecialchars($item['returned_at']); ?>">
                                         <td><?= $item['return_id']; ?></td>
                                         <td><?= $item['item_id']; ?></td>
                                         <td><?= $item['unique_id_remark']; ?></td>
@@ -797,13 +869,41 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     </table>
                 </div>
                 <div class="buttonContainer">
+                    <select class="filterButton size" id="filterDropdown3" onchange="filterByDate3()">
+                        <option value="">Filter</option>
+                        <option value="all">All</option>
+                        <option value="month">This month</option>
+                        <option value="year">This year</option>
+                    </select>
                     <button class="addButton">Print</button>
                     <button onclick="lost()" class="addButton">Close</button>
                 </div>
             </div>
         </div>
     </div>
+    <script>
+        function filterByDate3() {
+            let filterValue = document.getElementById('filterDropdown3').value;
+            let lostRows = document.querySelectorAll('.lost-row');
+            let currentDate = new Date();
 
+            lostRows.forEach(row => {
+                let lostAt = new Date(row.getAttribute('data-lost_at'));
+                let show = false;
+
+                if (filterValue === "all") {
+                    show = true;
+                } else if (filterValue === "month") {
+                    show = lostAt.getMonth() === currentDate.getMonth() && lostAt.getFullYear() === currentDate.getFullYear();
+                } else if (filterValue === "year") {
+                    show = lostAt.getFullYear() === currentDate.getFullYear();
+                }
+
+                row.style.display = show ? "table-row" : "none";
+            });
+        }
+
+    </script>
 
     <div class="summaryContainer damage" style="display: none; background-color: none;">
         <div class="summaryContainer">
@@ -838,7 +938,7 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($damagedItems as $item): ?>
-                                    <tr>
+                                    <tr class="damaged-row" data-damaged_at="<?= htmlspecialchars($item['returned_at']); ?>">
                                         <td><?= $item['return_id']; ?></td>
                                         <td><?= $item['item_id']; ?></td>
                                         <td><?= $item['unique_id_remark']; ?></td>
@@ -864,6 +964,12 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 </div>
 
                 <div class="buttonContainer">
+                    <select class="filterButton size" id="filterDropdown4" onchange="filterByDate4()">
+                        <option value="">Filter</option>
+                        <option value="all">All</option>
+                        <option value="month">This month</option>
+                        <option value="year">This year</option>
+                    </select>
                     <button class="addButton">Print</button>
                     <button onclick="damage()" class="addButton">Close</button>
                 </div>
@@ -871,6 +977,29 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         </div>
     </div>
 
+    <script>
+        function filterByDate4() {
+            let filterValue = document.getElementById('filterDropdown4').value;
+            let damagedRows = document.querySelectorAll('.damaged-row');
+            let currentDate = new Date();
+
+            damagedRows.forEach(row => {
+                let damagedAt = new Date(row.getAttribute('data-damaged_at'));
+                let show = false;
+
+                if (filterValue === "all") {
+                    show = true;
+                } else if (filterValue === "month") {
+                    show = damagedAt.getMonth() === currentDate.getMonth() && damagedAt.getFullYear() === currentDate.getFullYear();
+                } else if (filterValue === "year") {
+                    show = damagedAt.getFullYear() === currentDate.getFullYear();
+                }
+
+                row.style.display = show ? "table-row" : "none";
+            });
+        }
+
+    </script>
 
 
     <div class="summaryContainer replace" style="display: none; background-color: none;">
@@ -905,7 +1034,7 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($replacedItems as $item): ?>
-                                    <tr>
+                                    <tr class="replaced-row" data-replaced_at="<?= htmlspecialchars($item['returned_at']); ?>">
                                         <td><?= $item['return_id']; ?></td>
                                         <td><?= $item['item_id']; ?></td>
                                         <td><?= $item['unique_id_remark']; ?></td>
@@ -925,13 +1054,41 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 </div>
 
                 <div class="buttonContainer">
+                    <select class="filterButton size" id="filterDropdown5" onchange="filterByDate5()">
+                        <option value="">Filter</option>
+                        <option value="all">All</option>
+                        <option value="month">This month</option>
+                        <option value="year">This year</option>
+                    </select>
                     <button class="addButton">Print</button>
                     <button onclick="replace1()" class="addButton">Close</button>
                 </div>
             </div>
         </div>
     </div>
+    <script>
+        function filterByDate5() {
+            let filterValue = document.getElementById('filterDropdown5').value;
+            let replacedRows = document.querySelectorAll('.replaced-row');
+            let currentDate = new Date();
 
+            replacedRows.forEach(row => {
+                let replacedAt = new Date(row.getAttribute('data-replaced_at'));
+                let show = false;
+
+                if (filterValue === "all") {
+                    show = true;
+                } else if (filterValue === "month") {
+                    show = replacedAt.getMonth() === currentDate.getMonth() && replacedAt.getFullYear() === currentDate.getFullYear();
+                } else if (filterValue === "year") {
+                    show = replacedAt.getFullYear() === currentDate.getFullYear();
+                }
+
+                row.style.display = show ? "table-row" : "none";
+            });
+        }
+
+    </script>
     <div class="summaryContainer added" style="display: none;">
         <div class="summaryContainer">
             <div class="subSummaryContainer">
@@ -1015,7 +1172,7 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($overdueItems as $item): ?>
-                                    <tr>
+                                    <tr class="overdue-row" data-overdue_at="<?= htmlspecialchars($item['return_date']); ?>">
                                         <td><?= $item['transaction_id']; ?></td>
                                         <td><?= $item['item_id']; ?></td>
                                         <td><?= $item['item_name']; ?></td>
@@ -1032,12 +1189,41 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     </table>
                 </div>
                 <div class="buttonContainer">
+                    <select class="filterButton size" id="filterDropdown6" onchange="filterByDate6()">
+                        <option value="">Filter</option>
+                        <option value="all">All</option>
+                        <option value="month">This month</option>
+                        <option value="year">This year</option>
+                    </select>
                     <button class="addButton">Print</button>
                     <button onclick="overdue()" class="addButton">Close</button>
                 </div>
             </div>
         </div>
     </div>
+    <script>
+        function filterByDate6() {
+            let filterValue = document.getElementById('filterDropdown6').value;
+            let overdueRows = document.querySelectorAll('.overdue-row');
+            let currentDate = new Date();
+
+            overdueRows.forEach(row => {
+                let overdueAt = new Date(row.getAttribute('data-overdue_at'));
+                let show = false;
+
+                if (filterValue === "all") {
+                    show = true;
+                } else if (filterValue === "month") {
+                    show = overdueAt.getMonth() === currentDate.getMonth() && overdueAt.getFullYear() === currentDate.getFullYear();
+                } else if (filterValue === "year") {
+                    show = overdueAt.getFullYear() === currentDate.getFullYear();
+                }
+
+                row.style.display = show ? "table-row" : "none";
+            });
+        }
+
+    </script>
     <script>
         function updateStatus(returnId) {
             Swal.fire({

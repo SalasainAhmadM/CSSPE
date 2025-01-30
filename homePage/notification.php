@@ -283,30 +283,41 @@ if ($result->num_rows > 0) {
                     <p class="text">Notifications</p>
                 </div>
 
-                <div class="dashboardContainer">
+                <div class="searchContainer">
+                    <input class="searchBar" type="text" placeholder="Search..." oninput="searchNotifications()"
+                        id="searchInput">
+                    <select class="addButton size" id="filterDropdown" onchange="filterNotifications()">
+                        <option value="">Filter</option>
+                        <option value="all">All</option>
+                        <option value="day">This day</option>
+                        <option value="week">This week</option>
+                        <option value="month">This month</option>
+                    </select>
+                </div>
 
+                <div style="margin-top: 20px" class="dashboardContainer" id="notifContainer">
                     <?php foreach ($notifications as $type => $notificationList): ?>
                         <?php if (!empty($notificationList)): ?>
                             <?php foreach ($notificationList as $notification): ?>
-                                
-                                    <div class="notificationContainer">
-                                        <a class="subNotificaitonContainer">
-                                            <div class="messageContainer" style="padding:5px 5px;">
-                                                <h5><?php echo htmlspecialchars($notification['title']); ?></h5>
-                                                <p><?php echo htmlspecialchars($notification['description']); ?></p>
-                                            </div>
+                                <div class="notificationContainer"
+                                    data-description="<?php echo htmlspecialchars($notification['description']); ?>"
+                                    data-created-at="<?php echo htmlspecialchars($notification['formatted_date']); ?>">
 
-                                            <div class="dateContainer" style="padding:10px 2px;">
-                                                <h6 style="margin-left: 0.5rem;">Type:
-                                                    <?php echo htmlspecialchars($type); ?>
-                                                </h6>
-                                                <h6 style="margin-left: 0.5rem;">Date:
-                                                    <?php echo htmlspecialchars($notification['formatted_date']); ?>
-                                                </h6>
-                                            </div>
+                                    <a class="subNotificaitonContainer">
+                                        <div class="messageContainer" style="padding:5px 5px;">
+                                            <h5><?php echo htmlspecialchars($notification['title']); ?></h5>
+                                            <p><?php echo htmlspecialchars($notification['description']); ?></p>
+                                        </div>
+                                        <div class="dateContainer" style="padding:10px 2px;">
+                                            <h6 style="margin-left: 0.5rem;">Type:
+                                                <?php echo htmlspecialchars($type); ?>
+                                            </h6>
+                                            <h6 style="margin-left: 0.5rem;">Date:
+                                                <?php echo htmlspecialchars($notification['formatted_date']); ?>
+                                            </h6>
+                                        </div>
                                     </a>
-                                    </div>
-
+                                </div>
                             <?php endforeach; ?>
                         <?php else: ?>
                             <div class="notificationContainer">
@@ -318,8 +329,45 @@ if ($result->num_rows > 0) {
                             </div>
                         <?php endif; ?>
                     <?php endforeach; ?>
-
                 </div>
+
+                <script>
+                    function searchNotifications() {
+                        let input = document.getElementById('searchInput').value.toLowerCase();
+                        let notifContainers = document.querySelectorAll('.notificationContainer');
+
+                        notifContainers.forEach(container => {
+                            let description = container.getAttribute('data-description').toLowerCase();
+                            container.style.display = description.includes(input) ? "block" : "none";
+                        });
+                    }
+
+                    function filterNotifications() {
+                        let filterValue = document.getElementById('filterDropdown').value;
+                        let notifContainers = document.querySelectorAll('.notificationContainer');
+                        let currentDate = new Date();
+
+                        notifContainers.forEach(container => {
+                            let createdAt = new Date(container.getAttribute('data-created-at'));
+                            let show = false;
+
+                            if (filterValue === "all") {
+                                show = true;
+                            } else if (filterValue === "day") {
+                                show = createdAt.toDateString() === currentDate.toDateString();
+                            } else if (filterValue === "week") {
+                                let oneWeekAgo = new Date();
+                                oneWeekAgo.setDate(currentDate.getDate() - 7);
+                                show = createdAt >= oneWeekAgo;
+                            } else if (filterValue === "month") {
+                                show = createdAt.getMonth() === currentDate.getMonth() && createdAt.getFullYear() === currentDate.getFullYear();
+                            }
+
+                            container.style.display = show ? "block" : "none";
+                        });
+                    }
+                </script>
+
             </div>
         </div>
 

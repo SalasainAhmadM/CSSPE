@@ -71,6 +71,40 @@ $stmt = $conn->prepare($sql);
 $stmt->bind_param("iii", $itemId, $limit, $offset);
 $stmt->execute();
 $result = $stmt->get_result();
+
+// Fetch all item IDs and their unique IDs
+$itemQuantities = [];
+while ($row = $result->fetch_assoc()) {
+    $itemQuantities[$row['unique_id']] = [
+        'id' => $row['id'],
+        'unique_id' => $row['unique_id'],
+        'status' => $row['status'] // Default status from item_transactions
+    ];
+}
+
+// Fetch lost or damaged statuses from returned_items
+$uniqueIds = array_keys($itemQuantities);
+if (!empty($uniqueIds)) {
+    $placeholders = implode(',', array_fill(0, count($uniqueIds), '?'));
+    $statusQuery = "
+        SELECT unique_id_remark, status 
+        FROM returned_items 
+        WHERE unique_id_remark IN ($placeholders) AND status IN ('Lost', 'Damaged')
+    ";
+
+    $stmt = $conn->prepare($statusQuery);
+    $stmt->bind_param(str_repeat('s', count($uniqueIds)), ...$uniqueIds);
+    $stmt->execute();
+    $statusResult = $stmt->get_result();
+
+    while ($statusRow = $statusResult->fetch_assoc()) {
+        $uniqueId = $statusRow['unique_id_remark'];
+        if (isset($itemQuantities[$uniqueId])) {
+            $itemQuantities[$uniqueId]['status'] = $statusRow['status']; // Override with Lost or Damaged
+        }
+    }
+}
+
 ?>
 
 
@@ -195,8 +229,8 @@ $result = $stmt->get_result();
                             </tr>
                         </thead>
                         <tbody id="tableBody">
-                            <?php if ($result->num_rows > 0): ?>
-                                <?php while ($row = $result->fetch_assoc()): ?>
+                            <?php if (!empty($itemQuantities)): ?>
+                                <?php foreach ($itemQuantities as $row): ?>
                                     <tr>
                                         <td><?php echo htmlspecialchars($row['id']); ?></td>
                                         <td><?php echo htmlspecialchars($row['unique_id']); ?></td>
@@ -206,13 +240,14 @@ $result = $stmt->get_result();
                                                 onclick="deleteQuantity(<?php echo $row['id']; ?>)">Delete</button>
                                         </td>
                                     </tr>
-                                <?php endwhile; ?>
+                                <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
                                     <td colspan="4">No records found</td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
+
                     </table>
                 </div>
 
