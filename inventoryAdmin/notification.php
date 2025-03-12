@@ -700,7 +700,8 @@ $notifResult = $conn->query($notifQuery);
 
                 <!-- Search & Filter -->
                 <div style="position: relative;" class="searchContainer">
-                    <input class="searchBar" type="text" placeholder="Search notifications..." oninput="searchCard()" id="searchInput">
+                    <input class="searchBar" type="text" placeholder="Search notifications..." oninput="searchCard()"
+                        id="searchInput">
 
                     <select class="addButton size" id="filterDropdown" onchange="filterByDate()">
                         <option value="">Filter by date</option>
@@ -715,8 +716,7 @@ $notifResult = $conn->query($notifQuery);
                 <div class="dashboardContainer" id="notifContainer">
                     <?php if ($notifResult && $notifResult->num_rows > 0): ?>
                         <?php while ($notif = $notifResult->fetch_assoc()): ?>
-                            <div class="notificationContainer"
-                                data-notif-id="<?php echo $notif['id']; ?>"
+                            <div class="notificationContainer" data-notif-id="<?php echo $notif['id']; ?>"
                                 data-description="<?php echo htmlspecialchars($notif['description']); ?>"
                                 data-created-at="<?php echo htmlspecialchars($notif['created_at']); ?>">
 
@@ -725,7 +725,8 @@ $notifResult = $conn->query($notifQuery);
                                         <p><?php echo htmlspecialchars($notif['description']); ?></p>
                                     </div>
                                     <div class="dateContainer">
-                                        <p><i class="fas fa-clock"></i> <?php echo htmlspecialchars($notif['created_at']); ?></p>
+                                        <p><i class="fas fa-clock"></i> <?php echo htmlspecialchars($notif['created_at']); ?>
+                                        </p>
                                     </div>
                                 </div>
 
@@ -782,7 +783,7 @@ $notifResult = $conn->query($notifQuery);
         window.addEventListener('resize', checkMobile);
 
         // Toggle sidebar on mobile
-        toggleBtn.addEventListener('click', function() {
+        toggleBtn.addEventListener('click', function () {
             sidebar.classList.toggle('active');
 
             if (sidebar.classList.contains('active')) {
@@ -795,7 +796,7 @@ $notifResult = $conn->query($notifQuery);
         });
 
         // Close sidebar when clicking overlay
-        sidebarOverlay.addEventListener('click', function() {
+        sidebarOverlay.addEventListener('click', function () {
             sidebar.classList.remove('active');
             sidebar.style.left = '-280px';
             sidebarOverlay.classList.remove('active');
@@ -891,7 +892,7 @@ $notifResult = $conn->query($notifQuery);
                             const xhr = new XMLHttpRequest();
                             xhr.open('POST', './endpoints/delete_notif.php', true);
                             xhr.setRequestHeader('Content-Type', 'application/json');
-                            xhr.onreadystatechange = function() {
+                            xhr.onreadystatechange = function () {
                                 if (xhr.readyState === 4) {
                                     try {
                                         const response = JSON.parse(xhr.responseText);

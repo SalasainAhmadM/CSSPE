@@ -822,6 +822,7 @@ if (!empty($uniqueIds)) {
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
+                                <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
                                     <td colspan="4" style="text-align: center; padding: 30px;">
@@ -832,6 +833,7 @@ if (!empty($uniqueIds)) {
                                 </tr>
                             <?php endif; ?>
                         </tbody>
+
                     </table>
                 </div>
 

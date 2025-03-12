@@ -741,7 +741,8 @@ if ($result->num_rows > 0) {
 
                 <!-- Search and Filter -->
                 <div class="searchContainer">
-                    <input class="searchBar" type="text" placeholder="Search notifications..." oninput="searchNotifications()" id="searchInput">
+                    <input class="searchBar" type="text" placeholder="Search notifications..."
+                        oninput="searchNotifications()" id="searchInput">
                     <select class="filterDropdown" id="filterDropdown" onchange="filterNotifications()">
                         <option value="">Filter</option>
                         <option value="all">All</option>
@@ -761,7 +762,8 @@ if ($result->num_rows > 0) {
                                     data-created-at="<?php echo htmlspecialchars($notification['formatted_date']); ?>">
                                     <div class="notificationContent">
                                         <h3 class="notificationTitle"><?php echo htmlspecialchars($notification['title']); ?></h3>
-                                        <p class="notificationDesc"><?php echo htmlspecialchars($notification['description']); ?></p>
+                                        <p class="notificationDesc"><?php echo htmlspecialchars($notification['description']); ?>
+                                        </p>
                                         <div class="notificationMeta">
                                             <div class="notificationType">
                                                 <i class="fas fa-tag"></i>
@@ -820,7 +822,7 @@ if ($result->num_rows > 0) {
         window.addEventListener('resize', checkMobile);
 
         // Toggle sidebar on mobile
-        toggleBtn.addEventListener('click', function() {
+        toggleBtn.addEventListener('click', function () {
             sidebar.classList.toggle('active');
 
             if (sidebar.classList.contains('active')) {
@@ -833,7 +835,7 @@ if ($result->num_rows > 0) {
         });
 
         // Close sidebar when clicking overlay
-        sidebarOverlay.addEventListener('click', function() {
+        sidebarOverlay.addEventListener('click', function () {
             sidebar.classList.remove('active');
             sidebar.style.left = '-280px';
             sidebarOverlay.classList.remove('active');

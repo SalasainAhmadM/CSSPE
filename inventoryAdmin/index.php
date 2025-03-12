@@ -90,6 +90,7 @@ $borrowedQuery = "
         t.quantity_borrowed, 
         t.return_date, 
         t.borrowed_at, 
+        t.borrowed_at, 
         u.first_name, 
         u.last_name, 
         u.contact_no, 
