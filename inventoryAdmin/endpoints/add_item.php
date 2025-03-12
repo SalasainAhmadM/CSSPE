@@ -8,14 +8,14 @@ $inventoryAdminId = $_SESSION['user_id'];
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name = trim($_POST['name']);
-    $brand = trim($_POST['brand']);
-    $quantity = intval($_POST['quantity']);
     $type = trim($_POST['type']);
     $note = trim($_POST['note']);
     $description = trim($_POST['description']);
+    $brands = $_POST['brands'];
+    $quantities = $_POST['quantities'];
     $image = null;
 
-    if (empty($name) || empty($brand) || empty($quantity) || empty($description)) {
+    if (empty($name) || empty($description) || empty($brands) || empty($quantities)) {
         echo json_encode(['status' => 'error', 'message' => 'All fields are required!']);
         exit;
     }
@@ -42,39 +42,52 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // Insert item into `items` table
-    $query = "INSERT INTO items (name, description, brand, quantity, type, note, quantity_origin, users_id, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $query = "INSERT INTO items (name, description, type, note, users_id, image) VALUES (?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("sssssssis", $name, $description, $brand, $quantity, $type, $note, $quantity, $inventoryAdminId, $image);
+    $stmt->bind_param("ssssis", $name, $description, $type, $note, $inventoryAdminId, $image);
 
     if ($stmt->execute()) {
-        $itemId = $stmt->insert_id; // Get the last inserted ID for the `items` table
+        $itemId = $stmt->insert_id;
 
-        // Generate 6-digit unique IDs for each quantity and insert into `item_quantities`
-        $queryQuantities = "INSERT INTO item_quantities (item_id, unique_id) VALUES (?, ?)";
-        $stmtQuantities = $conn->prepare($queryQuantities);
+        // Insert brands and quantities
+        foreach ($brands as $index => $brand) {
+            $quantity = $quantities[$index];
 
-        for ($i = 0; $i < $quantity; $i++) {
-            $uniqueId = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+            // Insert brand into `brands` table
+            $brandQuery = "INSERT INTO brands (name, quantity, origin_quantity, item_id) VALUES (?, ?, ?, ?)";
+            $brandStmt = $conn->prepare($brandQuery);
+            $brandStmt->bind_param("sssi", $brand, $quantity, $quantity, $itemId);
+            $brandStmt->execute();
+            $brandId = $brandStmt->insert_id;
+            $brandStmt->close();
 
-            // Ensure the unique ID does not already exist in the database
-            $checkQuery = "SELECT COUNT(*) FROM item_quantities WHERE unique_id = ?";
-            $checkStmt = $conn->prepare($checkQuery);
-            $checkStmt->bind_param("s", $uniqueId);
-            $checkStmt->execute();
-            $checkStmt->bind_result($count);
-            $checkStmt->fetch();
-            $checkStmt->close();
+            // Fetch the last unique_id for the given item_id
+            $lastUniqueIdQuery = "SELECT unique_id FROM item_quantities ORDER BY id DESC LIMIT 1";
+            $lastUniqueIdStmt = $conn->prepare($lastUniqueIdQuery);
+            $lastUniqueIdStmt->execute();
+            $lastUniqueIdStmt->bind_result($lastUniqueId);
+            $lastUniqueIdStmt->fetch();
+            $lastUniqueIdStmt->close();
 
-            if ($count > 0) {
-                $i--; // Retry this iteration with a new ID
-                continue;
+            $datePart = date('dmy');
+            $incrementalNumber = 1;
+
+            if ($lastUniqueId) {
+                $lastIncrementalPart = intval(substr($lastUniqueId, -3));
+                $incrementalNumber = $lastIncrementalPart + 1;
             }
 
-            $stmtQuantities->bind_param("is", $itemId, $uniqueId);
-            $stmtQuantities->execute();
-        }
+            $stmtQuantities = $conn->prepare("INSERT INTO item_quantities (item_id, unique_id, brand_id) VALUES (?, ?, ?)");
 
-        $stmtQuantities->close();
+            for ($i = 0; $i < $quantity; $i++) {
+                $uniqueId = $datePart . str_pad($incrementalNumber, 3, '0', STR_PAD_LEFT);
+                $stmtQuantities->bind_param("iss", $itemId, $uniqueId, $brandId);
+                $stmtQuantities->execute();
+                $incrementalNumber++;
+            }
+
+            $stmtQuantities->close();
+        }
 
         echo json_encode(['status' => 'success', 'message' => 'Item and quantities added successfully!']);
     } else {
@@ -84,4 +97,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->close();
     $conn->close();
 }
-?>

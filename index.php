@@ -273,245 +273,254 @@ function fetchDepartments()
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>CSSPE Inventory & Info System</title>
 
-    <link rel="stylesheet" href="./assets/css/login.css">
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="./assets/css/output.css">
 
+    <!-- SweetAlert2 -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 
+    <!-- FontAwesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <!-- Include FontAwesome -->
-
-    <style>
-        .passwordContainer {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .toggle-password-icon {
-            position: absolute;
-            right: 35px;
-            cursor: pointer;
-            color: #aaa;
-            font-size: 18px;
-        }
-
-        .toggle-password-icon:hover {
-            color: #333;
-        }
-    </style>
-
 </head>
 
-<body>
-    <div class="container">
-        <div class="headerContainer">
-            <div class="subHeaderContainer">
-                <div class="logoContainer">
-                    <img class="logo" src="./assets/img/CSSPE.png" alt="">
+<body class="min-h-screen">
+    <!-- Header Bar -->
+    <header class="bg-red-900 text-white shadow-md">
+        <div class="container mx-auto px-4 py-3 flex flex-wrap justify-between items-center">
+            <div class="flex items-center space-x-3 mb-2 md:mb-0">
+                <div class="flex items-center">
+                    <img class="h-10 sm:h-12 w-auto" src="./assets/img/CSSPE.png" alt="CSSPE Logo">
                 </div>
-
-                <div class="collegeNameContainer">
-                    <p>CSSPE Inventory & Information System</p>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold">CSSPE Inventory & Info System</h1>
+                    <p class="text-xs sm:text-sm">College of Sport Science and Physical Education</p>
                 </div>
             </div>
-
-            <div class="subHeaderContainer">
-                <a href="#about"><button class="aboutButton" id="#about">About</button></a>
+            <div>
+                <a href="#" id="registerLink" onclick="toggleRegisterForm()" class="text-white font-medium hover:underline">
+                    REGISTER
+                </a>
             </div>
         </div>
+    </header>
 
-        <div class="subContainer">
-            <div class="backgroundColor">
-                <div class="loginContainer">
-                    <div class="titleContainer">
-                        <p>Login</p>
-                    </div>
-                    <form method="POST" action="">
-                        <div class="subLoginContainer">
-                            <div class="inputContainer">
-                                <input class="inputEmail" type="email" name="email" placeholder="Email:">
-                            </div>
+    <!-- Main Content with Background Image -->
+    <main class="min-h-[calc(100vh-64px)] flex items-center justify-center py-10 px-4" style="background: url(./assets/img/gym.jpg); background-size: cover; background-position: center;">
+        <!-- Login Form -->
+        <div class="w-full max-w-md">
+            <div class="bg-white bg-opacity-95 rounded-lg shadow-xl overflow-hidden">
+                <div class="p-6">
+                    <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Login</h2>
 
-                            <div class="inputContainer passwordContainer">
-                                <input id="passwordField" class="inputEmail" type="password" name="password"
-                                    placeholder="Password:">
-                                <i id="togglePassword" class="fas fa-eye toggle-password-icon"></i>
-                            </div>
+                    <form method="POST" action="" class="space-y-4">
+                        <div>
+                            <input
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                type="email"
+                                name="email"
+                                placeholder="Email"
+                                required>
+                        </div>
 
-                            <div class="inputContainer">
-                                <button type="submit" name="login" class="login">Login</button>
-                            </div>
+                        <div class="relative">
+                            <input
+                                id="passwordField"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                type="password"
+                                name="password"
+                                placeholder="Password"
+                                required>
+                            <i id="togglePassword" class="fas fa-eye absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"></i>
+                        </div>
+
+                        <div>
+                            <button
+                                type="submit"
+                                name="login"
+                                class="w-full bg-red-800 hover:bg-red-900 text-white font-medium py-3 px-4 rounded-lg transition duration-300">
+                                Login
+                            </button>
                         </div>
                     </form>
 
-                    <div class="registerLinkContainer">
-                        <p>Don't have an account? <span onclick="login()">Register</span></p>
+                    <div class="text-center mt-4">
+                        <p class="text-gray-600">
+                            Don't have an account?
+                            <a href="#" onclick="toggleRegisterForm()" class="text-red-800 hover:text-red-900 font-medium">
+                                Register
+                            </a>
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
-    </div>
-
-
-
-    <div class="aboutContainer" id="about">
-        <div class="subAboutContainer">
-            <div class="wmsuContainer1">
-                <div class="wmsuLogo1">
-                    <img class="logo" src="../assets/img/freepik-untitled-project-20241018143133NtJY.png" alt="">
+    <!-- Footer -->
+    <footer class="bg-red-900 text-white py-6 md:py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                <!-- University Info -->
+                <div class="flex flex-col">
+                    <div class="flex items-center mb-3">
+                        <img class="h-10 w-auto mr-2" src="./assets/img/CSSPE.png" alt="WMSU Logo">
+                        <div>
+                            <h3 class="text-sm md:text-base font-bold">Western Mindanao State University</h3>
+                            <p class="text-xs md:text-sm">College Of Sport Science And Physical Education</p>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="wmsuLogo">
-                    <p>Western Mindanao State University</p>
-                </div>
-            </div>
-
-            <div class="wmsuContainer1">
-                <div class="wmsuLogo1">
-                    <img class="logo" src="../assets/img/CSSPE.png" alt="">
-                </div>
-
-                <div class="wmsuLogo">
-                    <p>College of Sport Science and Physical Education</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="subAboutContainer1">
-            <div class="wmsuContainer">
-                <div class="address">
-                    <p style="text-align: center;">Normal Road, Baliwasan, Zamboanga City, Philippines</p>
+                <!-- Contact Info -->
+                <div class="text-xs md:text-sm">
+                    <p>Normal Road, Baliwasan, Zamboanga City, Philippines</p>
                     <p>Wmsu CSSPE</p>
                     <p>wmsu@wmsu.edu.ph</p>
                     <p>991-1771</p>
                 </div>
-            </div>
-        </div>
 
-        <div class="subAboutContainer">
-            <div class="wmsuContainer" style="display: flex; flex-direction: row;">
-                <div class="address">
-                    <div style="text-align: left;">
-                        <p>CSSPE Goals</p>
-                        <p>Quality Policy</p>
-                        <p>Events</p>
-                        <p>Articles</p>
-                        <p>Memorandums</p>
-                        <p>Departments</p>
-                        <p>Organization</p>
+                <!-- Quick Links -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <ul class="space-y-1 text-xs md:text-sm">
+                            <li><a href="#" class="hover:underline">CSSPE Goals</a></li>
+                            <li><a href="#" class="hover:underline">Quality Policy</a></li>
+                            <li><a href="#" class="hover:underline">Events</a></li>
+                            <li><a href="#" class="hover:underline">Articles</a></li>
+                            <li><a href="#" class="hover:underline">Memorandums</a></li>
+                            <li><a href="#" class="hover:underline">Departments</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <ul class="space-y-1 text-xs md:text-sm">
+                            <li><a href="#" class="hover:underline">Organizations</a></li>
+                            <li><a href="#" class="hover:underline">Inventory</a></li>
+                            <li><a href="#" class="hover:underline">Teachers</a></li>
+                            <li><a href="#" class="hover:underline">Privacy Policy</a></li>
+                            <li><a href="#" class="hover:underline">Terms of Service</a></li>
+                            <li><a href="#" class="hover:underline">About</a></li>
+                            <li><a href="#" class="hover:underline">Contact</a></li>
+                        </ul>
                     </div>
                 </div>
-
-                <div class="address">
-                    <div style="text-align: left;">
-                        <p>Inventory</p>
-                        <p>Teachers</p>
-                        <p>Privacy Policy</p>
-                        <p>Terms of Services</p>
-                        <p>About</p>
-                        <p>Contact</p>
-                    </div>
-                </div>
             </div>
         </div>
-    </div>
+    </footer>
 
-    <div class="registerContainer" style="background-color: none; display: none; transform: scale(0.825);">
-        <div class="registerContainer">
-            <div class="loginContainer">
-                <div class="titleContainer">
-                    <p>Register</p>
-                </div>
+    <!-- Registration Form (Hidden by Default) -->
+    <div id="registerContainer" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h2 class="text-xl md:text-2xl font-bold text-red-800">Register</h2>
+                <button onclick="toggleRegisterForm()" class="text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
 
-                <form method="POST" action="">
+            <div class="p-4">
+                <form method="POST" action="" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <input class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                type="text" name="first_name" placeholder="First Name:" required>
+                        </div>
+                        <div>
+                            <input class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                type="text" name="last_name" placeholder="Last Name:" required>
+                        </div>
+                    </div>
 
-                    <div class="subLoginContainer">
+                    <div>
+                        <input class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                            type="text" name="middle_name" placeholder="Middle Name (Optional):">
+                    </div>
 
-                        <div class="inputContainer">
-                            <input class="inputEmail" type="text" name="first_name" placeholder="First Name:" required>
-                        </div>
-                        <div class="inputContainer">
-                            <input class="inputEmail" type="text" name="last_name" placeholder="Last Name:" required>
-                        </div>
-                        <div class="inputContainer">
-                            <input class="inputEmail" type="text" name="middle_name"
-                                placeholder="Middle Name (Optional):">
-                        </div>
-                        <div class="inputContainer">
-                            <input class="inputEmail" type="email" name="email" placeholder="Email:" required>
-                        </div>
-                        <div class="inputContainer" style="padding: 0 10px;">
-                            <input class="inputEmail" style="margin-right:10px" type="text" name="address1"
-                                placeholder="House Number, Street Name, Barangay" required>
-                            <input class="inputEmail" type="text" name="address2" placeholder="Address:"
-                                value=", Zamboanga City" required>
-                        </div>
-                        <div class="inputContainer">
-                            <input class="inputEmail" type="text" name="contact_no" placeholder="Contact No.:" required>
-                        </div>
+                    <div>
+                        <input class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                            type="email" name="email" placeholder="Email:" required>
+                    </div>
 
-                        <div class="inputContainer" style="gap: 0.5rem;">
-                            <select class="inputEmail" name="department" required>
-                                <option value="">Choose a Department</option>
-                                <?php
-                                // Fetch and display departments
-                                $departments = fetchDepartments();
-                                foreach ($departments as $department) {
-                                    echo "<option value='" . $department['department_name'] . "'>" . $department['department_name'] . "</option>";
-                                }
-                                ?>
-                            </select>
-                        </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                            type="text" name="address1" placeholder="House Number, Street Name, Barangay" required>
+                        <input class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                            type="text" name="address2" placeholder="Address:" value=", Zamboanga City" required>
+                    </div>
 
-                        <div class="inputContainer" style="gap: 0.5rem;">
-                            <select class="inputEmail" name="rank" required>
-                                <option value="">Choose a rank</option>
-                                <option value="Instructor">Instructor</option>
-                                <option value="Assistant Professor">Assistant Professor</option>
-                                <option value="Associate Professor">Associate Professor</option>
-                                <option value="Professor">Professor</option>
-                            </select>
-                        </div>
-                        <div class="inputContainer passwordContainer">
-                            <input id="registerPassword" class="inputEmail" type="password" name="password"
-                                placeholder="Password:">
-                            <i id="toggleRegisterPassword" class="fas fa-eye toggle-password-icon"></i>
-                        </div>
+                    <div>
+                        <input class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                            type="text" name="contact_no" placeholder="Contact No.:" required>
+                    </div>
 
-                        <div class="inputContainer passwordContainer">
-                            <input id="confirmPassword" class="inputEmail" type="password" name="confirm_password"
-                                placeholder="Confirm Password:">
-                            <i id="toggleConfirmPassword" class="fas fa-eye toggle-password-icon"></i>
-                        </div>
-                        <div class="inputContainer">
-                            <button type="submit" name="register" class="login">Register</button>
-                        </div>
+                    <div>
+                        <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                            name="department" required>
+                            <option value="">Choose a Department</option>
+                            <?php
+                            // Fetch and display departments
+                            $departments = fetchDepartments();
+                            foreach ($departments as $department) {
+                                echo "<option value='" . $department['department_name'] . "'>" . $department['department_name'] . "</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
 
-                        <div class="registerLinkContainer">
-                            <p>Already have an account? <span onclick="login()">Login</span></p>
-                        </div>
+                    <div>
+                        <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                            name="rank" required>
+                            <option value="">Choose a rank</option>
+                            <option value="Instructor">Instructor</option>
+                            <option value="Assistant Professor">Assistant Professor</option>
+                            <option value="Associate Professor">Associate Professor</option>
+                            <option value="Professor">Professor</option>
+                        </select>
+                    </div>
 
+                    <div class="relative">
+                        <input id="registerPassword"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                            type="password" name="password" placeholder="Password:" required>
+                        <i id="toggleRegisterPassword" class="fas fa-eye absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"></i>
+                    </div>
+
+                    <div class="relative">
+                        <input id="confirmPassword"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                            type="password" name="confirm_password" placeholder="Confirm Password:" required>
+                        <i id="toggleConfirmPassword" class="fas fa-eye absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"></i>
+                    </div>
+
+                    <div>
+                        <button type="submit" name="register"
+                            class="w-full bg-red-800 hover:bg-red-900 text-white font-medium py-3 px-4 rounded-lg transition duration-300">
+                            Register
+                        </button>
+                    </div>
                 </form>
 
+                <div class="text-center mt-4">
+                    <p class="text-gray-600">Already have an account?
+                        <span onclick="toggleRegisterForm()" class="text-red-800 hover:text-red-900 cursor-pointer font-medium">Login</span>
+                    </p>
+                </div>
             </div>
         </div>
     </div>
 
-    </div>
-
+    <!-- Scripts -->
     <script src="./assets/js/login.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <?php if (!empty($message)): ?>
         <script>
             Swal.fire({
-                icon: 'error',
-                title: 'Login Failed',
+                icon: '<?php echo (strpos($message, "successful") !== false) ? "success" : "error"; ?>',
+                title: '<?php echo (strpos($message, "successful") !== false) ? "Success" : "Error"; ?>',
                 text: '<?= $message; ?>',
             });
         </script>
@@ -523,7 +532,9 @@ function fetchDepartments()
             const toggleIcon = document.getElementById(toggleId);
             const passwordField = document.getElementById(passwordFieldId);
 
-            toggleIcon.addEventListener("click", function () {
+            if (!toggleIcon || !passwordField) return;
+
+            toggleIcon.addEventListener("click", function() {
                 if (passwordField.type === "password") {
                     passwordField.type = "text";
                     toggleIcon.classList.remove("fa-eye");
@@ -536,54 +547,38 @@ function fetchDepartments()
             });
         }
 
-        // Apply to login and register fields
-        setupPasswordToggle("togglePassword", "passwordField"); // For login
-        setupPasswordToggle("toggleRegisterPassword", "registerPassword"); // For register password
-        setupPasswordToggle("toggleConfirmPassword", "confirmPassword"); // For confirm password
-    </script>
+        // Function to toggle registration form
+        function toggleRegisterForm() {
+            const registerContainer = document.getElementById('registerContainer');
+            registerContainer.classList.toggle('hidden');
+        }
 
-
-    <script>
+        // Initialize password toggles when the DOM is loaded
         document.addEventListener("DOMContentLoaded", () => {
+            // Apply to login and register fields
+            setupPasswordToggle("togglePassword", "passwordField");
+            setupPasswordToggle("toggleRegisterPassword", "registerPassword");
+            setupPasswordToggle("toggleConfirmPassword", "confirmPassword");
+
+            // Handle messages
             const message = <?php echo json_encode($message); ?>;
             if (message) {
-                if (message.includes("Error: Please fill in all the fields.")) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: message,
-                    });
-                } else if (message.includes("successful")) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: message,
-                    });
-                } else if (message.includes("Email already exists")) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Duplicate Email',
-                        text: message,
-                    });
-                } else if (message.includes("User with the same name already exists")) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Duplicate Name',
-                        text: message,
-                    });
-                } else if (message.includes("Error")) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: message,
-                    });
+                let icon = 'error';
+                let title = 'Error';
+
+                if (message.includes("successful")) {
+                    icon = 'success';
+                    title = 'Success';
                 }
+
+                Swal.fire({
+                    icon: icon,
+                    title: title,
+                    text: message,
+                });
             }
         });
     </script>
-
-
-
 </body>
 
 </html>

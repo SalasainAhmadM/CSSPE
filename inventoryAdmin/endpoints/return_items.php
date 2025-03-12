@@ -67,15 +67,22 @@ try {
     $stmt->bind_param('iisi', $new_quantity_borrowed, $new_quantity_returned, $new_status, $transaction_id);
     $stmt->execute();
 
-    // Update items table quantity
-    $update_items_query = "
+    // Calculate the actual return quantity excluding lost and damaged items
+    $actual_return_quantity = $return_quantity - $damaged - $lost;
+
+    // Ensure the quantity being added back is not negative
+    if ($actual_return_quantity > 0) {
+        // Update items table quantity
+        $update_items_query = "
         UPDATE items
         SET quantity = quantity + ?
         WHERE id = ?
     ";
-    $stmt = $conn->prepare($update_items_query);
-    $stmt->bind_param('ii', $return_quantity, $item_id);
-    $stmt->execute();
+        $stmt = $conn->prepare($update_items_query);
+        $stmt->bind_param('ii', $actual_return_quantity, $item_id);
+        $stmt->execute();
+    }
+
 
     // Insert records into returned_items table with unique_id_remark
     $statuses = [

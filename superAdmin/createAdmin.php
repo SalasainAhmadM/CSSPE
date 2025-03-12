@@ -139,221 +139,254 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create User</title>
 
-    <link rel="stylesheet" href="../assets/css/createAdmin.css">
-    <link rel="stylesheet" href="../assets/css/sidebar.css">
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="../assets/css/output.css">
 
+    <!-- SweetAlert2 -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
 
-<body>
-    <div class="body">
-        <div class="sidebar">
-            <div class="sidebarContent">
-                <div class="arrowContainer" style="margin-left: 80rem;" id="toggleButton">
-                    <div class="subArrowContainer">
-                        <img class="hideIcon" src="../assets/img/arrow.png" alt="">
-                    </div>
-                </div>
-            </div>
-            <div class="userContainer">
-                <div class="subUserContainer">
-                    <div class="userPictureContainer">
-                        <div class="subUserPictureContainer">
-                            <img class="subUserPictureContainer"
-                                src="../assets/img/<?= !empty($image) ? htmlspecialchars($image) : 'CSSPE.png' ?>"
-                                alt="">
-                        </div>
-                    </div>
+<body class="font-sans antialiased bg-gray-50 min-h-screen">
+    <!-- Toggle Sidebar Button (mobile only) -->
+    <button id="toggleSidebar" class="fixed top-4 left-4 z-50 lg:hidden bg-red-900 text-white p-2 rounded-md shadow-md">
+        <i class="fas fa-bars"></i>
+    </button>
 
-                    <div class="userPictureContainer1">
-                        <p><?php echo $fullName; ?></p>
-                    </div>
-                </div>
+    <!-- Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
 
-                <div class="navContainer">
-                    <div class="subNavContainer">
-
-                        <a href="../homePage/">
-                            <div class="buttonContainer1">
-                                <div class="nameOfIconContainer">
-                                    <p>Home</p>
-                                </div>
-                            </div>
-                        </a>
-
-                        <a href="../superAdmin/">
-                            <div class="buttonContainer1">
-                                <div class="nameOfIconContainer">
-                                    <p>Accounts</p>
-                                </div>
-                            </div>
-                        </a>
-
-                        <a href="../superAdmin/pendingAccount.php">
-                            <div class="buttonContainer1">
-                                <div class="nameOfIconContainer">
-                                    <p>Pending Accounts</p>
-                                </div>
-                            </div>
-                        </a>
-
-                        <a href="../superAdmin/createAdmin.php">
-                            <div class="buttonContainer1">
-                                <div class="nameOfIconContainer">
-                                    <p>Create Account</p>
-                                </div>
-                            </div>
-                        </a>
-                        <a href="../superAdmin/school_year.php">
-                            <div class="buttonContainer1">
-                                <div class="nameOfIconContainer">
-                                    <p>School Year</p>
-                                </div>
-                            </div>
-                        </a>
-                        <a href="../informationAdmin/">
-                            <div class="buttonContainer1">
-                                <div class="nameOfIconContainer">
-                                    <p>Information Admin Panel</p>
-                                </div>
-                            </div>
-                        </a>
-
-                        <a href="../inventoryAdmin/">
-                            <div class="buttonContainer1">
-                                <div class="nameOfIconContainer">
-                                    <p>Inventory Admin Panel</p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-
-                <div class="subUserContainer">
-                    <a href="../logout.php">
-                        <div style="margin-left: 1.5rem;" class="userPictureContainer1">
-                            <p>Logout</p>
-                        </div>
-                    </a>
-                </div>
-            </div>
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-red-900 text-white shadow-lg overflow-y-auto transition-transform duration-300 ease-in-out lg:translate-x-0 -translate-x-full z-40">
+        <!-- Sidebar Header -->
+        <div class="p-4 border-b border-red-800 flex items-center gap-3">
+            <img src="../assets/img/CSSPE.png" alt="Logo" class="w-8 h-8 object-contain">
+            <span class="font-bold"><?php echo $fullName; ?></span>
         </div>
 
-        <div class="mainContainer" style="margin-left: 250px;">
-            <div class="container">
-                <div class="headerContainer">
-                    <div class="subHeaderContainer">
-                        <div class="logoContainer">
-                            <img class="logo" src="../assets/img/CSSPE.png" alt="">
-                        </div>
+        <!-- Navigation Links -->
+        <nav class="flex flex-col py-2">
+            <a href="../homePage/" class="text-white py-3 px-4 hover:bg-red-800 transition-colors duration-200 flex items-center gap-3">
+                <i class="fas fa-home w-5"></i> Home
+            </a>
+            <a href="../superAdmin/" class="text-white py-3 px-4 hover:bg-red-800 transition-colors duration-200 flex items-center gap-3">
+                <i class="fas fa-users w-5"></i> Accounts
+            </a>
+            <a href="../superAdmin/pendingAccount.php" class="text-white py-3 px-4 hover:bg-red-800 transition-colors duration-200 flex items-center gap-3">
+                <i class="fas fa-user-clock w-5"></i> Pending Accounts
+            </a>
+            <a href="../superAdmin/createAdmin.php" class="text-white py-3 px-4 bg-red-800/40 transition-colors duration-200 flex items-center gap-3">
+                <i class="fas fa-user-plus w-5"></i> Create Account
+            </a>
+            <a href="../superAdmin/school_year.php" class="text-white py-3 px-4 hover:bg-red-800 transition-colors duration-200 flex items-center gap-3">
+                <i class="fas fa-calendar-alt w-5"></i> School Year
+            </a>
+            <a href="../informationAdmin/" class="text-white py-3 px-4 hover:bg-red-800 transition-colors duration-200 flex items-center gap-3">
+                <i class="fas fa-info-circle w-5"></i> Information Admin
+            </a>
+            <a href="../inventoryAdmin/" class="text-white py-3 px-4 hover:bg-red-800 transition-colors duration-200 flex items-center gap-3">
+                <i class="fas fa-boxes w-5"></i> Inventory Admin
+            </a>
+        </nav>
 
-                        <div class="collegeNameContainer">
-                            <p>CSSPE Inventory & Information System</p>
+        <!-- Logout Link -->
+        <a href="../logout.php" class="text-white py-3 px-4 hover:bg-red-800 transition-colors duration-200 absolute bottom-0 w-full border-t border-red-800 flex items-center gap-3">
+            <i class="fas fa-sign-out-alt w-5"></i> Logout
+        </a>
+    </aside>
+
+    <!-- Main Content -->
+    <main id="mainContent" class="lg:ml-64 transition-all duration-300 ease-in-out min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-red-900 text-white p-4 flex items-center gap-3 shadow-md">
+            <img src="../assets/img/CSSPE.png" alt="Logo" class="w-8 h-8 object-contain">
+            <h1 class="text-xl font-bold">CSSPE Inventory & Information System</h1>
+        </header>
+
+        <!-- Page Content -->
+        <div class="p-4 md:p-6 flex-grow flex justify-center">
+            <div class="w-full max-w-lg">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Create Account</h2>
+
+                <form method="POST" action="" class="bg-white shadow-lg rounded-lg p-6 mb-4">
+                    <div class="mb-4">
+                        <input
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            name="first_name"
+                            type="text"
+                            placeholder="First Name:"
+                            required>
+                    </div>
+
+                    <div class="mb-4">
+                        <input
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            name="last_name"
+                            type="text"
+                            placeholder="Last Name:"
+                            required>
+                    </div>
+
+                    <div class="mb-4">
+                        <input
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            name="middle_name"
+                            type="text"
+                            placeholder="Middle Name (Optional):">
+                    </div>
+
+                    <div class="mb-4">
+                        <input
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            name="email"
+                            type="email"
+                            placeholder="Email:"
+                            required>
+                    </div>
+
+                    <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            type="text"
+                            name="address1"
+                            placeholder="House Number, Street Name, Barangay"
+                            required>
+                        <input
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            type="text"
+                            name="address2"
+                            placeholder="Address:"
+                            value=", Zamboanga City"
+                            required>
+                    </div>
+
+                    <div class="mb-4">
+                        <input
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            name="contact_no"
+                            type="text"
+                            placeholder="Contact No.:"
+                            required>
+                    </div>
+
+                    <div class="mb-4">
+                        <select
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white"
+                            name="position"
+                            id="positionSelect"
+                            required>
+                            <option value="">Choose a position</option>
+                            <option value="Instructor">Instructor</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+
+                    <!-- Admin-specific fields -->
+                    <div id="adminFields" class="mb-4 hidden">
+                        <select
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white"
+                            name="role"
+                            id="roleSelect">
+                            <option value="">Choose an admin position</option>
+                            <option value="information_admin">Information Admin</option>
+                            <option value="inventory_admin">Inventory Admin</option>
+                        </select>
+                    </div>
+
+                    <!-- Instructor-specific fields -->
+                    <div id="instructorFields" class="mb-4 hidden">
+                        <select
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white"
+                            name="rank"
+                            id="rankSelect">
+                            <option value="">Choose a rank</option>
+                            <option value="Assistant Professor">Assistant Professor</option>
+                            <option value="Associate Professor">Associate Professor</option>
+                            <option value="Instructor">Instructor</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="relative">
+                            <input
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                name="password"
+                                id="password"
+                                type="password"
+                                placeholder="Password:"
+                                required>
+                            <i id="togglePassword" class="fas fa-eye absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"></i>
                         </div>
                     </div>
-                </div>
 
-                <div class="textContainer">
-                    <p class="text">Create Account</p>
-                </div>
-
-                <div class="createContainer">
-                    <div class="subAddContainer">
-
-                        <form method="POST" action="">
-                            <div class="subLoginContainer">
-
-                                <div class="inputContainer">
-                                    <input class="inputEmail" name="first_name" type="text" placeholder="First Name:"
-                                        required>
-                                </div>
-
-                                <div class="inputContainer">
-                                    <input class="inputEmail" name="last_name" type="text" placeholder="Last Name:"
-                                        required>
-                                </div>
-
-                                <div class="inputContainer">
-                                    <input class="inputEmail" name="middle_name" type="text"
-                                        placeholder="Middle Name (Optional):">
-                                </div>
-
-                                <div class="inputContainer">
-                                    <input class="inputEmail" name="email" type="email" placeholder="Email:" required>
-                                </div>
-
-                                <div class="inputContainer">
-                                    <input class="inputEmail" name="address" type="text" placeholder="Address:"
-                                        required>
-                                </div>
-
-                                <div class="inputContainer">
-                                    <input class="inputEmail" name="contact_no" type="text" placeholder="Contact No.:"
-                                        required>
-                                </div>
-
-                                <div class="inputContainer" style="gap: 0.5rem;">
-                                    <select class="inputEmail" name="position" id="positionSelect" required>
-                                        <option value="">Choose a position</option>
-                                        <option value="Instructor">Instructor</option>
-                                        <option value="Admin">Admin</option>
-                                    </select>
-                                </div>
-
-                                <!-- Admin-specific fields -->
-                                <div id="adminFields" style="display: none;">
-                                    <div class="inputContainer" style="gap: 0.5rem;">
-                                        <select class="inputEmail" name="role" id="roleSelect">
-                                            <option value="">Choose an admin position</option>
-                                            <option value="information_admin">Information Admin</option>
-                                            <option value="inventory_admin">Inventory Admin</option>
-                                            <!-- <option value="super_admin">Super Admin</option> -->
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <!-- Instructor-specific fields -->
-                                <div id="instructorFields" style="display: none;">
-                                    <div class="inputContainer" style="gap: 0.5rem;">
-                                        <select class="inputEmail" name="rank" id="rankSelect">
-                                            <option value="">Choose a rank</option>
-                                            <option value="Assistant Professor">Assistant Professor</option>
-                                            <option value="Associate Professor">Associate Professor</option>
-                                            <option value="Instructor">Instructor</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="inputContainer">
-                                    <input class="inputEmail" name="password" type="password" placeholder="Password:"
-                                        required>
-                                </div>
-
-                                <div class="inputContainer">
-                                    <input class="inputEmail" name="confirm_password" type="password"
-                                        placeholder="Confirm Password:" required>
-                                </div>
-
-                                <div class="inputContainer"
-                                    style="gap: 0.5rem; justify-content: center; padding-right: 0.9rem;">
-                                    <button class="addButton" name="register" style="width: 6rem;">Add</button>
-                                </div>
-                            </div>
-                        </form>
-
+                    <div class="mb-6">
+                        <div class="relative">
+                            <input
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                name="confirm_password"
+                                id="confirmPassword"
+                                type="password"
+                                placeholder="Confirm Password:"
+                                required>
+                            <i id="toggleConfirmPassword" class="fas fa-eye absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"></i>
+                        </div>
                     </div>
-                </div>
+
+                    <div class="flex justify-center">
+                        <button
+                            class="bg-red-900 hover:bg-red-800 text-white font-medium px-6 py-2 rounded-lg transition duration-200"
+                            name="register">
+                            Add User
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
-    </div>
-
-    <script src="../assets/js/sidebar.js"></script>
-    <script src="../assets/js/program.js"></script>
+    </main>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
+        // Toggle sidebar on mobile
+        document.getElementById('toggleSidebar').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        });
+
+        // Close sidebar when clicking overlay
+        document.getElementById('sidebarOverlay').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+
+            sidebar.classList.add('-translate-x-full');
+            this.classList.add('hidden');
+        });
+
+        // Toggle password visibility
+        function setupPasswordToggle(toggleId, passwordFieldId) {
+            const toggleBtn = document.getElementById(toggleId);
+            const passwordField = document.getElementById(passwordFieldId);
+
+            if (toggleBtn && passwordField) {
+                toggleBtn.addEventListener('click', function() {
+                    const type = passwordField.type === 'password' ? 'text' : 'password';
+                    passwordField.type = type;
+
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
+            // Setup password toggles
+            setupPasswordToggle('togglePassword', 'password');
+            setupPasswordToggle('toggleConfirmPassword', 'confirmPassword');
+
+            // Position selection handler
             const positionSelect = document.getElementById("positionSelect");
             const adminFields = document.getElementById("adminFields");
             const instructorFields = document.getElementById("instructorFields");
@@ -369,64 +402,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 rankSelect.removeAttribute('required');
 
                 if (selectedPosition === "Admin") {
-                    adminFields.style.display = "block";
-                    instructorFields.style.display = "none";
+                    adminFields.classList.remove('hidden');
+                    instructorFields.classList.add('hidden');
                     roleSelect.setAttribute('required', 'true');
                 } else if (selectedPosition === "Instructor") {
-                    adminFields.style.display = "none";
-                    instructorFields.style.display = "block";
+                    adminFields.classList.add('hidden');
+                    instructorFields.classList.remove('hidden');
                     rankSelect.setAttribute('required', 'true');
                 } else {
-                    adminFields.style.display = "none";
-                    instructorFields.style.display = "none";
+                    adminFields.classList.add('hidden');
+                    instructorFields.classList.add('hidden');
                 }
             });
 
             // Initial check to handle any preselected value
             positionSelect.dispatchEvent(new Event("change"));
-        });
-    </script>
 
-    <?php if (!empty($message)): ?>
-        <script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Login Failed',
-                text: '<?= $message; ?>',
-            });
-        </script>
-    <?php endif; ?>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const message = <?php echo json_encode($message); ?>;
-            if (message) {
-                if (message.includes("successful")) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: message,
-                    });
-                } else if (message.includes("Email already exists")) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Duplicate Email',
-                        text: message,
-                    });
-                } else if (message.includes("User with the same name already exists")) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Duplicate Name',
-                        text: message,
-                    });
-                } else if (message.includes("Error")) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: message,
-                    });
+            // Display messages
+            <?php if (isset($message)): ?>
+                const message = <?php echo json_encode($message); ?>;
+                if (message) {
+                    if (message.includes("successful")) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: message,
+                            confirmButtonColor: '#6B0D0D'
+                        });
+                    } else if (message.includes("Email already exists") ||
+                        message.includes("User with the same name already exists") ||
+                        message.includes("Error")) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: message,
+                            confirmButtonColor: '#6B0D0D'
+                        });
+                    }
                 }
-            }
+            <?php endif; ?>
         });
     </script>
 </body>

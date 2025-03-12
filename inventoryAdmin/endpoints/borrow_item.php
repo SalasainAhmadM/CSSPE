@@ -5,6 +5,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $item_id = intval($_POST['item_id']);
     $teacher_id = intval($_POST['teacher']);
     $quantity = intval($_POST['quantity']);
+    $student = trim($_POST['student']); // Trim whitespace from the student name
     $return_date = $_POST['return_date'];
 
     if (empty($item_id) || empty($teacher_id) || empty($quantity) || empty($return_date)) {
@@ -33,10 +34,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Insert into `item_transactions`
         $borrowed_at = (new DateTime('now', new DateTimeZone('Asia/Manila')))->format('Y-m-d H:i:s');
-        $query = "INSERT INTO item_transactions (quantity_borrowed, borrowed_at, return_date, item_id, users_id) 
-                  VALUES (?, ?, ?, ?, ?)";
+        $query = "INSERT INTO item_transactions (
+                    quantity_borrowed, 
+                    borrowed_at, 
+                    assigned_student, 
+                    return_date, 
+                    item_id, 
+                    users_id
+                  ) VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($query);
-        $stmt->bind_param('issis', $quantity, $borrowed_at, $return_date, $item_id, $teacher_id);
+        $stmt->bind_param(
+            'issssi',
+            $quantity,
+            $borrowed_at,
+            $student, // Assign the student name here
+            $return_date,
+            $item_id,
+            $teacher_id
+        );
+
         if (!$stmt->execute()) {
             throw new Exception('Failed to record transaction.');
         }

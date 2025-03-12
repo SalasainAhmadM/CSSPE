@@ -32,22 +32,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $item = $result->fetch_assoc();
     $imagePath = '../../assets/uploads/' . $item['image'];
 
-    // Delete the item
-    $deleteQuery = "DELETE FROM items WHERE id = ?";
-    $deleteStmt = $conn->prepare($deleteQuery);
-    $deleteStmt->bind_param("i", $itemId);
+    // Begin transaction
+    $conn->begin_transaction();
 
-    if ($deleteStmt->execute()) {
+    try {
+        // Delete brands associated with this item
+        $deleteBrandsQuery = "DELETE FROM brands WHERE item_id = ?";
+        $deleteBrandsStmt = $conn->prepare($deleteBrandsQuery);
+        $deleteBrandsStmt->bind_param("i", $itemId);
+        $deleteBrandsStmt->execute();
+        $deleteBrandsStmt->close();
+
+        // Delete the item
+        $deleteItemQuery = "DELETE FROM items WHERE id = ?";
+        $deleteItemStmt = $conn->prepare($deleteItemQuery);
+        $deleteItemStmt->bind_param("i", $itemId);
+        $deleteItemStmt->execute();
+        $deleteItemStmt->close();
+
+        // Commit transaction
+        $conn->commit();
+
         // Remove the image if it exists
         if (!empty($item['image']) && file_exists($imagePath)) {
             unlink($imagePath);
         }
-        echo json_encode(['status' => 'success', 'message' => 'Item deleted successfully!']);
-    } else {
-        echo json_encode(['status' => 'error', 'message' => 'Failed to delete item.']);
+
+        echo json_encode(['status' => 'success', 'message' => 'Item and associated brands deleted successfully!']);
+    } catch (Exception $e) {
+        $conn->rollback(); // Rollback transaction if any error occurs
+        echo json_encode(['status' => 'error', 'message' => 'Failed to delete item and brands.']);
     }
 
-    $deleteStmt->close();
     $stmt->close();
     $conn->close();
 }

@@ -14,6 +14,7 @@ $sql = "
         t.schedule_to, 
         t.borrowed_at, 
         t.return_date, 
+        t.assigned_student, 
         u.first_name, 
         u.last_name, 
         u.contact_no, 
