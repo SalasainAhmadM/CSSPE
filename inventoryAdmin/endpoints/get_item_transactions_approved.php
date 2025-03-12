@@ -1,13 +1,12 @@
 <?php
 require_once '../../conn/conn.php';
 
-
 $sql = "
     SELECT 
         t.transaction_id, 
         i.name AS item_name, 
         i.id AS item_id, 
-        i.brand AS item_brand, 
+        b.name AS item_brand, 
         t.quantity_borrowed, 
         t.class_date, 
         t.schedule_from, 
@@ -23,6 +22,7 @@ $sql = "
         GROUP_CONCAT(iq.unique_id SEPARATOR ', ') AS unique_ids
     FROM item_transactions t
     INNER JOIN items i ON t.item_id = i.id
+    INNER JOIN brands b ON t.brand_id = b.id 
     INNER JOIN users u ON t.users_id = u.id
     LEFT JOIN transaction_item_quantities tiq ON t.transaction_id = tiq.transaction_id
     LEFT JOIN item_quantities iq ON tiq.item_quantity_id = iq.id
@@ -32,6 +32,8 @@ $sql = "
 
 $result = $conn->query($sql);
 
+$response = ['status' => 'error', 'data' => []];
+
 if ($result && $result->num_rows > 0) {
     $transactions = [];
     while ($row = $result->fetch_assoc()) {
@@ -39,7 +41,6 @@ if ($result && $result->num_rows > 0) {
     }
     $response['status'] = 'success';
     $response['data'] = $transactions;
-} else {
 }
 
 header('Content-Type: application/json');

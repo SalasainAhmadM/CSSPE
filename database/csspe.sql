@@ -276,6 +276,7 @@ CREATE TABLE `item_transactions` (
   `return_date` date DEFAULT NULL,
   `returned_at` datetime DEFAULT NULL,
   `item_id` int(11) NOT NULL,
+  `brand_id` int(11) NOT NULL,
   `users_id` int(11) NOT NULL,
   `schedule_from` time DEFAULT NULL,
   `schedule_to` time DEFAULT NULL,
