@@ -72,15 +72,30 @@ try {
 
     // Ensure the quantity being added back is not negative
     if ($actual_return_quantity > 0) {
-        // Update items table quantity
-        $update_items_query = "
-        UPDATE items
-        SET quantity = quantity + ?
-        WHERE id = ?
-    ";
-        $stmt = $conn->prepare($update_items_query);
-        $stmt->bind_param('ii', $actual_return_quantity, $item_id);
+        // Fetch the brand_id associated with the transaction
+        $brand_id_query = "SELECT brand_id FROM item_transactions WHERE transaction_id = ?";
+        $stmt = $conn->prepare($brand_id_query);
+        $stmt->bind_param('i', $transaction_id);
         $stmt->execute();
+        $brand_id_result = $stmt->get_result();
+        $brand_id_row = $brand_id_result->fetch_assoc();
+
+        if ($brand_id_row) {
+            $brand_id = intval($brand_id_row['brand_id']);
+
+            // Update the brands table quantity
+            $update_brands_query = "
+            UPDATE brands
+            SET quantity = quantity + ?
+            WHERE id = ?
+        ";
+            $stmt = $conn->prepare($update_brands_query);
+            $stmt->bind_param('ii', $actual_return_quantity, $brand_id);
+            $stmt->execute();
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Brand ID not found for the transaction.']);
+            exit;
+        }
     }
 
 

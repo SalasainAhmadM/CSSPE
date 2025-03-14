@@ -65,16 +65,21 @@ $totalOverdue = $transactionData['total_overdue'] ?? 0;
 // Calculate available and recently added items
 $itemMetricsQuery = "
     SELECT 
-        SUM(CAST(quantity AS UNSIGNED)) AS total_available,
-        COUNT(CASE WHEN created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 1 END) AS total_recently_added
-    FROM items";
+        COALESCE(SUM(CAST(b.quantity AS UNSIGNED)), 0) AS total_available,
+        COALESCE(SUM(CASE WHEN b.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN CAST(b.quantity AS UNSIGNED) END), 0) AS total_recently_added
+    FROM brands b
+    JOIN items i ON b.item_id = i.id";
+
 $itemMetricsStmt = $conn->prepare($itemMetricsQuery);
 $itemMetricsStmt->execute();
 $itemMetricsResult = $itemMetricsStmt->get_result();
 $itemMetricsData = $itemMetricsResult->fetch_assoc();
 
-$totalAvailable = $itemMetricsData['total_available'] ?? 0;
-$totalRecentlyAdded = $itemMetricsData['total_recently_added'] ?? 0;
+$totalAvailable = $itemMetricsData['total_available'];
+$totalRecentlyAdded = $itemMetricsData['total_recently_added'];
+
+
+
 
 // Calculate lost, damaged, replaced items
 $returnedMetricsQuery = "
@@ -155,34 +160,43 @@ $returnedItems = $returnedResult->fetch_all(MYSQLI_ASSOC);
 // Fetch Available Items
 $availableQuery = "
     SELECT 
-        id, 
-        name, 
-        brand, 
-        quantity, 
-        description 
-    FROM items
-    WHERE quantity > 0
+        i.id, 
+        i.name, 
+        i.description,
+        b.name AS brand_name,
+        b.quantity AS brand_quantity
+    FROM items i
+    JOIN brands b ON i.id = b.item_id
+    WHERE b.quantity > 0
 ";
 $availableStmt = $conn->prepare($availableQuery);
 $availableStmt->execute();
 $availableResult = $availableStmt->get_result();
-$availableItems = $availableResult->fetch_all(MYSQLI_ASSOC);
+$availableItems = [];
+while ($row = $availableResult->fetch_assoc()) {
+    $availableItems[$row['id']]['name'] = $row['name'];
+    $availableItems[$row['id']]['description'] = $row['description'];
+    $availableItems[$row['id']]['brands'][] = [
+        'brand' => $row['brand_name'],
+        'quantity' => $row['brand_quantity']
+    ];
+}
 
 // Fetch Recently Added Items
 $recentlyAddedQuery = "
-    SELECT 
-        i.id, 
-        i.name, 
-        i.image, 
-        i.description, 
-        i.quantity, 
-        i.created_at,
-        GROUP_CONCAT(CONCAT(b.name, ' - ', b.quantity) ORDER BY b.name SEPARATOR '<br>') AS brand_details
-    FROM items i
-    LEFT JOIN brands b ON i.id = b.item_id
-    WHERE i.created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
-    GROUP BY i.id
-    ORDER BY i.created_at DESC
+SELECT
+i.id,
+i.name,
+i.image,
+i.description,
+i.quantity,
+i.created_at,
+GROUP_CONCAT(CONCAT(b.name, ' - ', b.quantity) ORDER BY b.name SEPARATOR '<br>') AS brand_details
+FROM items i
+LEFT JOIN brands b ON i.id = b.item_id
+WHERE i.created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+GROUP BY i.id
+ORDER BY i.created_at DESC
 ";
 
 $recentlyAddedStmt = $conn->prepare($recentlyAddedQuery);
@@ -192,24 +206,25 @@ $recentlyAddedItems = $recentlyAddedResult->fetch_all(MYSQLI_ASSOC);
 
 // Fetch Lost Items
 $lostQuery = "
-    SELECT 
-        r.return_id,
-        r.unique_id_remark,
-        i.name AS item_name,
-        i.id AS item_id,
-        i.brand,
-        r.quantity_returned,
-        r.returned_at,
-        r.remarks,
-        u.first_name,
-        u.last_name,
-        u.contact_no,
-        u.email
-    FROM returned_items r
-    JOIN items i ON r.item_id = i.id
-    JOIN item_transactions t ON r.transaction_id = t.transaction_id
-    JOIN users u ON t.users_id = u.id
-    WHERE r.status = 'Lost'
+SELECT
+r.return_id,
+r.unique_id_remark,
+i.name AS item_name,
+i.id AS item_id,
+b.name AS brand,
+r.quantity_returned,
+r.returned_at,
+r.remarks,
+u.first_name,
+u.last_name,
+u.contact_no,
+u.email
+FROM returned_items r
+JOIN items i ON r.item_id = i.id
+JOIN item_transactions t ON r.transaction_id = t.transaction_id
+JOIN users u ON t.users_id = u.id
+JOIN brands b ON t.brand_id = b.id
+WHERE r.status = 'Lost'
 ";
 $lostStmt = $conn->prepare($lostQuery);
 $lostStmt->execute();
@@ -217,24 +232,25 @@ $lostItems = $lostStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
 // Fetch Damaged Items
 $damagedQuery = "
-    SELECT 
-        r.return_id,
-        r.unique_id_remark,
-        i.name AS item_name,
-        i.id AS item_id,
-        i.brand,
-        r.quantity_returned,
-        r.returned_at,
-        r.remarks,
-        u.first_name,
-        u.last_name,
-        u.contact_no,
-        u.email
-    FROM returned_items r
-    JOIN items i ON r.item_id = i.id
-    JOIN item_transactions t ON r.transaction_id = t.transaction_id
-    JOIN users u ON t.users_id = u.id
-    WHERE r.status = 'Damaged'
+SELECT
+r.return_id,
+r.unique_id_remark,
+i.name AS item_name,
+i.id AS item_id,
+b.name AS brand,
+r.quantity_returned,
+r.returned_at,
+r.remarks,
+u.first_name,
+u.last_name,
+u.contact_no,
+u.email
+FROM returned_items r
+JOIN items i ON r.item_id = i.id
+JOIN item_transactions t ON r.transaction_id = t.transaction_id
+JOIN users u ON t.users_id = u.id
+JOIN brands b ON t.brand_id = b.id
+WHERE r.status = 'Damaged'
 ";
 $damagedStmt = $conn->prepare($damagedQuery);
 $damagedStmt->execute();
@@ -242,24 +258,25 @@ $damagedItems = $damagedStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
 // Fetch Replaced Items
 $replacedQuery = "
-    SELECT 
-        r.return_id,
-        r.unique_id_remark,
-        i.name AS item_name,
-        i.id AS item_id,
-        i.brand,
-        r.quantity_returned,
-        r.returned_at,
-        r.remarks,
-        u.first_name,
-        u.last_name,
-        u.contact_no,
-        u.email
-    FROM returned_items r
-    JOIN items i ON r.item_id = i.id
-    JOIN item_transactions t ON r.transaction_id = t.transaction_id
-    JOIN users u ON t.users_id = u.id
-    WHERE r.status = 'Replaced'
+SELECT
+r.return_id,
+r.unique_id_remark,
+i.name AS item_name,
+i.id AS item_id,
+b.name AS brand,
+r.quantity_returned,
+r.returned_at,
+r.remarks,
+u.first_name,
+u.last_name,
+u.contact_no,
+u.email
+FROM returned_items r
+JOIN items i ON r.item_id = i.id
+JOIN item_transactions t ON r.transaction_id = t.transaction_id
+JOIN users u ON t.users_id = u.id
+JOIN brands b ON t.brand_id = b.id
+WHERE r.status = 'Replaced'
 ";
 $replacedStmt = $conn->prepare($replacedQuery);
 $replacedStmt->execute();
@@ -269,22 +286,22 @@ $replacedItems = $replacedStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 // Overdue
 $currentDate = date('Y-m-d');
 $query = "
-SELECT 
-    t.transaction_id,
-    i.name AS item_name,
-    i.id AS item_id,
-    i.brand,
-    t.quantity_borrowed - IFNULL(t.quantity_returned, 0) AS overdue_quantity,
-    t.return_date,
-    u.first_name,
-    u.last_name,
-    u.contact_no,
-    u.email
+SELECT
+t.transaction_id,
+i.name AS item_name,
+i.id AS item_id,
+b.name AS brand,
+t.quantity_borrowed - IFNULL(t.quantity_returned, 0) AS overdue_quantity,
+t.return_date,
+u.first_name,
+u.last_name,
+u.contact_no,
+u.email
 FROM item_transactions t
 JOIN items i ON t.item_id = i.id
 JOIN users u ON t.users_id = u.id
-WHERE t.return_date < ? AND (t.status = 'Pending' OR t.status = 'Approved')
-";
+JOIN brands b ON t.brand_id = b.id
+WHERE t.return_date < ? AND (t.status='Pending' OR t.status='Approved' ) ";
 $stmt = $conn->prepare($query);
 $stmt->bind_param('s', $currentDate);
 $stmt->execute();
@@ -292,7 +309,7 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang=" en">
 
 <head>
     <meta charset="UTF-8">
@@ -639,7 +656,8 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                             <?php if (!empty($items)): ?>
                                 <?php foreach ($items as $item): ?>
                                     <tr class="hover:bg-gray-50 transition">
-                                        <td class="px-6 py-4 whitespace-nowrap"><?php echo htmlspecialchars($item['name']); ?>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <?php echo htmlspecialchars($item['name']); ?>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <img class="h-12 w-12 object-cover rounded"
@@ -653,7 +671,8 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">No items found.</td>
+                                    <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">No items found.
+                                    </td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
@@ -733,7 +752,8 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                             </td>
                                             <td class="border px-4 py-2"><?= $item['borrowed_at']; ?></td>
                                             <td class="border px-4 py-2"><?= $item['return_date']; ?></td>
-                                            <td class="border px-4 py-2"><?= $item['first_name'] . ' ' . $item['last_name']; ?>
+                                            <td class="border px-4 py-2">
+                                                <?= $item['first_name'] . ' ' . $item['last_name']; ?>
                                             </td>
                                             <td class="border px-4 py-2"><?= $item['contact_no']; ?></td>
                                             <td class="border px-4 py-2"><?= $item['email']; ?></td>
@@ -811,11 +831,12 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                             <td class="border px-4 py-2">
                                                 <span class="hover-tooltip">
                                                     <?= $item['quantity_returned']; ?>
-                                                    <div class="tooltip"><?= htmlspecialchars($item['unique_ids']); ?></div>
+                                                    <!-- <div class="tooltip"><?= htmlspecialchars($item['unique_ids']); ?></div> -->
                                                 </span>
                                             </td>
                                             <td class="border px-4 py-2"><?= $item['returned_at']; ?></td>
-                                            <td class="border px-4 py-2"><?= $item['first_name'] . ' ' . $item['last_name']; ?>
+                                            <td class="border px-4 py-2">
+                                                <?= $item['first_name'] . ' ' . $item['last_name']; ?>
                                             </td>
                                             <td class="border px-4 py-2"><?= $item['contact_no']; ?></td>
                                             <td class="border px-4 py-2"><?= $item['email']; ?></td>
@@ -871,19 +892,33 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                         <td colspan="5" class="border px-4 py-2 text-center">No available items.</td>
                                     </tr>
                                 <?php else: ?>
-                                    <?php foreach ($availableItems as $item): ?>
+                                    <?php foreach ($availableItems as $id => $item): ?>
                                         <tr class="hover:bg-gray-50">
-                                            <td class="border px-4 py-2"><?= $item['id']; ?></td>
-                                            <td class="border px-4 py-2"><?= $item['name']; ?></td>
-                                            <td class="border px-4 py-2"><?= $item['brand']; ?></td>
-                                            <td class="border px-4 py-2"><?= $item['quantity']; ?></td>
-                                            <td class="border px-4 py-2"><?= $item['description']; ?></td>
+                                            <td class="border px-4 py-2" rowspan="<?= count($item['brands']); ?>"><?= $id; ?>
+                                            </td>
+                                            <td class="border px-4 py-2" rowspan="<?= count($item['brands']); ?>">
+                                                <?= $item['name']; ?>
+                                            </td>
+                                            <td class="border px-4 py-2"><?= $item['brands'][0]['brand']; ?></td>
+                                            <td class="border px-4 py-2"><?= $item['brands'][0]['quantity']; ?></td>
+                                            <td class="border px-4 py-2" rowspan="<?= count($item['brands']); ?>">
+                                                <?= $item['description']; ?>
+                                            </td>
                                         </tr>
+                                        <?php for ($i = 1; $i < count($item['brands']); $i++): ?>
+                                            <tr class="hover:bg-gray-50">
+                                                <td class="border px-4 py-2"><?= $item['brands'][$i]['brand']; ?></td>
+                                                <td class="border px-4 py-2"><?= $item['brands'][$i]['quantity']; ?></td>
+                                            </tr>
+                                        <?php endfor; ?>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
+
+
+
                 </div>
             </div>
         </div>
@@ -953,7 +988,8 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                             <td class="border px-4 py-2"><?= $item['item_name']; ?></td>
                                             <td class="border px-4 py-2"><?= $item['brand']; ?></td>
                                             <td class="border px-4 py-2"><?= $item['returned_at']; ?></td>
-                                            <td class="border px-4 py-2"><?= $item['first_name'] . ' ' . $item['last_name']; ?>
+                                            <td class="border px-4 py-2">
+                                                <?= $item['first_name'] . ' ' . $item['last_name']; ?>
                                             </td>
                                             <td class="border px-4 py-2"><?= $item['contact_no']; ?></td>
                                             <td class="border px-4 py-2"><?= $item['email']; ?></td>
@@ -1040,7 +1076,8 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                             <td class="border px-4 py-2"><?= $item['item_name']; ?></td>
                                             <td class="border px-4 py-2"><?= $item['brand']; ?></td>
                                             <td class="border px-4 py-2"><?= $item['returned_at']; ?></td>
-                                            <td class="border px-4 py-2"><?= $item['first_name'] . ' ' . $item['last_name']; ?>
+                                            <td class="border px-4 py-2">
+                                                <?= $item['first_name'] . ' ' . $item['last_name']; ?>
                                             </td>
                                             <td class="border px-4 py-2"><?= $item['contact_no']; ?></td>
                                             <td class="border px-4 py-2"><?= $item['email']; ?></td>
@@ -1124,7 +1161,8 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                             <td class="border px-4 py-2"><?= $item['item_name']; ?></td>
                                             <td class="border px-4 py-2"><?= $item['brand']; ?></td>
                                             <td class="border px-4 py-2"><?= $item['returned_at']; ?></td>
-                                            <td class="border px-4 py-2"><?= $item['first_name'] . ' ' . $item['last_name']; ?>
+                                            <td class="border px-4 py-2">
+                                                <?= $item['first_name'] . ' ' . $item['last_name']; ?>
                                             </td>
                                             <td class="border px-4 py-2"><?= $item['contact_no']; ?></td>
                                             <td class="border px-4 py-2"><?= $item['email']; ?></td>
@@ -1179,7 +1217,8 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                             <tbody>
                                 <?php if (empty($recentlyAddedItems)): ?>
                                     <tr>
-                                        <td colspan="7" class="border px-4 py-2 text-center">No recently added items.</td>
+                                        <td colspan="7" class="border px-4 py-2 text-center">No recently added items.
+                                        </td>
                                     </tr>
                                 <?php else: ?>
                                     <?php foreach ($recentlyAddedItems as $item): ?>
@@ -1269,9 +1308,11 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                             <td class="border px-4 py-2"><?= $item['item_name']; ?></td>
                                             <td class="border px-4 py-2"><?= $item['brand']; ?></td>
                                             <td class="border px-4 py-2"><?= $item['overdue_quantity']; ?></td>
-                                            <td class="border px-4 py-2 text-red-600 font-semibold"><?= $item['return_date']; ?>
+                                            <td class="border px-4 py-2 text-red-600 font-semibold">
+                                                <?= $item['return_date']; ?>
                                             </td>
-                                            <td class="border px-4 py-2"><?= $item['first_name'] . ' ' . $item['last_name']; ?>
+                                            <td class="border px-4 py-2">
+                                                <?= $item['first_name'] . ' ' . $item['last_name']; ?>
                                             </td>
                                             <td class="border px-4 py-2"><?= $item['contact_no']; ?></td>
                                             <td class="border px-4 py-2"><?= $item['email']; ?></td>
