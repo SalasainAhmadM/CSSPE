@@ -21,7 +21,18 @@ if ($result->num_rows > 0) {
 }
 
 // Fetch the 10 latest items
-$itemQuery = "SELECT name, image, brand, quantity FROM items ORDER BY created_at DESC LIMIT 10";
+$itemQuery = "
+    SELECT 
+        i.name, 
+        i.image, 
+        GROUP_CONCAT(CONCAT(b.name, ' - ', b.quantity) ORDER BY b.name SEPARATOR '<br>') AS brand_details
+    FROM items i
+    LEFT JOIN brands b ON i.id = b.item_id
+    GROUP BY i.id
+    ORDER BY i.created_at DESC
+    LIMIT 10
+";
+
 $itemStmt = $conn->prepare($itemQuery);
 $itemStmt->execute();
 $itemResult = $itemStmt->get_result();
@@ -32,6 +43,7 @@ if ($itemResult->num_rows > 0) {
         $items[] = $itemRow;
     }
 }
+
 
 // Fetch borrowed, returned, and overdue counts
 $transactionQuery = "
@@ -86,10 +98,9 @@ $borrowedQuery = "
         t.transaction_id, 
         i.name AS item_name, 
         i.id AS item_id,
-        i.brand, 
+        b.name AS brand_name,  
         t.quantity_borrowed, 
         t.return_date, 
-        t.borrowed_at, 
         t.borrowed_at, 
         u.first_name, 
         u.last_name, 
@@ -98,6 +109,7 @@ $borrowedQuery = "
         GROUP_CONCAT(iq.unique_id ORDER BY iq.id SEPARATOR ', ') AS unique_ids
     FROM item_transactions t
     JOIN items i ON t.item_id = i.id
+    JOIN brands b ON t.brand_id = b.id  -- Joining brands table
     JOIN users u ON t.users_id = u.id
     JOIN transaction_item_quantities tiq ON t.transaction_id = tiq.transaction_id
     JOIN item_quantities iq ON tiq.item_quantity_id = iq.id
@@ -111,13 +123,14 @@ $borrowedStmt->execute();
 $borrowedResult = $borrowedStmt->get_result();
 $borrowedItems = $borrowedResult->fetch_all(MYSQLI_ASSOC);
 
+
 // Fetch Returned Items
 $returnedQuery = "
     SELECT 
         t.transaction_id, 
         i.name AS item_name, 
         i.id AS item_id,
-        i.brand, 
+        b.name AS brand,  -- Fetch brand name from brands table
         t.quantity_returned, 
         t.returned_at, 
         u.first_name, 
@@ -128,10 +141,12 @@ $returnedQuery = "
     FROM item_transactions t
     JOIN items i ON t.item_id = i.id
     JOIN users u ON t.users_id = u.id
+    JOIN brands b ON t.brand_id = b.id  -- Join brands table to get brand name
     LEFT JOIN returned_items r ON t.transaction_id = r.transaction_id AND t.item_id = r.item_id
     WHERE t.status = 'Returned'
-    GROUP BY t.transaction_id, i.id, i.brand, t.quantity_returned, t.returned_at, u.first_name, u.last_name, u.contact_no, u.email
+    GROUP BY t.transaction_id, i.id, b.name, t.quantity_returned, t.returned_at, u.first_name, u.last_name, u.contact_no, u.email
 ";
+
 $returnedStmt = $conn->prepare($returnedQuery);
 $returnedStmt->execute();
 $returnedResult = $returnedStmt->get_result();
@@ -156,17 +171,20 @@ $availableItems = $availableResult->fetch_all(MYSQLI_ASSOC);
 // Fetch Recently Added Items
 $recentlyAddedQuery = "
     SELECT 
-        id, 
-        name, 
-        image, 
-        description, 
-        brand, 
-        quantity, 
-        created_at 
-    FROM items
-    WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
-    ORDER BY created_at DESC
+        i.id, 
+        i.name, 
+        i.image, 
+        i.description, 
+        i.quantity, 
+        i.created_at,
+        GROUP_CONCAT(CONCAT(b.name, ' - ', b.quantity) ORDER BY b.name SEPARATOR '<br>') AS brand_details
+    FROM items i
+    LEFT JOIN brands b ON i.id = b.item_id
+    WHERE i.created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+    GROUP BY i.id
+    ORDER BY i.created_at DESC
 ";
+
 $recentlyAddedStmt = $conn->prepare($recentlyAddedQuery);
 $recentlyAddedStmt->execute();
 $recentlyAddedResult = $recentlyAddedStmt->get_result();
@@ -605,16 +623,16 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                             <tr>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Item Name</th>
+                                    Item Name
+                                </th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Image</th>
+                                    Image
+                                </th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Brand</th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Quantity</th>
+                                    Brands and Quantities
+                                </th>
                             </tr>
                         </thead>
                         <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
@@ -628,20 +646,19 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                                 src="<?php echo !empty($item['image']) ? '../assets/uploads/' . htmlspecialchars($item['image']) : '../assets/img/CSSPE.png'; ?>"
                                                 alt="<?php echo htmlspecialchars($item['name']); ?>">
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap"><?php echo htmlspecialchars($item['brand']); ?>
-                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <?php echo htmlspecialchars($item['quantity']); ?>
+                                            <?php echo !empty($item['brand_details']) ? $item['brand_details'] : 'N/A'; ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">No items found.</td>
+                                    <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">No items found.</td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
+
                 </div>
             </div>
         </div>
@@ -707,7 +724,7 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                             <td class="border px-4 py-2"><?= $item['transaction_id']; ?></td>
                                             <td class="border px-4 py-2"><?= $item['item_id']; ?></td>
                                             <td class="border px-4 py-2"><?= $item['item_name']; ?></td>
-                                            <td class="border px-4 py-2"><?= $item['brand']; ?></td>
+                                            <td class="border px-4 py-2"><?= htmlspecialchars($item['brand_name']); ?></td>
                                             <td class="border px-4 py-2">
                                                 <span class="hover-tooltip">
                                                     <?= $item['quantity_borrowed']; ?>
@@ -1148,17 +1165,16 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="w-full border-collapse>
+                        <table class="w-full border-collapse">
                             <thead>
-                                <tr class=" bg-gray-100">
-                            <th class="border px-4 py-2 text-left">Id</th>
-                            <th class="border px-4 py-2 text-left">Item Name</th>
-                            <th class="border px-4 py-2 text-left">Image</th>
-                            <th class="border px-4 py-2 text-left">Description</th>
-                            <th class="border px-4 py-2 text-left">Brand</th>
-                            <th class="border px-4 py-2 text-left">Quantity</th>
-                            <th class="border px-4 py-2 text-left">Date Added</th>
-                            </tr>
+                                <tr class="bg-gray-100">
+                                    <th class="border px-4 py-2 text-left">Id</th>
+                                    <th class="border px-4 py-2 text-left">Item Name</th>
+                                    <th class="border px-4 py-2 text-left">Image</th>
+                                    <th class="border px-4 py-2 text-left">Description</th>
+                                    <th class="border px-4 py-2 text-left">Brands & Quantities</th>
+                                    <th class="border px-4 py-2 text-left">Date Added</th>
+                                </tr>
                             </thead>
                             <tbody>
                                 <?php if (empty($recentlyAddedItems)): ?>
@@ -1173,17 +1189,19 @@ $overdueItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                             <td class="border px-4 py-2">
                                                 <img class="h-16 w-16 object-cover rounded"
                                                     src="<?= !empty($item['image']) ? '../assets/uploads/' . $item['image'] : '../assets/img/CSSPE.png'; ?>"
-                                                    alt="<?= $item['name']; ?>">
+                                                    alt="<?= htmlspecialchars($item['name']); ?>">
                                             </td>
-                                            <td class="border px-4 py-2"><?= $item['description']; ?></td>
-                                            <td class="border px-4 py-2"><?= $item['brand']; ?></td>
-                                            <td class="border px-4 py-2"><?= $item['quantity']; ?></td>
+                                            <td class="border px-4 py-2"><?= htmlspecialchars($item['description']); ?></td>
+                                            <td class="border px-4 py-2">
+                                                <?= !empty($item['brand_details']) ? $item['brand_details'] : 'N/A'; ?>
+                                            </td>
                                             <td class="border px-4 py-2"><?= $item['created_at']; ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
                             </tbody>
                         </table>
+
                     </div>
                 </div>
             </div>

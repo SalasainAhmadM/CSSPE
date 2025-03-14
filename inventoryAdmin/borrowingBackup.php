@@ -553,7 +553,7 @@ $teacherResult = $conn->query($teacherQuery);
         .inputEmail:read-only {
             background-color: var(--lighter);
             color: #555;
-            cursor: not-allowed;
+            /* cursor: not-allowed; */
         }
 
         /* Responsive adjustments */
@@ -910,7 +910,7 @@ $teacherResult = $conn->query($teacherQuery);
                         <option value="">Select an item</option>
                         <?php while ($origin = $originResult->fetch_assoc()): ?>
                             <option value="<?= $origin['id'] ?>">
-                                <?= htmlspecialchars($origin['name'] . ' (' . $origin['brand'] . ')') ?>
+                                <?= htmlspecialchars($origin['name']) ?>
                             </option>
                         <?php endwhile; ?>
                     </select>
@@ -918,14 +918,15 @@ $teacherResult = $conn->query($teacherQuery);
 
                 <div class="inputContainer">
                     <label for="item_brand">Brand</label>
-                    <input id="item_brand" class="inputEmail" placeholder="Brand" type="text" readonly>
+                    <select name="item_brand" id="item_brand" class="inputEmail" onchange="updateQuantity()">
+                        <option value="">Select a brand</option>
+                    </select>
                 </div>
 
                 <div class="inputContainer">
                     <label for="item_quantity">Available Quantity</label>
                     <input id="item_quantity" class="inputEmail" placeholder="Available" type="text" readonly>
                 </div>
-
                 <div class="inputContainer">
                     <label for="teacher">Select Faculty Member</label>
                     <select name="teacher" id="teacher" class="inputEmail">
@@ -960,6 +961,7 @@ $teacherResult = $conn->query($teacherQuery);
             </div>
         </div>
     </div>
+
 
     <!-- Edit Item Modal -->
     <div class="editContainer">
@@ -1306,31 +1308,31 @@ $teacherResult = $conn->query($teacherQuery);
                             transactions.forEach(transaction => {
                                 const row = document.createElement('tr');
                                 row.innerHTML = `
-                                    <td>${transaction.transaction_id}</td>
-                                    <td>${transaction.item_id}</td>
-                                    <td>${transaction.item_name}</td>
-                                    <td>${transaction.item_brand}</td>
-                                    <td>
-                                        <span class="hover-unique-id">
-                                            ${transaction.quantity_borrowed}
-                                            <div class="tooltip">${transaction.unique_ids}</div>
-                                        </span>
-                                    </td>
-                                    <td>${transaction.borrowed_at ? formatDateTimeWithNewline(transaction.borrowed_at) : 'N/A'}</td>
-                                    <td>${transaction.return_date}</td>
-                                    <td>${transaction.first_name} ${transaction.last_name}</td>
-                                    <td>${transaction.contact_no}</td>
-                                    <td>${transaction.email}</td>
-                                    <td class="button">
-                                        <button class="addButton" style="width: 7rem;" onclick="approveTransaction(${transaction.transaction_id})">
-                                            <i class="fas fa-check"></i> Approve
-                                        </button>
-                                        <button class="addButton1" style="width: 7rem;" 
-                                            onclick="declineTransaction(${transaction.transaction_id}, '${transaction.item_id}', ${transaction.quantity_borrowed})">
-                                            <i class="fas fa-times"></i> Decline
-                                        </button>
-                                    </td>
-                                `;
+                            <td>${transaction.transaction_id}</td>
+                            <td>${transaction.item_id}</td>
+                            <td>${transaction.item_name}</td>
+                            <td>${transaction.item_brand}</td> 
+                            <td>
+                                <span class="hover-unique-id">
+                                    ${transaction.quantity_borrowed}
+                                    <div class="tooltip">${transaction.unique_ids}</div>
+                                </span>
+                            </td>
+                            <td>${transaction.borrowed_at ? formatDateTimeWithNewline(transaction.borrowed_at) : 'N/A'}</td>
+                            <td>${transaction.return_date}</td>
+                            <td>${transaction.first_name} ${transaction.last_name}</td>
+                            <td>${transaction.contact_no}</td>
+                            <td>${transaction.email}</td>
+                            <td class="button">
+                                <button class="addButton" style="width: 7rem;" onclick="approveTransaction(${transaction.transaction_id})">
+                                    <i class="fas fa-check"></i> Approve
+                                </button>
+                                <button class="addButton1" style="width: 7rem;" 
+                                    onclick="declineTransaction(${transaction.transaction_id}, '${transaction.item_id}', ${transaction.quantity_borrowed})">
+                                    <i class="fas fa-times"></i> Decline
+                                </button>
+                            </td>
+                        `;
                                 tbody.appendChild(row);
                             });
                         } else {
@@ -1353,7 +1355,7 @@ $teacherResult = $conn->query($teacherQuery);
 
         function fetchItemDetails(itemId) {
             if (!itemId) {
-                document.getElementById('item_brand').value = '';
+                document.getElementById('item_brand').innerHTML = '<option value="">Select a brand</option>';
                 document.getElementById('item_quantity').value = '';
                 return;
             }
@@ -1365,8 +1367,26 @@ $teacherResult = $conn->query($teacherQuery);
                     try {
                         const response = JSON.parse(xhr.responseText);
                         if (response.status === 'success') {
-                            document.getElementById('item_brand').value = response.data.brand;
-                            document.getElementById('item_quantity').value = response.data.quantity;
+                            const brands = response.data;
+                            const brandSelect = document.getElementById('item_brand');
+                            brandSelect.innerHTML = '<option value="">Select a brand</option>';
+
+                            brands.forEach(brand => {
+                                const option = document.createElement('option');
+                                option.value = brand.id; // Set the value to the brand_id
+                                option.textContent = `${brand.brand} (Available: ${brand.quantity})`; // Display brand name and quantity
+                                brandSelect.appendChild(option);
+                            });
+
+                            // Set the available quantity based on the selected brand
+                            brandSelect.addEventListener('change', function () {
+                                const selectedBrand = brands.find(b => b.id === parseInt(this.value, 10)); // Find by brand_id
+                                if (selectedBrand) {
+                                    document.getElementById('item_quantity').value = selectedBrand.quantity;
+                                } else {
+                                    document.getElementById('item_quantity').value = '';
+                                }
+                            });
                         } else {
                             Swal.fire({
                                 icon: 'error',
@@ -1381,16 +1401,25 @@ $teacherResult = $conn->query($teacherQuery);
             };
             xhr.send();
         }
+        function updateQuantity() {
+            const brandSelect = document.getElementById('item_brand');
+            const selectedBrand = brandSelect.options[brandSelect.selectedIndex].text;
+            const quantity = selectedBrand.match(/\(Available: (\d+)\)/)[1];
+            document.getElementById('item_quantity').value = quantity || '';
+        }
 
         function confirmBorrow() {
             const itemId = document.getElementById('origin_item').value;
             const teacherId = document.getElementById('teacher').value;
+            const brandSelect = document.getElementById('item_brand');
+            const brandId = brandSelect.options[brandSelect.selectedIndex].value; // Get the selected brand ID
             const quantity = parseInt(document.getElementById('quantity').value, 10);
             const student = document.getElementById('student').value;
             const returnDate = document.getElementById('returnDate').value;
             const availableQuantity = parseInt(document.getElementById('item_quantity').value, 10);
 
-            if (!itemId || !teacherId || isNaN(quantity) || !returnDate) {
+
+            if (!itemId || !teacherId || isNaN(quantity) || !returnDate || !brandId) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Missing Fields',
@@ -1471,7 +1500,7 @@ $teacherResult = $conn->query($teacherQuery);
                         }
                     };
 
-                    const params = `item_id=${itemId}&teacher=${teacherId}&quantity=${quantity}&student=${student}&return_date=${returnDate}`;
+                    const params = `item_id=${itemId}&brand_id=${brandId}&teacher=${teacherId}&quantity=${quantity}&student=${student}&return_date=${returnDate}`;
                     xhr.send(params);
                 }
             });

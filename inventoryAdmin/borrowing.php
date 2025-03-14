@@ -36,9 +36,15 @@ if ($schoolYearResult->num_rows > 0) {
 $originQuery = "SELECT id, name, brand FROM items";
 $originResult = $conn->query($originQuery);
 
+$originMultipleQuery = "SELECT id, name, brand FROM items";
+$originMultipleResult = $conn->query($originMultipleQuery);
+
 // Fetch users with role 'Instructor'
 $teacherQuery = "SELECT id, CONCAT(first_name, ' ', COALESCE(middle_name, ''), ' ', last_name) AS full_name FROM users WHERE role = 'Instructor' AND ban = 0";
 $teacherResult = $conn->query($teacherQuery);
+
+$teacherMultipleQuery = "SELECT id, CONCAT(first_name, ' ', COALESCE(middle_name, ''), ' ', last_name) AS full_name FROM users WHERE role = 'Instructor' AND ban = 0";
+$teacherMultipleResult = $conn->query($teacherMultipleQuery);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -556,6 +562,141 @@ $teacherResult = $conn->query($teacherQuery);
             /* cursor: not-allowed; */
         }
 
+        /* Multiple Borrow */
+        .addContainerMultiple {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .subAddContainerMultiple {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 1200px;
+            overflow-y: auto;
+            max-height: 90vh;
+        }
+
+        .subLoginContainerMultiple {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .itemRow,
+        .detailsRow {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .inputContainer {
+            flex: 1;
+        }
+
+        .addMoreButton {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #6B0D0D;
+            font-size: 16px;
+            padding: 5px;
+            margin-left: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .addMoreButton:hover {
+            color: #4a0a0a;
+        }
+
+        .inputContainer input[type="number"] {
+            padding-right: 40px;
+        }
+
+        .deleteRowButton {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #d9534f;
+            font-size: 16px;
+            padding: 5px;
+            margin-left: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .deleteRowButton:hover {
+            color: #c9302c;
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .subAddContainerMultiple {
+                width: 95%;
+                padding: 15px;
+            }
+
+            .itemRow,
+            .detailsRow {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+
+            .inputContainer {
+                width: 100%;
+            }
+
+            .inputContainer input,
+            .inputContainer select {
+                width: 100%;
+                font-size: 14px;
+            }
+
+            .addMoreButton {
+                font-size: 14px;
+            }
+
+            .deleteRowButton {
+                font-size: 14px;
+            }
+
+            .titleContainer {
+                font-size: 18px;
+            }
+
+            .inputContainer label {
+                font-size: 14px;
+            }
+
+            .inputContainer[style*="position: relative"] {
+                flex-direction: column;
+            }
+
+            .inputContainer[style*="position: relative"] input {
+                width: 100%;
+            }
+
+            .inputContainer[style*="position: relative"] .addMoreButton {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+
+
+        }
+
         /* Responsive adjustments */
         @media (max-width: 1200px) {
             .sidebar {
@@ -864,6 +1005,9 @@ $teacherResult = $conn->query($teacherQuery);
                         <button onclick="addProgram()" class="addButton size">
                             <i class="fas fa-plus"></i> Borrow Item
                         </button>
+                        <button onclick="addMultiple()" class="addButton size">
+                            <i class="fas fa-plus"></i> Borrow Multiple Items
+                        </button>
                     </div>
                 </div>
 
@@ -962,6 +1106,336 @@ $teacherResult = $conn->query($teacherQuery);
         </div>
     </div>
 
+    <!-- Add Borrow Multiple Items Modal -->
+    <div class="addContainerMultiple">
+        <div class="subAddContainerMultiple">
+            <div style="height: 40px; margin-bottom: 10px" class="titleContainer">
+                <i class="fas fa-hand-holding"></i>
+                <p>Borrow Multiple Items</p>
+            </div>
+
+            <div class="subLoginContainerMultiple">
+                <!-- Default Item Row -->
+                <div class="itemRow" data-row="1">
+                    <div class="inputContainer">
+                        <label for="origin_item_1">Item</label>
+                        <select name="origin_item_1" id="origin_item_1" class="inputEmail"
+                            onchange="fetchMultipleItemDetails(this.value, 1)">
+                            <option value="">Select an item</option>
+                            <?php while ($originMultiple = $originMultipleResult->fetch_assoc()): ?>
+                                <option value="<?= $originMultiple['id'] ?>">
+                                    <?= htmlspecialchars($originMultiple['name']) ?>
+                                </option>
+                            <?php endwhile; ?>
+                        </select>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label for="item_brand_1">Brand</label>
+                        <select name="item_brand_1" id="item_brand_1" class="inputEmail">
+                            <option value="">Select a brand</option>
+                        </select>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label for="item_quantity_1">Available</label>
+                        <input id="item_quantity_1" class="inputEmail" placeholder="Available" type="text" readonly>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label for="quantity_1">Quantity</label>
+                        <input id="quantity_1" class="inputEmail" placeholder="Quantity" type="number" min="1">
+                    </div>
+
+                    <div class="inputContainer">
+                        <label for="teacher_1">Faculty Member</label>
+                        <select name="teacher_1" id="teacher_1" class="inputEmail">
+                            <option value="">Select a faculty member</option>
+                            <?php while ($teacherMultiple = $teacherMultipleResult->fetch_assoc()): ?>
+                                <option value="<?= $teacherMultiple['id'] ?>">
+                                    <?= htmlspecialchars(trim($teacherMultiple['full_name'])) ?>
+                                </option>
+                            <?php endwhile; ?>
+                        </select>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label for="student_1">Assign Student</label>
+                        <input id="student_1" class="inputEmail" placeholder="Enter Student Name (Optional)"
+                            type="text">
+                    </div>
+
+                    <div class="inputContainer" style="position: relative; display: flex; flex-direction: column;">
+                        <label for="returnDate_1">Return Date</label>
+                        <div style="display: flex; align-items: center;">
+                            <input id="returnDate_1" class="inputEmail" placeholder="Enter Return Date" type="date"
+                                style="flex: 1;">
+                            <button class="addMoreButton" onclick="addMoreItems()">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Item Rows Will Be Added Here -->
+                <div id="additionalItemRows"></div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="inputContainer" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                <button class="addButton1" style="width: 100px;" onclick="closeMultipleBorrowModal()">Cancel</button>
+                <button class="addButton" style="width: 100px;" onclick="confirmMultipleBorrow()">Borrow</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to open the Borrow Multiple Items modal
+        function addMultiple() {
+            const addContainerMultiple = document.querySelector('.addContainerMultiple');
+            addContainerMultiple.style.display = 'flex';
+        }
+
+        // Function to close the Borrow Multiple Items modal
+        function closeMultipleBorrowModal() {
+            const addContainerMultiple = document.querySelector('.addContainerMultiple');
+            addContainerMultiple.style.display = 'none';
+        }
+
+        function fetchMultipleItemDetails(itemId, rowIndex) {
+            if (!itemId) {
+                document.getElementById(`item_brand_${rowIndex}`).innerHTML = '<option value="">Select a brand</option>';
+                document.getElementById(`item_quantity_${rowIndex}`).value = '';
+                return;
+            }
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', `./endpoints/fetch_multipleitem_details.php?item_id=${itemId}`, true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.status === 'success') {
+                            const brands = response.data;
+                            const brandSelect = document.getElementById(`item_brand_${rowIndex}`);
+                            brandSelect.innerHTML = '<option value="">Select a brand</option>';
+
+                            brands.forEach(brand => {
+                                const option = document.createElement('option');
+                                option.value = brand.id;
+                                option.textContent = `${brand.brand} (Available: ${brand.quantity})`;
+                                option.setAttribute('data-quantity', brand.quantity);
+                                brandSelect.appendChild(option);
+                            });
+
+                            // Ensure only this row's quantity updates
+                            brandSelect.onchange = function () {
+                                const selectedBrand = brandSelect.options[brandSelect.selectedIndex];
+                                document.getElementById(`item_quantity_${rowIndex}`).value = selectedBrand.dataset.quantity || '';
+                            };
+
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: response.message || 'Failed to fetch item details',
+                                confirmButtonColor: '#6B0D0D'
+                            });
+                        }
+                    } catch (e) {
+                        console.error('Error parsing response:', e);
+                    }
+                }
+            };
+            xhr.send();
+        }
+
+        let rowCounter = 1; // Start row counter from 1
+
+        function addMoreItems() {
+            rowCounter++; // Increment row count
+            let newRow = document.createElement("div");
+            newRow.classList.add("itemRow");
+            newRow.setAttribute("data-row", rowCounter);
+            newRow.innerHTML = `
+        <div class="inputContainer">
+            <label for="origin_item_${rowCounter}">Item</label>
+            <select name="origin_item_${rowCounter}" id="origin_item_${rowCounter}" class="inputEmail"
+                onchange="fetchMultipleItemDetails(this.value, ${rowCounter})">
+                ${document.getElementById("origin_item_1").innerHTML} 
+            </select>
+        </div>
+
+        <div class="inputContainer">
+            <label for="item_brand_${rowCounter}">Brand</label>
+            <select name="item_brand_${rowCounter}" id="item_brand_${rowCounter}" class="inputEmail">
+                <option value="">Select a brand</option>
+            </select>
+        </div>
+
+        <div class="inputContainer">
+            <label for="item_quantity_${rowCounter}">Available</label>
+            <input id="item_quantity_${rowCounter}" class="inputEmail" placeholder="Available" type="text" readonly>
+        </div>
+
+        <div class="inputContainer">
+            <label for="quantity_${rowCounter}">Quantity</label>
+            <input id="quantity_${rowCounter}" class="inputEmail" placeholder="Quantity" type="number" min="1">
+        </div>
+
+        <div class="inputContainer">
+            <label for="teacher_${rowCounter}">Faculty Member</label>
+            <select name="teacher_${rowCounter}" id="teacher_${rowCounter}" class="inputEmail">
+       
+                ${document.getElementById("teacher_1").innerHTML}
+            </select>
+        </div>
+
+        <div class="inputContainer">
+            <label for="student_${rowCounter}">Assign Student</label>
+            <input id="student_${rowCounter}" class="inputEmail" placeholder="Enter Student Name (Optional)" type="text">
+        </div>
+
+        <div class="inputContainer" style="position: relative; display: flex; flex-direction: column;">
+            <label for="returnDate_${rowCounter}">Return Date</label>
+            <div style="display: flex; align-items: center;">
+                <input id="returnDate_${rowCounter}" class="inputEmail" placeholder="Enter Return Date" type="date"
+                    style="flex: 1;">
+                <button class="addMoreButton" onclick="addMoreItems()">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+        </div>
+    `;
+
+            document.getElementById("additionalItemRows").appendChild(newRow);
+        }
+        function confirmMultipleBorrow() {
+            let items = [];
+            let allValid = true;
+
+            document.querySelectorAll('.itemRow').forEach((row) => {
+                const rowIndex = row.getAttribute('data-row');
+                const itemId = document.getElementById(`origin_item_${rowIndex}`).value;
+                const teacherId = document.getElementById(`teacher_${rowIndex}`).value;
+                const brandSelect = document.getElementById(`item_brand_${rowIndex}`);
+                const brandId = brandSelect.options[brandSelect.selectedIndex].value;
+                const quantity = parseInt(document.getElementById(`quantity_${rowIndex}`).value, 10);
+                const student = document.getElementById(`student_${rowIndex}`).value;
+                const returnDate = document.getElementById(`returnDate_${rowIndex}`).value;
+                const availableQuantity = parseInt(document.getElementById(`item_quantity_${rowIndex}`).value, 10);
+
+                if (!itemId || !teacherId || isNaN(quantity) || !returnDate || !brandId) {
+                    allValid = false;
+                    return;
+                }
+
+                if (quantity > availableQuantity) {
+                    allValid = false;
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Quantity Exceeded!',
+                        text: `The quantity you are trying to borrow (${quantity}) exceeds the available stock (${availableQuantity}). Please adjust the quantity.`,
+                        confirmButtonColor: '#6B0D0D',
+                    });
+                    return;
+                }
+
+                if (quantity <= 0) {
+                    allValid = false;
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid Quantity',
+                        text: `Quantity must be greater than zero.`,
+                        confirmButtonColor: '#6B0D0D',
+                    });
+                    return;
+                }
+
+                items.push({ item_id: itemId, brand_id: brandId, teacher: teacherId, quantity, student, return_date: returnDate });
+            });
+
+            if (!allValid) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Missing or Invalid Fields',
+                    text: 'Please check all fields before proceeding.',
+                    confirmButtonColor: '#6B0D0D',
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Confirm Borrow',
+                text: 'Are you sure you want to proceed with these transactions?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#6B0D0D',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, confirm!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', './endpoints/borrow_multiple_items.php', true);
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState === 4) {
+                            if (xhr.status === 200) {
+                                try {
+                                    const response = JSON.parse(xhr.responseText);
+
+                                    if (response.status === 'success') {
+                                        closeMultipleBorrowModal(); // Close modal on success
+
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Borrowing Confirmed!',
+                                            text: response.message,
+                                            showConfirmButton: false,
+                                            timer: 3000
+                                        }).then(() => {
+                                            location.reload();
+                                        });
+
+                                        // Reset form
+                                        document.querySelectorAll('.itemRow').forEach(row => row.remove());
+                                        addMoreItems(); // Re-add the first row
+                                        setTimeout(fetchTransactions, 1000);
+                                    } else {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Error',
+                                            text: response.message,
+                                            confirmButtonColor: '#6B0D0D',
+                                        });
+                                    }
+                                } catch (e) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: response.message,
+                                        showConfirmButton: false,
+                                        timer: 3000,
+                                        confirmButtonColor: '#6B0D0D'
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                }
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'Failed to communicate with the server.',
+                                    confirmButtonColor: '#6B0D0D',
+                                });
+                            }
+                        }
+                    };
+
+                    xhr.send(JSON.stringify({ items }));
+                }
+            });
+        }
+    </script>
 
     <!-- Edit Item Modal -->
     <div class="editContainer">
@@ -1336,11 +1810,17 @@ $teacherResult = $conn->query($teacherQuery);
                                 tbody.appendChild(row);
                             });
                         } else {
-                            Swal.fire({
-                                icon: 'info',
-                                title: response.message || 'No transactions found',
-                                confirmButtonColor: '#6B0D0D'
-                            });
+                            // Show empty state if no data
+                            const tbody = document.querySelector('.tableContainer tbody');
+                            tbody.innerHTML = `
+                                <tr>
+                                    <td colspan="12" style="text-align: center; padding: 40px 20px;">
+                                        <i class="fas fa-inbox" style="font-size: 48px; color: #ddd; margin-bottom: 15px; display: block;"></i>
+                                        <p style="font-size: 16px; color: #888; margin: 0;">No pending borrowed items found</p>
+                                        <p style="font-size: 14px; color: #aaa; margin-top: 5px;">pending items will appear here</p>
+                                    </td>
+                                </tr>
+                            `;
                         }
                     } catch (e) {
                         console.error('Error parsing response:', e);

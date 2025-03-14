@@ -19,9 +19,10 @@ $stmt->close();
 
 // Fetch borrowed history
 $sql_borrow_history = "SELECT t.transaction_id, t.quantity_borrowed, t.borrowed_at, t.return_date, t.status, 
-                              i.name AS item_name, i.brand AS item_brand
+                              i.name AS item_name, b.name AS item_brand
                        FROM item_transactions t
                        JOIN items i ON t.item_id = i.id
+                       JOIN brands b ON t.brand_id = b.id
                        WHERE t.users_id = ?
                        ORDER BY t.borrowed_at DESC";
 $stmt_borrow_history = $conn->prepare($sql_borrow_history);
@@ -62,7 +63,7 @@ $lostQuery = "
     SELECT 
         r.return_id,
         i.name AS item_name,
-        i.brand,
+        b.name AS brand,
         r.quantity_returned,
         r.returned_at,
         r.remarks,
@@ -72,6 +73,7 @@ $lostQuery = "
     FROM returned_items r
     JOIN items i ON r.item_id = i.id
     JOIN item_transactions t ON r.transaction_id = t.transaction_id
+    JOIN brands b ON t.brand_id = b.id
     JOIN users u ON t.users_id = u.id
     WHERE r.status = 'Lost' AND u.id = ?
 ";
@@ -85,7 +87,7 @@ $damagedQuery = "
     SELECT 
         r.return_id,
         i.name AS item_name,
-        i.brand,
+        b.name AS brand,
         r.quantity_returned,
         r.returned_at,
         r.remarks,
@@ -95,6 +97,7 @@ $damagedQuery = "
     FROM returned_items r
     JOIN items i ON r.item_id = i.id
     JOIN item_transactions t ON r.transaction_id = t.transaction_id
+    JOIN brands b ON t.brand_id = b.id
     JOIN users u ON t.users_id = u.id
     WHERE r.status = 'Damaged' AND u.id = ?
 ";
@@ -108,7 +111,7 @@ $replacedQuery = "
     SELECT 
         r.return_id,
         i.name AS item_name,
-        i.brand,
+        b.name AS brand,
         r.quantity_returned,
         r.returned_at,
         r.remarks,
@@ -118,6 +121,7 @@ $replacedQuery = "
     FROM returned_items r
     JOIN items i ON r.item_id = i.id
     JOIN item_transactions t ON r.transaction_id = t.transaction_id
+    JOIN brands b ON t.brand_id = b.id
     JOIN users u ON t.users_id = u.id
     WHERE r.status = 'Replaced' AND u.id = ?
 ";
@@ -1197,7 +1201,9 @@ $conn->close();
                 <div class="profile-details">
                     <div class="detail-group">
                         <div class="detail-label">Full Name</div>
-                        <div class="detail-value"><?= htmlspecialchars($user['first_name'] . ' ' . $user['middle_name'] . ' ' . $user['last_name']) ?></div>
+                        <div class="detail-value">
+                            <?= htmlspecialchars($user['first_name'] . ' ' . $user['middle_name'] . ' ' . $user['last_name']) ?>
+                        </div>
                     </div>
 
                     <div class="detail-group">
@@ -1446,7 +1452,8 @@ $conn->close();
                                     alt="Profile Picture">
                             </div>
                             <div class="image-upload">
-                                <input type="file" name="profile_image" id="profileImageInput" accept="image/*" class="file-input">
+                                <input type="file" name="profile_image" id="profileImageInput" accept="image/*"
+                                    class="file-input">
                                 <button type="submit" class="btn btn-primary">Upload Image</button>
                             </div>
                         </div>
@@ -1454,47 +1461,56 @@ $conn->close();
                         <div class="form-details">
                             <div class="form-group">
                                 <label class="form-label">First Name</label>
-                                <input type="text" name="first_name" value="<?= htmlspecialchars($user['first_name']) ?>" class="form-control">
+                                <input type="text" name="first_name"
+                                    value="<?= htmlspecialchars($user['first_name']) ?>" class="form-control">
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Last Name</label>
-                                <input type="text" name="last_name" value="<?= htmlspecialchars($user['last_name']) ?>" class="form-control">
+                                <input type="text" name="last_name" value="<?= htmlspecialchars($user['last_name']) ?>"
+                                    class="form-control">
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Middle Name</label>
-                                <input type="text" name="middle_name" value="<?= htmlspecialchars($user['middle_name']) ?>" class="form-control">
+                                <input type="text" name="middle_name"
+                                    value="<?= htmlspecialchars($user['middle_name']) ?>" class="form-control">
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Email</label>
-                                <input type="email" name="email" value="<?= htmlspecialchars($user['email']) ?>" class="form-control">
+                                <input type="email" name="email" value="<?= htmlspecialchars($user['email']) ?>"
+                                    class="form-control">
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Contact Number</label>
-                                <input type="text" name="contact_no" value="<?= htmlspecialchars($user['contact_no']) ?>" class="form-control">
+                                <input type="text" name="contact_no"
+                                    value="<?= htmlspecialchars($user['contact_no']) ?>" class="form-control">
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Address</label>
-                                <input type="text" name="address" value="<?= htmlspecialchars($user['address']) ?>" class="form-control">
+                                <input type="text" name="address" value="<?= htmlspecialchars($user['address']) ?>"
+                                    class="form-control">
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Position</label>
-                                <input type="text" name="rank" value="<?= htmlspecialchars($user['rank']) ?>" class="form-control">
+                                <input type="text" name="rank" value="<?= htmlspecialchars($user['rank']) ?>"
+                                    class="form-control">
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Department</label>
-                                <input type="text" name="department" value="<?= htmlspecialchars($user['department']) ?>" class="form-control">
+                                <input type="text" name="department"
+                                    value="<?= htmlspecialchars($user['department']) ?>" class="form-control">
                             </div>
 
                             <div class="form-group password-field">
                                 <label class="form-label">Password</label>
-                                <input type="password" name="password" id="password" class="form-control" placeholder="New Password (leave blank if unchanged)">
+                                <input type="password" name="password" id="password" class="form-control"
+                                    placeholder="New Password (leave blank if unchanged)">
                                 <button type="button" id="togglePassword" class="toggle-password">
                                     <i class="fas fa-eye"></i>
                                 </button>
@@ -1529,11 +1545,11 @@ $conn->close();
         const searchBar = document.getElementById('searchBar');
 
         // Profile image preview
-        profileImageInput.addEventListener('change', function(event) {
+        profileImageInput.addEventListener('change', function (event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     profileImagePreview.src = e.target.result;
                 };
                 reader.readAsDataURL(file);
@@ -1541,7 +1557,7 @@ $conn->close();
         });
 
         // Toggle password visibility
-        togglePassword.addEventListener('click', function() {
+        togglePassword.addEventListener('click', function () {
             const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordField.setAttribute('type', type);
             this.querySelector('i').classList.toggle('fa-eye');
@@ -1549,7 +1565,7 @@ $conn->close();
         });
 
         // Search functionality
-        searchBar.addEventListener('input', function() {
+        searchBar.addEventListener('input', function () {
             const filter = this.value.toLowerCase();
             const rows = document.querySelectorAll('#borrowHistoryTable tbody tr');
 
@@ -1584,7 +1600,7 @@ $conn->close();
         }
 
         // Toggle sidebar on mobile
-        toggleBtn.addEventListener('click', function() {
+        toggleBtn.addEventListener('click', function () {
             sidebar.classList.toggle('active');
 
             if (sidebar.classList.contains('active')) {
@@ -1597,7 +1613,7 @@ $conn->close();
         });
 
         // Close sidebar when clicking overlay
-        sidebarOverlay.addEventListener('click', function() {
+        sidebarOverlay.addEventListener('click', function () {
             sidebar.classList.remove('active');
             sidebar.style.left = '-280px';
             sidebarOverlay.classList.remove('active');
@@ -1646,7 +1662,7 @@ $conn->close();
 
         // Close modals if clicking outside content area
         document.querySelectorAll('.modal-overlay').forEach(modal => {
-            modal.addEventListener('click', function(e) {
+            modal.addEventListener('click', function (e) {
                 if (e.target === this) {
                     this.style.display = 'none';
                     document.body.style.overflow = '';

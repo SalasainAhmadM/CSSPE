@@ -46,6 +46,8 @@ $totalPages = ceil($totalItems / $limit);
 $teacherQuery = "SELECT id, CONCAT(first_name, ' ', COALESCE(middle_name, ''), ' ', last_name) AS full_name FROM users WHERE role = 'Instructor'";
 $teacherResult = $conn->query($teacherQuery);
 
+$originMultipleQuery = "SELECT id, name, brand FROM items";
+$originMultipleResult = $conn->query($originMultipleQuery);
 ?>
 
 <!DOCTYPE html>
@@ -388,11 +390,24 @@ $teacherResult = $conn->query($teacherQuery);
         }
 
         /* Search bar */
-        .searchContainer {
+        .searchAddContainer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin: 0 25px;
-            position: relative;
             max-width: 600px;
         }
+
+        .searchContainer {
+            flex-grow: 1;
+            max-width: 70%;
+        }
+
+        .addButton.size {
+            margin-left: 30px;
+            white-space: nowrap;
+        }
+
 
         .searchBar {
             width: 100%;
@@ -566,7 +581,7 @@ $teacherResult = $conn->query($teacherQuery);
         .inputEmail:read-only {
             background-color: var(--lighter);
             color: #555;
-            cursor: not-allowed;
+            /* cursor: not-allowed; */
         }
 
         /* Sidebar styling */
@@ -721,6 +736,142 @@ $teacherResult = $conn->query($teacherQuery);
             max-width: 400px;
             margin: 0 auto;
         }
+
+        /* Multiple Borrow */
+        .addContainerMultiple {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .subAddContainerMultiple {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 1200px;
+            overflow-y: auto;
+            max-height: 90vh;
+        }
+
+        .subLoginContainerMultiple {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .itemRow,
+        .detailsRow {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .inputContainer {
+            flex: 1;
+        }
+
+        .addMoreButton {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #6B0D0D;
+            font-size: 16px;
+            padding: 5px;
+            margin-left: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .addMoreButton:hover {
+            color: #4a0a0a;
+        }
+
+        .inputContainer input[type="number"] {
+            padding-right: 40px;
+        }
+
+        .deleteRowButton {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #d9534f;
+            font-size: 16px;
+            padding: 5px;
+            margin-left: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .deleteRowButton:hover {
+            color: #c9302c;
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .subAddContainerMultiple {
+                width: 95%;
+                padding: 15px;
+            }
+
+            .itemRow,
+            .detailsRow {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+
+            .inputContainer {
+                width: 100%;
+            }
+
+            .inputContainer input,
+            .inputContainer select {
+                width: 100%;
+                font-size: 14px;
+            }
+
+            .addMoreButton {
+                font-size: 14px;
+            }
+
+            .deleteRowButton {
+                font-size: 14px;
+            }
+
+            .titleContainer {
+                font-size: 18px;
+            }
+
+            .inputContainer label {
+                font-size: 14px;
+            }
+
+            .inputContainer[style*="position: relative"] {
+                flex-direction: column;
+            }
+
+            .inputContainer[style*="position: relative"] input {
+                width: 100%;
+            }
+
+            .inputContainer[style*="position: relative"] .addMoreButton {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+
+
+        }
+
 
         /* Responsive adjustments */
         @media (max-width: 1200px) {
@@ -1089,19 +1240,25 @@ $teacherResult = $conn->query($teacherQuery);
                     <span>Browse and borrow available items</span>
                 </h2>
 
-                <!-- Search Bar -->
-                <div class="searchContainer">
-                    <input id="searchBar" class="searchBar" type="text" placeholder="Search by item name...">
+                <div class="searchAddContainer">
+                    <div class="searchContainer">
+                        <input id="searchBar" class="searchBar" type="text" placeholder="Search by item name...">
+                    </div>
+                    <button onclick="addMultiple()" class="addButton size">
+                        <i class="fas fa-plus"></i> Borrow Multiple Items
+                    </button>
                 </div>
-
                 <!-- Inventory Grid -->
                 <div id="inventoryGrid" class="inventoryGrid">
                     <?php if ($itemsResult->num_rows > 0): ?>
                         <?php while ($item = $itemsResult->fetch_assoc()): ?>
                             <div class="inventoryContainer" data-title="<?= htmlspecialchars($item['name']) ?>">
                                 <div class="subInventoryContainer">
-                                    <div class="imageContainer" onclick="showNote('<?= htmlspecialchars($item['note'] ?: 'No note available') ?>')">
-                                        <img class="image" src="../assets/uploads/<?= htmlspecialchars($item['image'] ?: '../../assets/img/CSSPE.png') ?>" alt="Item Image">
+                                    <div class="imageContainer"
+                                        onclick="showNote('<?= htmlspecialchars($item['note'] ?: 'No note available') ?>')">
+                                        <img class="image"
+                                            src="../assets/uploads/<?= htmlspecialchars($item['image'] ?: '../../assets/img/CSSPE.png') ?>"
+                                            alt="Item Image">
                                     </div>
 
                                     <div class="infoContainer">
@@ -1120,7 +1277,9 @@ $teacherResult = $conn->query($teacherQuery);
                                         <p><strong>Available:</strong> <?= htmlspecialchars($item['quantity']) ?></p>
                                     </div>
                                     <div class="buttonContainer">
-                                        <button onclick="borrowItem(<?= htmlspecialchars($item['id']) ?>, '<?= htmlspecialchars($item['name']) ?>', '<?= htmlspecialchars($item['brand']) ?>')" class="addButton">
+                                        <button
+                                            onclick="borrowItem(<?= htmlspecialchars($item['id']) ?>, '<?= htmlspecialchars($item['name']) ?>', '<?= htmlspecialchars($item['brand']) ?>')"
+                                            class="addButton">
                                             <i class="fas fa-hand-holding"></i>Borrow
                                         </button>
                                     </div>
@@ -1145,7 +1304,8 @@ $teacherResult = $conn->query($teacherQuery);
                     <?php endif; ?>
 
                     <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                        <a href="?page=<?php echo $i; ?>" class="<?php echo ($i === $page) ? 'active' : ''; ?>"><?php echo $i; ?></a>
+                        <a href="?page=<?php echo $i; ?>"
+                            class="<?php echo ($i === $page) ? 'active' : ''; ?>"><?php echo $i; ?></a>
                     <?php endfor; ?>
 
                     <?php if ($page < $totalPages): ?>
@@ -1176,20 +1336,35 @@ $teacherResult = $conn->query($teacherQuery);
                         <input id="itemName" class="inputEmail" type="text" readonly>
                     </div>
 
-                    <!-- Brand  -->
+                    <!-- Brand Selection Dropdown -->
                     <div class="inputContainer">
                         <label>Brand:</label>
-                        <input id="itemBrand" class="inputEmail" type="text" readonly>
+                        <select id="itemBrand" class="inputEmail">
+                            <option value="" disabled selected>Select a Brand</option>
+                        </select>
                     </div>
 
-                    <input id="teacherSelect" class="inputEmail" value="<?php echo htmlspecialchars($userid); ?>" type="hidden">
+                    <!-- Available Quantity -->
+                    <div class="inputContainer">
+                        <label>Available:</label>
+                        <input id="available_quantity" placeholder="Available Quantity" class="inputEmail" type="text"
+                            readonly>
+                    </div>
+
+
+                    <input id="teacherSelect" class="inputEmail" value="<?php echo htmlspecialchars($userid); ?>"
+                        type="hidden">
 
                     <!-- Quantity -->
                     <div class="inputContainer">
                         <label>Quantity:</label>
-                        <input id="quantity" class="inputEmail" type="number" placeholder="Quantity:" min="1">
+                        <input id="quantity" class="inputEmail" type="number" placeholder="Quantity" min="1">
                     </div>
 
+                    <div class="inputContainer">
+                        <label for="student">Assign Student</label>
+                        <input id="student" class="inputEmail" placeholder="Enter Student Name (Optional)" type="text">
+                    </div>
                     <!-- Return Date -->
                     <div class="inputContainer">
                         <label>Return Date:</label>
@@ -1197,13 +1372,334 @@ $teacherResult = $conn->query($teacherQuery);
                     </div>
 
                     <!-- Buttons -->
-                    <div class="inputContainer" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                    <div class="inputContainer"
+                        style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
                         <button class="addButton1">Cancel</button>
                         <button class="confirmButton">Borrow</button>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Add Borrow Multiple Items Modal -->
+        <div class="addContainerMultiple">
+            <div class="subAddContainerMultiple">
+                <div style="height: 40px; margin-bottom: 10px" class="titleContainer">
+                    <i class="fas fa-hand-holding"></i>
+                    <p>Borrow Multiple Items</p>
+                </div>
+
+                <div class="subLoginContainerMultiple">
+                    <!-- Default Item Row -->
+                    <div class="itemRow" data-row="1">
+                        <div class="inputContainer">
+                            <label for="origin_item_1">Item</label>
+                            <select name="origin_item_1" id="origin_item_1" class="inputEmail"
+                                onchange="fetchMultipleItemDetails(this.value, 1)">
+                                <option value="">Select an item</option>
+                                <?php while ($originMultiple = $originMultipleResult->fetch_assoc()): ?>
+                                    <option value="<?= $originMultiple['id'] ?>">
+                                        <?= htmlspecialchars($originMultiple['name']) ?>
+                                    </option>
+                                <?php endwhile; ?>
+                            </select>
+                        </div>
+
+                        <div class="inputContainer">
+                            <label for="item_brand_1">Brand</label>
+                            <select name="item_brand_1" id="item_brand_1" class="inputEmail">
+                                <option value="">Select a brand</option>
+                            </select>
+                        </div>
+
+                        <div class="inputContainer">
+                            <label for="item_quantity_1">Available</label>
+                            <input id="item_quantity_1" class="inputEmail" placeholder="Available" type="text" readonly>
+                        </div>
+
+                        <div class="inputContainer">
+                            <label for="quantity_1">Quantity</label>
+                            <input id="quantity_1" class="inputEmail" placeholder="Quantity" type="number" min="1">
+                        </div>
+
+                        <input id="teacher_1" class="inputEmail" value="<?php echo htmlspecialchars($userid); ?>"
+                            type="hidden">
+
+
+                        <div class="inputContainer">
+                            <label for="student_1">Assign Student</label>
+                            <input id="student_1" class="inputEmail" placeholder="Enter Student Name (Optional)"
+                                type="text">
+                        </div>
+
+                        <div class="inputContainer" style="position: relative; display: flex; flex-direction: column;">
+                            <label for="returnDate_1">Return Date</label>
+                            <div style="display: flex; align-items: center;">
+                                <input id="returnDate_1" class="inputEmail" placeholder="Enter Return Date" type="date"
+                                    style="flex: 1;">
+                                <button class="addMoreButton" onclick="addMoreItems()">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Item Rows Will Be Added Here -->
+                    <div id="additionalItemRows"></div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="inputContainer"
+                    style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                    <button class="addButton1" style="width: 100px;"
+                        onclick="closeMultipleBorrowModal()">Cancel</button>
+                    <button class="addButton" style="width: 100px;" onclick="confirmMultipleBorrow()">Borrow</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Function to open the Borrow Multiple Items modal
+            function addMultiple() {
+                const addContainerMultiple = document.querySelector('.addContainerMultiple');
+                addContainerMultiple.style.display = 'flex';
+            }
+
+            // Function to close the Borrow Multiple Items modal
+            function closeMultipleBorrowModal() {
+                const addContainerMultiple = document.querySelector('.addContainerMultiple');
+                addContainerMultiple.style.display = 'none';
+            }
+
+            function fetchMultipleItemDetails(itemId, rowIndex) {
+                if (!itemId) {
+                    document.getElementById(`item_brand_${rowIndex}`).innerHTML = '<option value="">Select a brand</option>';
+                    document.getElementById(`item_quantity_${rowIndex}`).value = '';
+                    return;
+                }
+
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', `../inventoryAdmin/endpoints/fetch_multipleitem_details.php?item_id=${itemId}`, true);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response.status === 'success') {
+                                const brands = response.data;
+                                const brandSelect = document.getElementById(`item_brand_${rowIndex}`);
+                                brandSelect.innerHTML = '<option value="">Select a brand</option>';
+
+                                brands.forEach(brand => {
+                                    const option = document.createElement('option');
+                                    option.value = brand.id;
+                                    option.textContent = `${brand.brand} (Available: ${brand.quantity})`;
+                                    option.setAttribute('data-quantity', brand.quantity);
+                                    brandSelect.appendChild(option);
+                                });
+
+                                // Ensure only this row's quantity updates
+                                brandSelect.onchange = function () {
+                                    const selectedBrand = brandSelect.options[brandSelect.selectedIndex];
+                                    document.getElementById(`item_quantity_${rowIndex}`).value = selectedBrand.dataset.quantity || '';
+                                };
+
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: response.message || 'Failed to fetch item details',
+                                    confirmButtonColor: '#6B0D0D'
+                                });
+                            }
+                        } catch (e) {
+                            console.error('Error parsing response:', e);
+                        }
+                    }
+                };
+                xhr.send();
+            }
+
+            let rowCounter = 1; // Initialize row counter
+
+            function addMoreItems() {
+                rowCounter++; // Increment row count
+                let newRow = document.createElement("div");
+                newRow.classList.add("itemRow");
+                newRow.setAttribute("data-row", rowCounter);
+                newRow.innerHTML = `
+        <div class="inputContainer">
+            <label for="origin_item_${rowCounter}">Item</label>
+            <select name="origin_item_${rowCounter}" id="origin_item_${rowCounter}" class="inputEmail"
+                onchange="fetchMultipleItemDetails(this.value, ${rowCounter})">
+                ${document.getElementById("origin_item_1").innerHTML} 
+            </select>
+        </div>
+
+        <div class="inputContainer">
+            <label for="item_brand_${rowCounter}">Brand</label>
+            <select name="item_brand_${rowCounter}" id="item_brand_${rowCounter}" class="inputEmail">
+                <option value="">Select a brand</option>
+            </select>
+        </div>
+
+        <div class="inputContainer">
+            <label for="item_quantity_${rowCounter}">Available</label>
+            <input id="item_quantity_${rowCounter}" class="inputEmail" placeholder="Available" type="text" readonly>
+        </div>
+
+        <div class="inputContainer">
+            <label for="quantity_${rowCounter}">Quantity</label>
+            <input id="quantity_${rowCounter}" class="inputEmail" placeholder="Quantity" type="number" min="1">
+        </div>
+
+        <!-- Hidden input for teacher ID -->
+        <input id="teacher_${rowCounter}" class="inputEmail" value="${document.getElementById("teacher_1").value}" type="hidden">
+
+        <div class="inputContainer">
+            <label for="student_${rowCounter}">Assign Student</label>
+            <input id="student_${rowCounter}" class="inputEmail" placeholder="Enter Student Name (Optional)" type="text">
+        </div>
+
+        <div class="inputContainer" style="position: relative; display: flex; flex-direction: column;">
+            <label for="returnDate_${rowCounter}">Return Date</label>
+            <div style="display: flex; align-items: center;">
+                <input id="returnDate_${rowCounter}" class="inputEmail" placeholder="Enter Return Date" type="date"
+                    style="flex: 1;">
+                <button class="addMoreButton" onclick="addMoreItems()">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+        </div>
+    `;
+
+                document.getElementById("additionalItemRows").appendChild(newRow);
+            }
+            function confirmMultipleBorrow() {
+                let items = [];
+                let allValid = true;
+
+                document.querySelectorAll('.itemRow').forEach((row) => {
+                    const rowIndex = row.getAttribute('data-row');
+                    const itemId = document.getElementById(`origin_item_${rowIndex}`).value;
+                    const teacherId = document.getElementById(`teacher_${rowIndex}`).value;
+                    const brandSelect = document.getElementById(`item_brand_${rowIndex}`);
+                    const brandId = brandSelect.options[brandSelect.selectedIndex].value;
+                    const quantity = parseInt(document.getElementById(`quantity_${rowIndex}`).value, 10);
+                    const student = document.getElementById(`student_${rowIndex}`).value;
+                    const returnDate = document.getElementById(`returnDate_${rowIndex}`).value;
+                    const availableQuantity = parseInt(document.getElementById(`item_quantity_${rowIndex}`).value, 10);
+
+                    if (!itemId || !teacherId || isNaN(quantity) || !returnDate || !brandId) {
+                        allValid = false;
+                        return;
+                    }
+
+                    if (quantity > availableQuantity) {
+                        allValid = false;
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Quantity Exceeded!',
+                            text: `The quantity you are trying to borrow (${quantity}) exceeds the available stock (${availableQuantity}). Please adjust the quantity.`,
+                            confirmButtonColor: '#6B0D0D',
+                        });
+                        return;
+                    }
+
+                    if (quantity <= 0) {
+                        allValid = false;
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Invalid Quantity',
+                            text: `Quantity must be greater than zero.`,
+                            confirmButtonColor: '#6B0D0D',
+                        });
+                        return;
+                    }
+
+                    items.push({ item_id: itemId, brand_id: brandId, teacher: teacherId, quantity, student, return_date: returnDate });
+                });
+
+                if (!allValid) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Missing or Invalid Fields',
+                        text: 'Please check all fields before proceeding.',
+                        confirmButtonColor: '#6B0D0D',
+                    });
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Confirm Borrow',
+                    text: 'Are you sure you want to proceed with these transactions?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#6B0D0D',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, confirm!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const xhr = new XMLHttpRequest();
+                        xhr.open('POST', '../inventoryAdmin/endpoints/borrow_multiple_items.php', true);
+                        xhr.setRequestHeader('Content-Type', 'application/json');
+                        xhr.onreadystatechange = function () {
+                            if (xhr.readyState === 4) {
+                                if (xhr.status === 200) {
+                                    try {
+                                        const response = JSON.parse(xhr.responseText);
+
+                                        if (response.status === 'success') {
+                                            closeMultipleBorrowModal(); // Close modal on success
+
+                                            Swal.fire({
+                                                icon: 'success',
+                                                title: 'Borrowing Confirmed!',
+                                                text: response.message,
+                                                showConfirmButton: false,
+                                                timer: 3000
+                                            }).then(() => {
+                                                location.reload();
+                                            });
+
+                                            // Reset form
+                                            document.querySelectorAll('.itemRow').forEach(row => row.remove());
+                                            addMoreItems(); // Re-add the first row
+                                            setTimeout(fetchTransactions, 1000);
+                                        } else {
+                                            Swal.fire({
+                                                icon: 'error',
+                                                title: 'Error',
+                                                text: response.message,
+                                                confirmButtonColor: '#6B0D0D',
+                                            });
+                                        }
+                                    } catch (e) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: response.message,
+                                            showConfirmButton: false,
+                                            timer: 3000,
+                                            confirmButtonColor: '#6B0D0D'
+                                        }).then(() => {
+                                            location.reload();
+                                        });
+                                    }
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'Failed to communicate with the server.',
+                                        confirmButtonColor: '#6B0D0D',
+                                    });
+                                }
+                            }
+                        };
+
+                        xhr.send(JSON.stringify({ items }));
+                    }
+                });
+            }
+        </script>
 
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
@@ -1237,7 +1733,7 @@ $teacherResult = $conn->query($teacherQuery);
             window.addEventListener('resize', checkMobile);
 
             // Toggle sidebar on mobile
-            toggleBtn.addEventListener('click', function() {
+            toggleBtn.addEventListener('click', function () {
                 sidebar.classList.toggle('active');
 
                 if (sidebar.classList.contains('active')) {
@@ -1250,7 +1746,7 @@ $teacherResult = $conn->query($teacherQuery);
             });
 
             // Close sidebar when clicking overlay
-            sidebarOverlay.addEventListener('click', function() {
+            sidebarOverlay.addEventListener('click', function () {
                 sidebar.classList.remove('active');
                 sidebar.style.left = '-280px';
                 sidebarOverlay.classList.remove('active');
@@ -1290,21 +1786,15 @@ $teacherResult = $conn->query($teacherQuery);
                 });
             }
 
-            function borrowItem(itemId, itemName, itemBrand) {
-                // Perform an AJAX request to check ban status
+            function borrowItem(itemId, itemName) {
                 fetch('checkBanStatus.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            userId: <?= json_encode($_SESSION['user_id']) ?>
-                        })
-                    })
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: <?= json_encode($_SESSION['user_id']) ?> })
+                })
                     .then(response => response.json())
                     .then(data => {
                         if (data.banned) {
-                            // Show SweetAlert if user is banned
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Access Denied',
@@ -1313,11 +1803,49 @@ $teacherResult = $conn->query($teacherQuery);
                                 confirmButtonColor: '#6B0D0D'
                             });
                         } else {
-                            // Proceed with the borrowing process
-                            // Open the modal or handle the borrowing logic
                             document.getElementById('itemId').value = itemId;
                             document.getElementById('itemName').value = itemName;
-                            document.getElementById('itemBrand').value = itemBrand;
+                            document.getElementById('available_quantity').value = ''; // Reset available quantity
+
+                            // Fetch brands for the selected item
+                            fetch(`fetch_brands.php?item_id=${itemId}`)
+                                .then(response => response.json())
+                                .then(brands => {
+                                    const brandSelect = document.getElementById('itemBrand');
+                                    brandSelect.innerHTML = '';
+
+                                    // Default "Select a Brand" option
+                                    let defaultOption = document.createElement('option');
+                                    defaultOption.value = '';
+                                    defaultOption.textContent = 'Select a Brand';
+                                    defaultOption.disabled = true;
+                                    defaultOption.selected = true;
+                                    brandSelect.appendChild(defaultOption);
+
+                                    if (brands.length > 0) {
+                                        brands.forEach(brand => {
+                                            let option = document.createElement('option');
+                                            option.value = brand.id;
+                                            option.dataset.quantity = brand.quantity; // Store quantity in data attribute
+                                            option.textContent = `${brand.name} (Available: ${brand.quantity})`;
+                                            brandSelect.appendChild(option);
+                                        });
+
+                                        // Auto-update Available Quantity when brand is selected
+                                        brandSelect.addEventListener('change', function () {
+                                            let selectedOption = brandSelect.options[brandSelect.selectedIndex];
+                                            document.getElementById('available_quantity').value = selectedOption.dataset.quantity;
+                                        });
+
+                                    } else {
+                                        let option = document.createElement('option');
+                                        option.textContent = 'No available brands';
+                                        option.disabled = true;
+                                        brandSelect.appendChild(option);
+                                    }
+                                })
+                                .catch(error => console.error('Error fetching brands:', error));
+
                             document.querySelector('.editContainer').style.display = 'flex';
                         }
                     })
@@ -1333,21 +1861,16 @@ $teacherResult = $conn->query($teacherQuery);
                     });
             }
 
-            function closeModal() {
-                const modal = document.querySelector('.editContainer');
-                modal.style.display = 'none';
-            }
-
-            document.querySelector('.addButton1').addEventListener('click', closeModal);
-
-            document.querySelector('.confirmButton').addEventListener('click', function() {
+            document.querySelector('.confirmButton').addEventListener('click', function () {
                 // Get form values
                 const itemId = document.getElementById('itemId').value;
+                const brandId = document.getElementById('itemBrand').value; // Get selected brand ID
                 const teacherId = document.getElementById('teacherSelect').value;
                 const quantity = document.getElementById('quantity').value;
                 const returnDate = document.getElementById('returnDate').value;
+                const student = document.getElementById('student').value;
 
-                if (!teacherId || !quantity || !returnDate) {
+                if (!teacherId || !quantity || !returnDate || !brandId) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Missing Information',
@@ -1370,14 +1893,16 @@ $teacherResult = $conn->query($teacherQuery);
                         // Submit the form using fetch
                         const formData = new FormData();
                         formData.append('item_id', itemId);
+                        formData.append('brand_id', brandId); // Include brand ID
                         formData.append('teacher', teacherId);
                         formData.append('quantity', quantity);
                         formData.append('return_date', returnDate);
+                        formData.append('student', student); // Add the student name
 
                         fetch('borrow_item.php', {
-                                method: 'POST',
-                                body: formData
-                            })
+                            method: 'POST',
+                            body: formData
+                        })
                             .then(response => response.json())
                             .then(data => {
                                 if (data.status === 'success') {
@@ -1409,11 +1934,19 @@ $teacherResult = $conn->query($teacherQuery);
                     }
                 });
             });
+            function closeModal() {
+                const modal = document.querySelector('.editContainer');
+                modal.style.display = 'none';
+            }
+
+            document.querySelector('.addButton1').addEventListener('click', closeModal);
+
+
 
             const searchBar = document.getElementById('searchBar');
             const inventoryGrid = document.getElementById('inventoryGrid');
 
-            searchBar.addEventListener('input', function() {
+            searchBar.addEventListener('input', function () {
                 const searchTerm = searchBar.value.toLowerCase();
                 const inventoryContainers = inventoryGrid.getElementsByClassName('inventoryContainer');
 
