@@ -1287,9 +1287,11 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
             // Add each project to the table
             projects.forEach(project => {
                 const row = document.createElement('tr');
+                // Use default image if project.image is empty
+                const projectImage = project.image || '../assets/img/CSSPE.png';
                 row.innerHTML = `
             <td>${project.project_name}</td>
-            <td><img src="${project.image}" alt="${project.project_name}" /></td>
+            <td><img src="${projectImage}" alt="${project.project_name}" /></td>
             <td>${project.description}</td>
         `;
                 projectsTableBody.appendChild(row);

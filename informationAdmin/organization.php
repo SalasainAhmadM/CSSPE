@@ -120,6 +120,122 @@ if (isset($_GET['delete_id'])) {
     }
 }
 
+// add project
+if (isset($_POST['add_project'])) {
+    $project_name = mysqli_real_escape_string($conn, $_POST['project_name']);
+    $project_description = mysqli_real_escape_string($conn, $_POST['project_description']);
+    $organization_id = intval($_POST['organization_id']);
+
+    // Handle image upload
+    $image_path = null; // Default to null if no image is uploaded
+    if (isset($_FILES['project_image']) && $_FILES['project_image']['error'] == 0) {
+        $image_name = $_FILES['project_image']['name'];
+        $image_tmp = $_FILES['project_image']['tmp_name'];
+        $image_size = $_FILES['project_image']['size'];
+
+        $image_ext = pathinfo($image_name, PATHINFO_EXTENSION);
+        $image_new_name = uniqid() . '.' . $image_ext;
+        $image_path = "../assets/img/" . $image_new_name;
+
+        if (in_array(strtolower($image_ext), ['jpg', 'jpeg', 'png', 'gif']) && $image_size < 5000000) {
+            move_uploaded_file($image_tmp, $image_path);
+        } else {
+            echo "Invalid image format or size!";
+            exit();
+        }
+    }
+
+    // Insert project into the database
+    $query = "INSERT INTO projects (project_name, description, image, organization_id) 
+              VALUES ('$project_name', '$project_description', '$image_path', '$organization_id')";
+
+    if (mysqli_query($conn, $query)) {
+        $_SESSION['message'] = "Project added successfully!";
+        $_SESSION['message_type'] = "success";
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit();
+    } else {
+        $_SESSION['message'] = "Error adding project!";
+        $_SESSION['message_type'] = "error";
+    }
+}
+
+// edit project
+if (isset($_POST['update_project'])) {
+    $project_id = intval($_POST['project_id']);
+    $project_name = mysqli_real_escape_string($conn, $_POST['project_name']);
+    $project_description = mysqli_real_escape_string($conn, $_POST['project_description']);
+
+    // Fetch current image path
+    $result = mysqli_query($conn, "SELECT image FROM projects WHERE id = '$project_id'");
+    $row = mysqli_fetch_assoc($result);
+    $current_image = $row['image'];
+
+    // Handle image upload
+    $image_path = $current_image; // Default to current image
+    if (isset($_FILES['project_image']) && $_FILES['project_image']['error'] == 0) {
+        $image_name = $_FILES['project_image']['name'];
+        $image_tmp = $_FILES['project_image']['tmp_name'];
+        $image_size = $_FILES['project_image']['size'];
+
+        $image_ext = pathinfo($image_name, PATHINFO_EXTENSION);
+        $image_new_name = uniqid() . '.' . $image_ext;
+        $image_path = "../assets/img/" . $image_new_name;
+
+        if (in_array(strtolower($image_ext), ['jpg', 'jpeg', 'png', 'gif']) && $image_size < 5000000) {
+            move_uploaded_file($image_tmp, $image_path);
+        } else {
+            echo "Invalid image format or size!";
+            exit();
+        }
+    }
+
+    // Update project in the database
+    $query = "UPDATE projects 
+              SET project_name = '$project_name', description = '$project_description', image = '$image_path' 
+              WHERE id = '$project_id'";
+
+    if (mysqli_query($conn, $query)) {
+        $_SESSION['message'] = "Project updated successfully!";
+        $_SESSION['message_type'] = "success";
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit();
+    } else {
+        $_SESSION['message'] = "Error updating project!";
+        $_SESSION['message_type'] = "error";
+    }
+}
+
+// delete project
+// Handle project deletion
+if (isset($_GET['delete_project_id'])) {
+    $project_id = intval($_GET['delete_project_id']);
+
+    // Fetch the project image path before deleting
+    $query = "SELECT image FROM projects WHERE id = $project_id";
+    $result = mysqli_query($conn, $query);
+    $row = mysqli_fetch_assoc($result);
+    $image_path = $row['image'];
+
+    // Delete the project from the database
+    $delete_query = "DELETE FROM projects WHERE id = $project_id";
+    if (mysqli_query($conn, $delete_query)) {
+        // Delete the associated image file if it exists
+        if ($image_path && file_exists($image_path)) {
+            unlink($image_path); // Delete the image file
+        }
+
+        $_SESSION['message'] = "Project deleted successfully!";
+        $_SESSION['message_type'] = "success";
+    } else {
+        $_SESSION['message'] = "Error deleting project!";
+        $_SESSION['message_type'] = "error";
+    }
+
+    // Redirect back to the same page
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -352,22 +468,23 @@ if (isset($_GET['delete_id'])) {
         </div>
     </form>
 
-    <!-- Manage Projects Modal -->
-    <div id="manageProjectsModal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm hidden items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto animate-fadeIn">
-            <div class="bg-red-900 text-white px-6 py-4 flex items-center justify-between rounded-t-lg">
-                <div class="flex items-center gap-3">
-                    <i class="fas fa-tasks text-xl"></i>
-                    <h3 class="text-xl font-bold">Manage Projects</h3>
-                </div>
-                <button onclick="closeManageProjects()" class="text-white hover:text-gray-200 focus:outline-none">
-                    <i class="fas fa-times"></i>
-                </button>
+   <!-- Manage Projects Modal -->
+<div id="manageProjectsModal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto animate-fadeIn">
+        <div class="bg-red-900 text-white px-6 py-4 flex items-center justify-between rounded-t-lg">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-tasks text-xl"></i>
+                <h3 class="text-xl font-bold">Manage Projects</h3>
             </div>
-
-            <div class="p-6">
-                <!-- Search & Action Buttons -->
-                <div class="flex flex-col md:flex-row gap-4 mb-6">
+            <button type="button" onclick="closeManageProjects()" class="text-white hover:text-gray-200 focus:outline-none">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+<!-- Hidden input to store organization ID -->
+<input type="hidden" id="organization_id_for_projects" name="organization_id">
+        <div class="p-6">
+            <!-- Search & Action Buttons -->
+            <div class="flex flex-col md:flex-row gap-4 mb-6">
                     <div class="relative flex-grow">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-red-900">
                             <i class="fas fa-search"></i>
@@ -383,132 +500,137 @@ if (isset($_GET['delete_id'])) {
                         </button>
                     </div>
                 </div>
+            <!-- Hidden input to store organization ID -->
+            <input type="hidden" id="organization_id_for_projects">
 
-                <!-- Projects Table -->
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <table class="w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="p-4 text-left font-semibold text-red-900">Project Name</th>
-                                <th class="p-4 text-left font-semibold text-red-900">Description</th>
-                                <th class="p-4 text-left font-semibold text-red-900">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="border-b border-gray-200 hover:bg-gray-50">
-                                <td class="p-4">Hakdog</td>
-                                <td class="p-4">Hakdog</td>
-                                <td class="p-4">
-                                    <div class="flex flex-wrap gap-2">
-                                        <button onclick="editProject()"
-                                            class="bg-red-900 hover:bg-red-800 text-white px-3 py-1 rounded transition duration-200 text-sm flex items-center justify-center gap-1">
-                                            <i class="fas fa-edit"></i> Edit
-                                        </button>
-                                        <button class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded transition duration-200 text-sm flex items-center justify-center gap-1">
-                                            <i class="fas fa-trash-alt"></i> Delete
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <!-- Projects Table -->
+            <table class="w-full">
+                <thead>
+                    <tr class="bg-gray-50">
+                        <th class="p-4 text-left font-semibold text-red-900">Project Name</th>
+                        <th class="p-4 text-left font-semibold text-red-900">Image</th>
+                        <th class="p-4 text-left font-semibold text-red-900">Description</th>
+                        <th class="p-4 text-left font-semibold text-red-900">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="projectsTableBody">
+                    <!-- Projects will be dynamically populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+  <!-- Add Project Modal -->
+<form method="POST" action="" enctype="multipart/form-data">
+    <div id="addProjectModal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto animate-fadeIn">
+            <div class="bg-red-900 text-white px-6 py-4 flex items-center justify-between rounded-t-lg">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-plus-circle text-xl"></i>
+                    <h3 class="text-xl font-bold">Add Project</h3>
+                </div>
+                <button type="button" onclick="addProject()" class="text-white hover:text-gray-200 focus:outline-none">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-6">
+                <!-- Hidden input to store organization ID -->
+                <input type="hidden" id="add_project_organization_id" name="organization_id">
+
+                <!-- Project Name -->
+                <div class="mb-4">
+                    <label for="project_name" class="block text-sm font-medium text-gray-700 mb-1">Project Name</label>
+                    <input type="text" id="project_name" name="project_name" placeholder="Enter project name" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                </div>
+
+                <!-- Description -->
+                <div class="mb-6">
+                    <label for="project_description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea id="project_description" name="project_description" placeholder="Enter project description" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 min-h-[150px] resize-y"></textarea>
+                </div>
+
+                <!-- Image Upload -->
+                <div class="mb-6">
+                    <label for="project_image" class="block text-sm font-medium text-gray-700 mb-1">Project Image</label>
+                    <input type="file" id="project_image" name="project_image" accept="image/*"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" onclick="addProject()"
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center gap-2">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" name="add_project"
+                        class="bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center gap-2">
+                        <i class="fas fa-plus"></i> Add
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Add Project Modal -->
-    <form method="POST" action="" enctype="multipart/form-data">
-        <div id="addProjectModal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm hidden items-center justify-center z-50">
-            <div class="bg-white rounded-lg shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto animate-fadeIn">
-                <div class="bg-red-900 text-white px-6 py-4 flex items-center justify-between rounded-t-lg">
-                    <div class="flex items-center gap-3">
-                        <i class="fas fa-plus-circle text-xl"></i>
-                        <h3 class="text-xl font-bold">Add Project</h3>
-                    </div>
-                    <button type="button" onclick="addProject()" class="text-white hover:text-gray-200 focus:outline-none">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-
-                <div class="p-6">
-                    <!-- Project Name -->
-                    <div class="mb-4">
-                        <label for="project_name" class="block text-sm font-medium text-gray-700 mb-1">Project Name</label>
-                        <input type="text" id="project_name" name="project_name" placeholder="Enter project name" required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
-                    </div>
-
-                    <!-- Description -->
-                    <div class="mb-6">
-                        <label for="project_description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                        <textarea id="project_description" name="project_description" placeholder="Enter project description" required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 min-h-[150px] resize-y"></textarea>
-                    </div>
-
-                    <!-- Form Actions -->
-                    <div class="flex justify-end gap-3 mt-6">
-                        <button type="button" onclick="addProject()"
-                            class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center gap-2">
-                            <i class="fas fa-times"></i> Cancel
-                        </button>
-                        <button type="submit" name="add_project"
-                            class="bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center gap-2">
-                            <i class="fas fa-plus"></i> Add
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
+</form>
 
     <!-- Edit Project Modal -->
-    <form method="POST" action="" enctype="multipart/form-data">
-        <div id="editProjectModal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm hidden items-center justify-center z-50">
-            <div class="bg-white rounded-lg shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto animate-fadeIn">
-                <div class="bg-red-900 text-white px-6 py-4 flex items-center justify-between rounded-t-lg">
-                    <div class="flex items-center gap-3">
-                        <i class="fas fa-edit text-xl"></i>
-                        <h3 class="text-xl font-bold">Edit Project</h3>
-                    </div>
-                    <button type="button" onclick="closeEditProject()" class="text-white hover:text-gray-200 focus:outline-none">
-                        <i class="fas fa-times"></i>
-                    </button>
+<form method="POST" action="" enctype="multipart/form-data">
+    <div id="editProjectModal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto animate-fadeIn">
+            <div class="bg-red-900 text-white px-6 py-4 flex items-center justify-between rounded-t-lg">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-edit text-xl"></i>
+                    <h3 class="text-xl font-bold">Edit Project</h3>
+                </div>
+                <button type="button" onclick="closeEditProject()" class="text-white hover:text-gray-200 focus:outline-none">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-6">
+                <!-- Hidden input to store project id -->
+                <input type="hidden" name="project_id" id="edit_project_id">
+
+                <!-- Project Name -->
+                <div class="mb-4">
+                    <label for="edit_project_name" class="block text-sm font-medium text-gray-700 mb-1">Project Name</label>
+                    <input type="text" id="edit_project_name" name="project_name" placeholder="Enter project name" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
                 </div>
 
-                <div class="p-6">
-                    <!-- Hidden input to store project id -->
-                    <input type="hidden" name="project_id" id="edit_project_id">
+                <!-- Description -->
+                <div class="mb-6">
+                    <label for="edit_project_description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea id="edit_project_description" name="project_description" placeholder="Enter project description" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 min-h-[150px] resize-y"></textarea>
+                </div>
 
-                    <!-- Project Name -->
-                    <div class="mb-4">
-                        <label for="edit_project_name" class="block text-sm font-medium text-gray-700 mb-1">Project Name</label>
-                        <input type="text" id="edit_project_name" name="project_name" placeholder="Enter project name" required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
-                    </div>
+                <!-- Image Upload -->
+                <div class="mb-6">
+                    <label for="edit_project_image" class="block text-sm font-medium text-gray-700 mb-1">Project Image</label>
+                    <input type="file" id="edit_project_image" name="project_image" accept="image/*"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    <small class="text-gray-500">Leave empty to keep the current image.</small>
+                </div>
 
-                    <!-- Description -->
-                    <div class="mb-6">
-                        <label for="edit_project_description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                        <textarea id="edit_project_description" name="project_description" placeholder="Enter project description" required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 min-h-[150px] resize-y"></textarea>
-                    </div>
-
-                    <!-- Form Actions -->
-                    <div class="flex justify-end gap-3 mt-6">
-                        <button type="button" onclick="closeEditProject()"
-                            class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center gap-2">
-                            <i class="fas fa-times"></i> Cancel
-                        </button>
-                        <button type="submit" name="update_project"
-                            class="bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center gap-2">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                    </div>
+                <!-- Form Actions -->
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" onclick="closeEditProject()"
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center gap-2">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" name="update_project"
+                        class="bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center gap-2">
+                        <i class="fas fa-save"></i> Save
+                    </button>
                 </div>
             </div>
         </div>
-    </form>
+    </div>
+</form>
 
     <!-- Edit Organization Modal -->
     <form method="POST" action="" enctype="multipart/form-data">
@@ -660,25 +782,89 @@ if (isset($_GET['delete_id'])) {
                 }
             });
         }
-
-        // Open manage projects modal
-        function popupMP(organizationId, organizationName) {
-            // Here you would typically fetch projects for this organization
-            // and populate the projects table
-
-            // Set organization ID in hidden field if needed
-            // document.getElementById('organization_id_for_projects').value = organizationId;
-
-            // Set modal title to include organization name
-            const modalTitle = document.querySelector('#manageProjectsModal h3');
-            modalTitle.textContent = `Manage Projects - ${organizationName}`;
-
-            // Show modal
-            const modal = document.getElementById('manageProjectsModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+// Delete project with confirmation
+function deleteProject(projectId) {
+    Swal.fire({
+        title: 'Delete Project',
+        text: 'Are you sure you want to delete this project?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#6B0D0D',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, delete!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = "?delete_project_id=" + projectId;
         }
+    });
+}
+// Open manage projects modal
+function popupMP(organizationId, organizationName) {
+    // Set organization ID in hidden field
+    document.getElementById('organization_id_for_projects').value = organizationId;
 
+    // Set modal title to include organization name
+    const modalTitle = document.querySelector('#manageProjectsModal h3');
+    modalTitle.textContent = `Manage Projects - ${organizationName}`;
+
+    // Fetch projects for this organization
+    fetch(`fetch_projects.php?organization_id=${organizationId}`)
+        .then(response => response.json())
+        .then(projects => {
+            // Populate projects table
+            populateProjectsTable(projects);
+        })
+        .catch(error => {
+            console.error('Error fetching projects:', error);
+        });
+
+    // Show modal
+    const modal = document.getElementById('manageProjectsModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+// Populate projects table in the modal
+function populateProjectsTable(projects) {
+    const tableBody = document.querySelector('#manageProjectsModal table tbody');
+    tableBody.innerHTML = ''; // Clear existing rows
+
+    if (projects.length === 0) {
+        // If no projects, show a message
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="text-center py-4 text-gray-500">No projects found for this organization.</td>
+            </tr>
+        `;
+        return;
+    }
+
+   // Add each project to the table
+projects.forEach(project => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+        <td class="p-4">${project.project_name}</td>
+        <td class="p-4">
+            <img src="${project.image || '../assets/img/CSSPE.png'}" alt="${project.project_name}" class="w-20 h-20 object-cover rounded-md border border-gray-200">
+        </td>
+        <td class="p-4">${project.description}</td>
+        <td class="p-4">
+            <div class="flex gap-2">
+                <button onclick="editProject(${project.id}, '${project.project_name}', '${project.description}')"
+                    class="bg-red-900 hover:bg-red-800 text-white px-3 py-1 rounded transition duration-200 text-sm flex items-center gap-1">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button onclick="deleteProject(${project.id})"
+                    class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded transition duration-200 text-sm flex items-center gap-1">
+                    <i class="fas fa-trash-alt"></i> Delete
+                </button>
+            </div>
+        </td>
+    `;
+    tableBody.appendChild(row);
+});
+}
         // Close manage projects modal
         function closeManageProjects() {
             const modal = document.getElementById('manageProjectsModal');
@@ -686,25 +872,32 @@ if (isset($_GET['delete_id'])) {
             modal.classList.remove('flex');
         }
 
-        // Toggle add project modal
-        function addProject() {
-            const modal = document.getElementById('addProjectModal');
-            modal.classList.toggle('hidden');
-            modal.classList.toggle('flex');
-        }
+// Toggle add project modal
+function addProject() {
+    // Get organization ID from the hidden input in the Manage Projects Modal
+    const organizationId = document.getElementById('organization_id_for_projects').value;
 
-        // Handle edit project modal
-        function editProject(id, name, description) {
-            if (id) {
-                document.getElementById('edit_project_id').value = id;
-                document.getElementById('edit_project_name').value = name;
-                document.getElementById('edit_project_description').value = description;
-            }
+    // Set organization ID in the hidden input of the Add Project Modal
+    document.getElementById('add_project_organization_id').value = organizationId;
 
-            const modal = document.getElementById('editProjectModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
+    // Show the Add Project Modal
+    const modal = document.getElementById('addProjectModal');
+    modal.classList.toggle('hidden');
+    modal.classList.toggle('flex');
+}
+// Handle edit project modal
+function editProject(id, name, description, image) {
+    if (id) {
+        document.getElementById('edit_project_id').value = id;
+        document.getElementById('edit_project_name').value = name;
+        document.getElementById('edit_project_description').value = description;
+        document.getElementById('edit_project_image').value = ''; // Clear file input
+    }
+
+    const modal = document.getElementById('editProjectModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
 
         // Close edit project modal
         function closeEditProject() {
@@ -730,25 +923,25 @@ if (isset($_GET['delete_id'])) {
             });
         });
 
-        // Search functionality for projects (when implemented)
-        const projectSearchInput = document.getElementById('projectSearch');
-        if (projectSearchInput) {
-            projectSearchInput.addEventListener('input', function() {
-                const searchText = this.value.toLowerCase();
-                const tableRows = document.querySelectorAll('#manageProjectsModal table tbody tr');
+      // Search functionality for projects
+const projectSearchInput = document.getElementById('projectSearch');
+if (projectSearchInput) {
+    projectSearchInput.addEventListener('input', function () {
+        const searchText = this.value.toLowerCase();
+        const tableRows = document.querySelectorAll('#manageProjectsModal table tbody tr');
 
-                tableRows.forEach(row => {
-                    const name = row.cells[0].textContent.toLowerCase();
-                    const description = row.cells[1].textContent.toLowerCase();
+        tableRows.forEach(row => {
+            const name = row.cells[0].textContent.toLowerCase();
+            const description = row.cells[2].textContent.toLowerCase();
 
-                    if (name.includes(searchText) || description.includes(searchText)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
-            });
-        }
+            if (name.includes(searchText) || description.includes(searchText)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+}
 
         // Print organizations table
         function printTable() {
@@ -896,25 +1089,22 @@ if (isset($_GET['delete_id'])) {
             }, 500);
         }
 
-        // Print projects table
-        function printProjectsTable() {
-            // Create a new window for printing
-            const printWindow = window.open('', '_blank');
+// Print projects table
+function printProjectsTable() {
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
 
-            // Get the current date and time
-            const now = new Date();
-            const dateString = now.toLocaleDateString();
-            const timeString = now.toLocaleTimeString();
+    // Get the current date and time
+    const now = new Date();
+    const dateString = now.toLocaleDateString();
+    const timeString = now.toLocaleTimeString();
 
-            // Get modal title to extract organization name
-            const modalTitle = document.querySelector('#manageProjectsModal h3').textContent;
-            const organizationName = modalTitle.replace('Manage Projects - ', '');
+    // Get modal title to extract organization name
+    const modalTitle = document.querySelector('#manageProjectsModal h3').textContent;
+    const organizationName = modalTitle.replace('Manage Projects - ', '');
 
-            // Get table data
-            const table = document.querySelector('#manageProjectsModal table');
-
-            // Create print content with Tailwind-inspired styling
-            printWindow.document.write(`
+    // Create print content with Tailwind-inspired styling
+    printWindow.document.write(`
         <!DOCTYPE html>
         <html>
         <head>
@@ -978,6 +1168,13 @@ if (isset($_GET['delete_id'])) {
                     font-size: 14px;
                     color: #6c757d;
                 }
+                .project-image {
+                    width: 80px;
+                    height: 80px;
+                    object-fit: cover;
+                    border-radius: 8px;
+                    border: 1px solid #e2e8f0;
+                }
             </style>
         </head>
         <body>
@@ -995,30 +1192,33 @@ if (isset($_GET['delete_id'])) {
                 <thead>
                     <tr>
                         <th>Project Name</th>
+                        <th>Image</th>
                         <th>Description</th>
                     </tr>
                 </thead>
                 <tbody>
     `);
 
-            // Add table rows
-            const rows = document.querySelectorAll('#manageProjectsModal tbody tr');
-            rows.forEach(row => {
-                if (row.style.display !== 'none') { // Only print visible rows
-                    const name = row.cells[0].textContent;
-                    const description = row.cells[1].textContent;
+    // Add table rows
+    const rows = document.querySelectorAll('#manageProjectsModal tbody tr');
+    rows.forEach(row => {
+        if (row.style.display !== 'none') { // Only print visible rows
+            const name = row.cells[0].textContent;
+            const imageSrc = row.cells[1].querySelector('img').src; // Get image source
+            const description = row.cells[2].textContent;
 
-                    printWindow.document.write(`
+            printWindow.document.write(`
                 <tr>
                     <td>${name}</td>
+                    <td><img src="${imageSrc}" alt="${name}" class="project-image"></td>
                     <td>${description}</td>
                 </tr>
             `);
-                }
-            });
+        }
+    });
 
-            // Close the HTML
-            printWindow.document.write(`
+    // Close the HTML
+    printWindow.document.write(`
                 </tbody>
             </table>
             <div class="footer">
@@ -1028,14 +1228,14 @@ if (isset($_GET['delete_id'])) {
         </html>
     `);
 
-            // Trigger print
-            printWindow.document.close();
-            printWindow.focus();
-            setTimeout(() => {
-                printWindow.print();
-                // printWindow.close();
-            }, 500);
-        }
+    // Trigger print
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+        printWindow.print();
+        // printWindow.close();
+    }, 500);
+}
 
         // Display SweetAlert messages (from PHP)
         <?php if (isset($_SESSION['message'])): ?>
