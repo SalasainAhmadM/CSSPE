@@ -950,20 +950,23 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
             <div class="org-grid" id="orgGrid">
                 <?php if (mysqli_num_rows($result) > 0): ?>
                     <?php mysqli_data_seek($result, 0); // Reset result pointer 
-                    ?>
+                        ?>
                     <?php while ($org = mysqli_fetch_assoc($result)): ?>
                         <div class="org-card" data-name="<?= htmlspecialchars($org['organization_name']) ?>">
                             <div class="org-image-container">
-                                <img class="org-image" src="<?= htmlspecialchars($org['image']) ?>" alt="<?= htmlspecialchars($org['organization_name']) ?>">
+                                <img class="org-image" src="<?= htmlspecialchars($org['image']) ?>"
+                                    alt="<?= htmlspecialchars($org['organization_name']) ?>">
                             </div>
                             <div class="org-content">
                                 <h3 class="org-name"><?= htmlspecialchars($org['organization_name']) ?></h3>
                                 <p class="org-description"><?= htmlspecialchars($org['description']) ?></p>
                                 <div class="org-actions">
-                                    <button class="view-details-btn" onclick="showOrgDetails('<?= htmlspecialchars(addslashes($org['organization_name'])) ?>', '<?= htmlspecialchars(addslashes($org['description'])) ?>', '<?= htmlspecialchars($org['image']) ?>')">
+                                    <button class="view-details-btn"
+                                        onclick="showOrgDetails('<?= htmlspecialchars(addslashes($org['organization_name'])) ?>', '<?= htmlspecialchars(addslashes($org['description'])) ?>', '<?= htmlspecialchars($org['image']) ?>')">
                                         <i class="fas fa-info-circle"></i> Details
                                     </button>
-                                    <button class="view-projects-btn" onclick="showOrgProjects('<?= htmlspecialchars(addslashes($org['organization_name'])) ?>')">
+                                    <button class="view-projects-btn"
+                                        onclick="showOrgProjects('<?= htmlspecialchars(addslashes($org['organization_name'])) ?>', <?= $org['id'] ?>)">
                                         <i class="fas fa-project-diagram"></i> Projects
                                     </button>
                                 </div>
@@ -993,17 +996,20 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
                     <tbody>
                         <?php if (mysqli_num_rows($result) > 0): ?>
                             <?php mysqli_data_seek($result, 0); // Reset result pointer 
-                            ?>
+                                ?>
                             <?php while ($org = mysqli_fetch_assoc($result)): ?>
                                 <tr>
                                     <td><?= htmlspecialchars($org['organization_name']) ?></td>
-                                    <td><img class="table-image" src="<?= htmlspecialchars($org['image']) ?>" alt="<?= htmlspecialchars($org['organization_name']) ?>"></td>
+                                    <td><img class="table-image" src="<?= htmlspecialchars($org['image']) ?>"
+                                            alt="<?= htmlspecialchars($org['organization_name']) ?>"></td>
                                     <td><?= htmlspecialchars($org['description']) ?></td>
                                     <td class="table-actions">
-                                        <button class="view-details-btn" onclick="showOrgDetails('<?= htmlspecialchars(addslashes($org['organization_name'])) ?>', '<?= htmlspecialchars(addslashes($org['description'])) ?>', '<?= htmlspecialchars($org['image']) ?>')">
+                                        <button class="view-details-btn"
+                                            onclick="showOrgDetails('<?= htmlspecialchars(addslashes($org['organization_name'])) ?>', '<?= htmlspecialchars(addslashes($org['description'])) ?>', '<?= htmlspecialchars($org['image']) ?>')">
                                             <i class="fas fa-info-circle"></i> Details
                                         </button>
-                                        <button class="view-projects-btn" onclick="showOrgProjects('<?= htmlspecialchars(addslashes($org['organization_name'])) ?>')">
+                                        <button class="view-projects-btn"
+                                            onclick="showOrgProjects('<?= htmlspecialchars(addslashes($org['organization_name'])) ?>')">
                                             <i class="fas fa-project-diagram"></i> Projects
                                         </button>
                                     </td>
@@ -1052,7 +1058,8 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
             </div>
             <div class="projects-modal-search">
                 <i class="fas fa-search projects-search-icon"></i>
-                <input id="projectsSearchInput" class="projects-search-input" type="text" placeholder="Search projects...">
+                <input id="projectsSearchInput" class="projects-search-input" type="text"
+                    placeholder="Search projects...">
             </div>
             <div class="projects-modal-body">
                 <table class="projects-table" id="projectsTable">
@@ -1098,47 +1105,47 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
         // Sample project data (would come from database in real implementation)
         const projectsData = {
             'Tech Club': [{
-                    name: 'Smart Campus App',
-                    image: '../assets/img/CSSPE.png',
-                    description: 'A mobile app to navigate campus resources.'
-                },
-                {
-                    name: 'IoT Weather Station',
-                    image: '../assets/img/CSSPE.png',
-                    description: 'Real-time weather monitoring system.'
-                },
-                {
-                    name: 'Automated Attendance System',
-                    image: '../assets/img/CSSPE.png',
-                    description: 'RFID-based attendance tracking system.'
-                }
+                name: 'Smart Campus App',
+                image: '../assets/img/CSSPE.png',
+                description: 'A mobile app to navigate campus resources.'
+            },
+            {
+                name: 'IoT Weather Station',
+                image: '../assets/img/CSSPE.png',
+                description: 'Real-time weather monitoring system.'
+            },
+            {
+                name: 'Automated Attendance System',
+                image: '../assets/img/CSSPE.png',
+                description: 'RFID-based attendance tracking system.'
+            }
             ],
             'Science Society': [{
-                    name: 'Biodiversity Survey',
-                    image: '../assets/img/CSSPE.png',
-                    description: 'Ecological study of campus flora and fauna.'
-                },
-                {
-                    name: 'Water Quality Testing',
-                    image: '../assets/img/CSSPE.png',
-                    description: 'Analysis of campus water sources.'
-                }
+                name: 'Biodiversity Survey',
+                image: '../assets/img/CSSPE.png',
+                description: 'Ecological study of campus flora and fauna.'
+            },
+            {
+                name: 'Water Quality Testing',
+                image: '../assets/img/CSSPE.png',
+                description: 'Analysis of campus water sources.'
+            }
             ],
             'Arts Club': [{
-                    name: 'Annual Art Exhibition',
-                    image: '../assets/img/CSSPE.png',
-                    description: 'Showcase of student artwork.'
-                },
-                {
-                    name: 'Mural Project',
-                    image: '../assets/img/CSSPE.png',
-                    description: 'Campus beautification initiative.'
-                },
-                {
-                    name: 'Digital Media Workshop',
-                    image: '../assets/img/CSSPE.png',
-                    description: 'Training in digital art tools.'
-                }
+                name: 'Annual Art Exhibition',
+                image: '../assets/img/CSSPE.png',
+                description: 'Showcase of student artwork.'
+            },
+            {
+                name: 'Mural Project',
+                image: '../assets/img/CSSPE.png',
+                description: 'Campus beautification initiative.'
+            },
+            {
+                name: 'Digital Media Workshop',
+                image: '../assets/img/CSSPE.png',
+                description: 'Training in digital art tools.'
+            }
             ]
         };
 
@@ -1163,7 +1170,7 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
         }
 
         // Toggle sidebar on mobile
-        toggleBtn.addEventListener('click', function() {
+        toggleBtn.addEventListener('click', function () {
             sidebar.classList.toggle('active');
 
             if (sidebar.classList.contains('active')) {
@@ -1176,14 +1183,14 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
         });
 
         // Close sidebar when clicking overlay
-        sidebarOverlay.addEventListener('click', function() {
+        sidebarOverlay.addEventListener('click', function () {
             sidebar.classList.remove('active');
             sidebar.style.left = '-280px';
             sidebarOverlay.classList.remove('active');
         });
 
         // Search organizations
-        searchInput.addEventListener('input', function() {
+        searchInput.addEventListener('input', function () {
             const searchTerm = this.value.toLowerCase();
             let hasVisibleCards = false;
 
@@ -1241,39 +1248,38 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
         }
 
         // Show organization projects in modal
-        function showOrgProjects(orgName) {
+        function showOrgProjects(orgName, orgId) {
             projectsModalTitle.textContent = orgName + ' - Projects';
 
-            // Populate projects table
-            populateProjectsTable(orgName);
+            // Fetch projects from the server
+            fetch(`fetch_projects.php?organization_id=${orgId}`)
+                .then(response => response.json())
+                .then(projects => {
+                    // Populate projects table
+                    populateProjectsTable(projects);
+                })
+                .catch(error => {
+                    console.error('Error fetching projects:', error);
+                });
 
             // Show modal
             projectsModal.style.display = 'flex';
             document.body.style.overflow = 'hidden'; // Prevent scrolling
         }
 
-        // Close projects modal
-        function closeProjectsModal() {
-            projectsModal.style.display = 'none';
-            document.body.style.overflow = ''; // Enable scrolling
-        }
-
         // Populate projects table based on organization name
-        function populateProjectsTable(orgName) {
+        function populateProjectsTable(projects) {
             // Clear table first
             projectsTableBody.innerHTML = '';
-
-            // Get projects for this organization (use sample data)
-            const projects = projectsData[orgName] || [];
 
             // If no projects, show message
             if (projects.length === 0) {
                 const emptyRow = document.createElement('tr');
                 emptyRow.innerHTML = `
-                    <td colspan="3" style="text-align: center; padding: 20px;">
-                        No projects found for this organization.
-                    </td>
-                `;
+            <td colspan="3" style="text-align: center; padding: 20px;">
+                No projects found for this organization.
+            </td>
+        `;
                 projectsTableBody.appendChild(emptyRow);
                 return;
             }
@@ -1282,16 +1288,24 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
             projects.forEach(project => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${project.name}</td>
-                    <td><img src="${project.image}" alt="${project.name}" /></td>
-                    <td>${project.description}</td>
-                `;
+            <td>${project.project_name}</td>
+            <td><img src="${project.image}" alt="${project.project_name}" /></td>
+            <td>${project.description}</td>
+        `;
                 projectsTableBody.appendChild(row);
             });
         }
 
+        // Close projects modal
+        function closeProjectsModal() {
+            projectsModal.style.display = 'none';
+            document.body.style.overflow = ''; // Enable scrolling
+        }
+
+
+
         // Search projects within the projects modal
-        projectsSearchInput.addEventListener('input', function() {
+        projectsSearchInput.addEventListener('input', function () {
             const searchTerm = this.value.toLowerCase();
             const rows = projectsTableBody.querySelectorAll('tr');
             let hasVisibleRows = false;
@@ -1333,13 +1347,13 @@ if ($result_notifications && $row_notifications = mysqli_fetch_assoc($result_not
         });
 
         // Close modals when clicking outside content
-        orgModal.addEventListener('click', function(e) {
+        orgModal.addEventListener('click', function (e) {
             if (e.target === this) {
                 closeOrgModal();
             }
         });
 
-        projectsModal.addEventListener('click', function(e) {
+        projectsModal.addEventListener('click', function (e) {
             if (e.target === this) {
                 closeProjectsModal();
             }
