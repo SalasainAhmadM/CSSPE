@@ -839,20 +839,20 @@ if (!empty($uniqueIds)) {
                 <!-- Pagination -->
                 <div class="pagination">
                     <?php if ($page > 1): ?>
-                        <a href="?id=<?php echo $itemId; ?>&page=<?php echo $page - 1; ?>" class="prev">
+                        <a href="?id=<?php echo $brandId; ?>&page=<?php echo $page - 1; ?>" class="prev">
                             <i class="fas fa-chevron-left"></i> Previous
                         </a>
                     <?php endif; ?>
 
                     <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                        <a href="?id=<?php echo $itemId; ?>&page=<?php echo $i; ?>"
+                        <a href="?id=<?php echo $brandId; ?>&page=<?php echo $i; ?>"
                             class="<?php echo ($i === $page) ? 'active' : ''; ?>">
                             <?php echo $i; ?>
                         </a>
                     <?php endfor; ?>
 
                     <?php if ($page < $totalPages): ?>
-                        <a href="?id=<?php echo $itemId; ?>&page=<?php echo $page + 1; ?>" class="next">
+                        <a href="?id=<?php echo $brandId; ?>&page=<?php echo $page + 1; ?>" class="next">
                             Next <i class="fas fa-chevron-right"></i>
                         </a>
                     <?php endif; ?>

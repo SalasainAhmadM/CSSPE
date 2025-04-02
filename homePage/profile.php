@@ -30,6 +30,45 @@ $stmt_borrow_history->bind_param("i", $userid);
 $stmt_borrow_history->execute();
 $borrow_history_result = $stmt_borrow_history->get_result();
 
+// Fetch Pending Requests Count
+$pendingUnreadQuery = "SELECT COUNT(*) AS count FROM item_transactions 
+                WHERE users_id = ? 
+                AND status = 'Pending' 
+                AND notif = 0";
+$pendingUnreadStmt = $conn->prepare($pendingUnreadQuery);
+$pendingUnreadStmt->bind_param("i", $userid);
+$pendingUnreadStmt->execute();
+$pendingUnreadResult = $pendingUnreadStmt->get_result();
+$pendingUnreadCount = $pendingUnreadResult->fetch_assoc()['count'] ?? 0;
+$pendingUnreadStmt->close();
+
+// Fetch Pending Requests Count
+$pendingQuery = "SELECT COUNT(*) AS count FROM item_transactions WHERE users_id = ? AND status = 'Pending'";
+$pendingStmt = $conn->prepare($pendingQuery);
+$pendingStmt->bind_param("i", $userid);
+$pendingStmt->execute();
+$pendingResult = $pendingStmt->get_result();
+$pendingCount = $pendingResult->fetch_assoc()['count'] ?? 0;
+$pendingStmt->close();
+
+// Fetch Borrowed Items Count 
+$borrowedUnreadQuery = "SELECT COUNT(*) AS count FROM item_transactions WHERE users_id = ? AND status = 'Approved' AND notif = 0";
+$borrowedUnreadStmt = $conn->prepare($borrowedUnreadQuery);
+$borrowedUnreadStmt->bind_param("i", $userid);
+$borrowedUnreadStmt->execute();
+$borrowedUnreadResult = $borrowedUnreadStmt->get_result();
+$borrowedUnreadCount = $borrowedUnreadResult->fetch_assoc()['count'] ?? 0;
+$borrowedUnreadStmt->close();
+
+// Fetch Borrowed Items Count 
+$borrowedQuery = "SELECT COUNT(*) AS count FROM item_transactions WHERE users_id = ? AND status = 'Approved'";
+$borrowedStmt = $conn->prepare($borrowedQuery);
+$borrowedStmt->bind_param("i", $userid);
+$borrowedStmt->execute();
+$borrowedResult = $borrowedStmt->get_result();
+$borrowedCount = $borrowedResult->fetch_assoc()['count'] ?? 0;
+$borrowedStmt->close();
+
 // Fetch lost, damaged, and replaced items
 $sql_item_status = "SELECT 
                         status, COUNT(*) AS count 
@@ -56,7 +95,6 @@ while ($row = $item_status_result->fetch_assoc()) {
 }
 
 $stmt_item_status->close();
-
 
 // Fetch Lost Items for Logged-in User
 $lostQuery = "
@@ -130,6 +168,48 @@ $replacedStmt->bind_param("i", $userid);
 $replacedStmt->execute();
 $replacedItems = $replacedStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
+// Fetch Pending Requests
+$pendingQuery = "
+    SELECT 
+        t.transaction_id,
+        i.name AS item_name,
+        b.name AS brand,
+        t.quantity_borrowed,
+        t.borrowed_at AS requested_at,
+        t.class_date,
+        t.schedule_from,
+        t.schedule_to
+    FROM item_transactions t
+    JOIN items i ON t.item_id = i.id
+    JOIN brands b ON t.brand_id = b.id
+    WHERE t.users_id = ? AND t.status = 'Pending'
+";
+$pendingStmt = $conn->prepare($pendingQuery);
+$pendingStmt->bind_param("i", $userid);
+$pendingStmt->execute();
+$pendingItems = $pendingStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+// Fetch Borrowed Items
+$borrowedQuery = "
+    SELECT 
+        t.transaction_id,
+        i.name AS item_name,
+        b.name AS brand,
+        t.quantity_borrowed,
+        t.borrowed_at,
+        t.return_date,
+        t.class_date,
+        t.schedule_from,
+        t.schedule_to
+    FROM item_transactions t
+    JOIN items i ON t.item_id = i.id
+    JOIN brands b ON t.brand_id = b.id
+    WHERE t.users_id = ? AND t.status = 'Approved'
+";
+$borrowedStmt = $conn->prepare($borrowedQuery);
+$borrowedStmt->bind_param("i", $userid);
+$borrowedStmt->execute();
+$borrowedItems = $borrowedStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $userid = $_SESSION['user_id'];
@@ -890,6 +970,29 @@ $conn->close();
             margin-top: 20px;
         }
 
+        .notif-icon {
+            margin-left: auto;
+            position: relative;
+            color: #666;
+            font-size: 1.2em;
+            padding-left: 15px;
+        }
+
+        .notif-icon::after {
+            content: attr(data-count);
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            padding: 4px 8px;
+            font-size: 0.7em;
+            font-weight: bold;
+            min-width: 20px;
+            text-align: center;
+        }
+
         /* Responsive adjustments */
         @media (max-width: 1200px) {
             .sidebar {
@@ -1094,7 +1197,7 @@ $conn->close();
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <img src="../assets/img/<?= !empty($image) ? htmlspecialchars($image) : 'CSSPE.png' ?>" alt="Profile">
-            <span><?php echo $fullName; ?></span>
+            <span><?= htmlspecialchars($user['first_name'] . ' ' . $user['middle_name'] . ' ' . $user['last_name']) ?></span>
         </div>
 
         <div style="display: flex; flex-direction: column; padding: 10px 0;">
@@ -1163,6 +1266,25 @@ $conn->close();
             <!-- Stats Dashboard -->
             <div class="stats-container">
                 <div class="stats-grid">
+
+                    <div class="stat-card" onclick="showPendingRequests()">
+                        <div class="stat-title">
+                            Pending
+                            <i class="fa-regular fa-bell notif-icon"
+                                data-count="<?php echo $pendingUnreadCount; ?>"></i>
+                        </div>
+                        <div class="stat-value"><?php echo $pendingCount; ?></div>
+                    </div>
+
+                    <div class="stat-card" onclick="showBorrowedItems()">
+                        <div class="stat-title">
+                            Borrowed
+                            <i class="fas fa-clipboard-list notif-icon"
+                                data-count="<?php echo $borrowedUnreadCount; ?>"></i>
+                        </div>
+                        <div class="stat-value"><?php echo $borrowedCount; ?></div>
+                    </div>
+
                     <div class="stat-card" onclick="lost()">
                         <div class="stat-title">Lost</div>
                         <div class="stat-value"><?php echo $statuses['Lost']; ?></div>
@@ -1435,6 +1557,108 @@ $conn->close();
         </div>
     </div>
 
+    <!-- Pending Items -->
+    <div class="modal-overlay table-modal" id="pendingRequestsModal">
+        <div class="modal-content table-modal-content">
+            <div class="modal-header">
+                <span><i class="fas fa-clock"></i> Pending Requests</span>
+                <button class="close-btn" onclick="showPendingRequests()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-container">
+                    <table class="borrow-table">
+                        <thead>
+                            <tr>
+                                <th>Transaction ID</th>
+                                <th>Item Name</th>
+                                <th>Brand</th>
+                                <th>Quantity</th>
+                                <th>Request Date</th>
+                                <th>Class Date</th>
+                                <th>Schedule</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (!empty($pendingItems)): ?>
+                                <?php foreach ($pendingItems as $item): ?>
+                                    <tr>
+                                        <td><?php echo $item['transaction_id']; ?></td>
+                                        <td><?php echo $item['item_name']; ?></td>
+                                        <td><?php echo $item['brand']; ?></td>
+                                        <td><?php echo $item['quantity_borrowed']; ?></td>
+                                        <td><?php echo date('M d, Y', strtotime($item['requested_at'])); ?></td>
+                                        <td><?php echo date('M d, Y', strtotime($item['class_date'])); ?></td>
+                                        <td><?php echo date('h:i A', strtotime($item['schedule_from'])) . ' - ' . date('h:i A', strtotime($item['schedule_to'])); ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="7" style="text-align: center;">No pending requests.</td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="showPendingRequests()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Borrowed Items Modal -->
+    <div class="modal-overlay table-modal" id="borrowedItemsModal">
+        <div class="modal-content table-modal-content">
+            <div class="modal-header">
+                <span><i class="fas fa-hand-holding"></i> Borrowed Items</span>
+                <button class="close-btn" onclick="showBorrowedItems()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-container">
+                    <table class="borrow-table">
+                        <thead>
+                            <tr>
+                                <th>Transaction ID</th>
+                                <th>Item Name</th>
+                                <th>Brand</th>
+                                <th>Quantity</th>
+                                <th>Borrow Date</th>
+                                <th>Due Date</th>
+                                <th>Class Date</th>
+                                <th>Schedule</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (!empty($borrowedItems)): ?>
+                                <?php foreach ($borrowedItems as $item): ?>
+                                    <tr>
+                                        <td><?php echo $item['transaction_id']; ?></td>
+                                        <td><?php echo $item['item_name']; ?></td>
+                                        <td><?php echo $item['brand']; ?></td>
+                                        <td><?php echo $item['quantity_borrowed']; ?></td>
+                                        <td><?php echo date('M d, Y', strtotime($item['borrowed_at'])); ?></td>
+                                        <td><?php echo date('M d, Y', strtotime($item['return_date'])); ?></td>
+                                        <td><?php echo date('M d, Y', strtotime($item['class_date'])); ?></td>
+                                        <td><?php echo date('h:i A', strtotime($item['schedule_from'])) . ' - ' . date('h:i A', strtotime($item['schedule_to'])); ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="8" style="text-align: center;">No borrowed items.</td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="showBorrowedItems()">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Edit Profile Modal -->
     <div class="modal-overlay" id="profileModal">
         <div class="modal-content">
@@ -1620,6 +1844,78 @@ $conn->close();
         });
 
         // Modal functions
+        function showPendingRequests() {
+            // Mark pending notifications as read
+            fetch('update_notif.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'mark_as_read',
+                    status: 'Pending'
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update only the notification badge for Pending
+                        const pendingIcon = document.querySelector('.fa-regular');
+                        pendingIcon.setAttribute('data-count', data.pendingNotif);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+
+            // Show modal
+            const modal = document.getElementById('pendingRequestsModal');
+            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+            document.body.style.overflow = modal.style.display === 'flex' ? 'hidden' : '';
+        }
+
+        function showBorrowedItems() {
+            // Mark borrowed notifications as read
+            fetch('update_notif.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'mark_as_read',
+                    status: 'Approved'
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update only the notification badge for Borrowed
+                        const borrowedIcon = document.querySelector('.fa-clipboard-list');
+                        borrowedIcon.setAttribute('data-count', data.borrowedNotif);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+
+            // Show modal
+            const modal = document.getElementById('borrowedItemsModal');
+            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+            document.body.style.overflow = modal.style.display === 'flex' ? 'hidden' : '';
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const borrowedIcon = document.querySelector('.fa-clipboard-list');
+            if (!borrowedIcon) return;
+
+            const unreadCount = parseInt(borrowedIcon.getAttribute('data-count'), 10);
+
+            // Show notification only if there are unread items
+            if (unreadCount > 0) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Approved Borrowed Items!',
+                    text: 'You have new approved borrowed items.',
+                    confirmButtonColor: '#6B0D0D',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            }
+
+        });
+
         function lost() {
             lostItemsModal.style.display = lostItemsModal.style.display === 'flex' ? 'none' : 'flex';
             document.body.style.overflow = lostItemsModal.style.display === 'flex' ? 'hidden' : '';
